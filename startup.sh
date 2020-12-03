@@ -32,4 +32,4 @@ else
 
 fi
 
-exec java ${JAVA_MEM_ARGS} -jar ${PROXY_ARGS} -Dserver.port="${PORT}" -Dspring.data.mongodb.uri="$MONGODB_URL" "${APP_DIR}/chips-rest-interfaces-consumer.jar"
+exec java ${JAVA_MEM_ARGS} -jar ${PROXY_ARGS} -Dserver.port="${PORT}" "${APP_DIR}/chips-rest-interfaces-consumer.jar"

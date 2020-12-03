@@ -12,17 +12,19 @@ clean:
 	rm -rf ./build-*
 	rm -f ./build.log
 
+.PHONY: security-check
+security-check:
+    mvn org.owasp:dependency-check-maven:purge
+    mvn org.owasp:dependency-check-maven:check
+
 .PHONY: build
 	mvn versions:set -DnewVersion=$(version) -DgenerateBackupPoms=false
 	mvn package -DskipTests=true
 	cp ./target/$(artifact_name)-$(version).jar ./$(artifact_name).jar
 
 .PHONY: test
-test: test-unit
-
-.PHONY: test-unit
-test-unit: clean
-	mvn test -Dgroups="Unit"
+    test: clean
+	mvn test
 
 .PHONY: package
 package:
