@@ -1,0 +1,6 @@
+app_name: chips-rest-interfaces-consumer
+group: internalapi
+
+weight: 900
+routes:
+  1: ^/(.*)/chips-rest-interfaces-consumer
