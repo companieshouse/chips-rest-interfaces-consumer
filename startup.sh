@@ -11,7 +11,7 @@ if [[ -z "${MESOS_SLAVE_PID}" ]]; then
     source ~/.chs_env/global_env
     source ~/.chs_env/chips-rest-interfaces-consumer/env
 
-    PORT="${CHIPS_REST_INTERFACES_CONSUMER_PORT:= }"
+    PORT="${CHIPS_REST_INTERFACES_CONSUMER_PORT:= 5015}"
 
 else
 
