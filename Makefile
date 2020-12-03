@@ -13,9 +13,9 @@ clean:
 	rm -f ./build.log
 
 .PHONY: security-check
-security-check:
-    mvn org.owasp:dependency-check-maven:purge
-    mvn org.owasp:dependency-check-maven:check
+	security-check:
+	mvn org.owasp:dependency-check-maven:purge
+	mvn org.owasp:dependency-check-maven:check
 
 .PHONY: build
 	mvn versions:set -DnewVersion=$(version) -DgenerateBackupPoms=false
