@@ -9,7 +9,7 @@ if [[ -z "${MESOS_SLAVE_PID}" ]]; then
 
     source ~/.chs_env/private_env
     source ~/.chs_env/global_env
-    source ~/.chs_env/strike-off-objections-api/env
+    source ~/.chs_env/chips-rest-interfaces-consumer/env
 
     PORT="${CHIPS_REST_INTERFACES_CONSUMER_PORT:= }"
 
@@ -32,4 +32,4 @@ else
 
 fi
 
-exec java ${JAVA_MEM_ARGS} -jar ${PROXY_ARGS} -Dserver.port="${PORT}" -Dspring.data.mongodb.uri="$MONGODB_URL" "${APP_DIR}/
+exec java ${JAVA_MEM_ARGS} -jar ${PROXY_ARGS} -Dserver.port="${PORT}" -Dspring.data.mongodb.uri="$MONGODB_URL" "${APP_DIR}/chips-rest-interfaces-consumer.jar"
