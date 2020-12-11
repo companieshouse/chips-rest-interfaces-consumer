@@ -20,6 +20,7 @@
         <spring-boot-dependencies.version>2.4.0</spring-boot-dependencies.version>
         <spring-boot-maven-plugin.version>2.4.0</spring-boot-maven-plugin.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <tomcat.version>9.0.41</tomcat.version>
     </properties>
 
     <dependencyManagement>
