@@ -20,7 +20,6 @@
         <spring-boot-dependencies.version>2.4.0</spring-boot-dependencies.version>
         <spring-boot-maven-plugin.version>2.4.0</spring-boot-maven-plugin.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-        <tomcat.version>9.0.41</tomcat.version>
     </properties>
 
     <dependencyManagement>
@@ -36,6 +35,11 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+            <version>9.0.41</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
