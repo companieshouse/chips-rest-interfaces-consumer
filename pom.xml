@@ -20,7 +20,9 @@
         <spring-boot-dependencies.version>2.4.0</spring-boot-dependencies.version>
         <spring-boot-maven-plugin.version>2.4.0</spring-boot-maven-plugin.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <!--Sonar -->
         <sonar.pullrequest.base>main</sonar.pullrequest.base>
+        <sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
