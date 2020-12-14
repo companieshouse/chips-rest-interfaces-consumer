@@ -22,6 +22,7 @@
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <ch-kafka.version>1.4.4</ch-kafka.version>
         <structured-logging.version>1.9.4</structured-logging.version>
+        <sonar.pullrequest.base>main</sonar.pullrequest.base>
     </properties>
 
     <dependencyManagement>
@@ -97,6 +98,11 @@
             <artifactId>structured-logging</artifactId>
             <version>${structured-logging.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.sonarsource.scanner.maven</groupId>
+            <artifactId>sonar-maven-plugin</artifactId>
+            <version>${sonar-maven-plugin.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -137,5 +143,5 @@
             </plugin>
         </plugins>
     </build>
-
+  
 </project>
