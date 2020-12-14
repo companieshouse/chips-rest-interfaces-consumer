@@ -69,16 +69,16 @@
             <artifactId>ch-kafka</artifactId>
             <version>${ch-kafka.version}</version>
             <exclusions>
-                <exclusion>  <!-- exclude the bundled guava as it is out of date and causes pipeline security check failure  -->
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
+                <exclusion>  <!-- exclude the bundled avro as it is out of date and causes pipeline security check failure  -->
+                    <groupId>org.apache.avro</groupId>
+                    <artifactId>avro</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>30.0-jre</version>
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro</artifactId>
+            <version>1.10.1</version>
         </dependency>
         <dependency>
             <groupId>uk.gov.companieshouse</groupId>
