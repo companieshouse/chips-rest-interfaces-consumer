@@ -41,7 +41,7 @@ public class IncomingMessageConsumer implements MessageConsumer {
     private DeserializerFactory deserializerFactory;
 
     @Autowired
-    private Logger LOG;
+    private Logger logger;
 
     private CHConsumer consumer;
 
@@ -67,12 +67,12 @@ public class IncomingMessageConsumer implements MessageConsumer {
         List<ChipsKafkaMessage> receivedList = new ArrayList<>();
         for (Message msg : consumer.consume()) {
             try {
-                LOG.info(msg.toString());
+                logger.info(msg.toString());
                 receivedList.add(deserialise(msg));
             } catch (Exception e) {
                 Map<String, Object> data = new HashMap<>();
                 data.put("message", msg.getValue() == null ? "" : new String(msg.getValue()));
-                LOG.error("Failed to read message from queue", e, data);
+                logger.error("Failed to read message from queue", e, data);
             }
         }
         return receivedList;
