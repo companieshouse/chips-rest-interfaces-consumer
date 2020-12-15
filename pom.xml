@@ -22,10 +22,19 @@
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <ch-kafka.version>1.4.4</ch-kafka.version>
         <structured-logging.version>1.9.4</structured-logging.version>
+
         <!--Sonar -->
-        <sonar.pullrequest.base>main</sonar.pullrequest.base>
         <sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
     </properties>
+
+    <profiles>
+        <profile>
+            <id>sonar-pr-analysis</id>
+            <properties>
+                <sonar.pullrequest.base>main</sonar.pullrequest.base>
+            </properties>
+        </profile>
+    </profiles>
 
     <dependencyManagement>
         <dependencies>
