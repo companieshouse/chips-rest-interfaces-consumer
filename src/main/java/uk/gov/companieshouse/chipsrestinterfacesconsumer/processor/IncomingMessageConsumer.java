@@ -11,6 +11,7 @@ import uk.gov.companieshouse.kafka.consumer.ConsumerConfig;
 import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
 import uk.gov.companieshouse.kafka.message.Message;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -40,8 +41,7 @@ public class IncomingMessageConsumer implements MessageConsumer {
     @Autowired
     private DeserializerFactory deserializerFactory;
 
-    @Autowired
-    private Logger logger;
+    private final Logger logger = LoggerFactory.getLogger("IncomingMessageConsumer");
 
     private CHConsumer consumer;
 
