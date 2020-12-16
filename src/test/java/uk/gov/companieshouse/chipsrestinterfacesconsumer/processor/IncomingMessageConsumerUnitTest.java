@@ -26,7 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class IncomingMessageConsumerUnitTest {
+class IncomingMessageConsumerUnitTest {
 
     @InjectMocks
     @Spy
@@ -73,6 +73,7 @@ public class IncomingMessageConsumerUnitTest {
         // TODO mock deserializer
         List<Message> messages = new ArrayList<Message>();
         when(consumer.consume()).thenReturn(messages);
-        incomingMessageConsumer.read();
+        Collection<ChipsKafkaMessage> result = incomingMessageConsumer.read();
+        assertTrue(result.isEmpty());
     }
 }
