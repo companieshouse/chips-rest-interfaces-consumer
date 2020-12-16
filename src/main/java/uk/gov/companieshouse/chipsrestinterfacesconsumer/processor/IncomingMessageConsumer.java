@@ -17,8 +17,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,10 +46,10 @@ public class IncomingMessageConsumer implements MessageConsumer {
     private CHConsumer consumer;
 
     @PostConstruct
-    public void init() {
+    void init() {
         ConsumerConfig config = new ConsumerConfig();
         config.setBrokerAddresses(new String[] { brokerAddress });
-        config.setTopics(Arrays.asList(topicName));
+        config.setTopics(Collections.singletonList(topicName));
         config.setPollTimeout(pollTimeout);
         config.setGroupName(groupName);
 
