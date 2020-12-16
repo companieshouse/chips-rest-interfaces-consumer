@@ -27,23 +27,23 @@ import java.util.Map;
 public class IncomingMessageConsumer implements MessageConsumer {
 
     @Value("${kafka.group.name}")
-    String groupName;
+    private String groupName;
 
     @Value("${kafka.broker.address}")
-    String brokerAddress;
+    private String brokerAddress;
 
     @Value("${kafka.consumer.topic}")
-    String topicName;
+    private String topicName;
 
     @Value("${kafka.consumer.pollTimeout:100}")
-    long pollTimeout = 100;
+    private long pollTimeout = 100;
 
     @Autowired
     private DeserializerFactory deserializerFactory;
 
     private final Logger logger = LoggerFactory.getLogger("IncomingMessageConsumer");
 
-    CHConsumer consumer;
+    private CHConsumer consumer;
 
     @PostConstruct
     public void init() {

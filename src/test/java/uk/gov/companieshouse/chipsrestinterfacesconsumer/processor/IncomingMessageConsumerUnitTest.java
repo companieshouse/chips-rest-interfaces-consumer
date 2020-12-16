@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.chipsrestinterfacesconsumer.processor;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -8,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.model.ChipsKafkaMessage;
 import uk.gov.companieshouse.kafka.consumer.CHConsumer;
 import uk.gov.companieshouse.kafka.consumer.ConsumerConfig;
@@ -41,11 +43,12 @@ class IncomingMessageConsumerUnitTest {
     @Test
     void initialisationTest(){
         doReturn(consumer).when(incomingMessageConsumer).createConsumer(Mockito.any());
-        incomingMessageConsumer.brokerAddress = "kafka address";
-        incomingMessageConsumer.topicName = "filing-received";
+        ReflectionTestUtils.setField(incomingMessageConsumer, "groupName", "test-group");
+        ReflectionTestUtils.setField(incomingMessageConsumer, "brokerAddress", "kafka address");
+        ReflectionTestUtils.setField(incomingMessageConsumer, "topicName", "filing-received");
+        ReflectionTestUtils.setField(incomingMessageConsumer, "pollTimeout", 100);
         incomingMessageConsumer.init();
 
-        assertEquals(consumer, incomingMessageConsumer.consumer);
         verify(consumer).connect();
 
         ArgumentCaptor<ConsumerConfig> consumerConfigCaptor = ArgumentCaptor.forClass(ConsumerConfig.class);
@@ -53,11 +56,17 @@ class IncomingMessageConsumerUnitTest {
         ConsumerConfig config = consumerConfigCaptor.getValue();
         assertNotNull(config.getBrokerAddresses());
         assertEquals(1, config.getBrokerAddresses().length);
-        assertEquals(incomingMessageConsumer.brokerAddress, config.getBrokerAddresses()[0]);
+
+        assertEquals(ReflectionTestUtils.getField(incomingMessageConsumer, "groupName"),
+                config.getGroupName());
+        assertEquals(ReflectionTestUtils.getField(incomingMessageConsumer, "brokerAddress"),
+                config.getBrokerAddresses()[0]);
         assertNotNull(config.getTopics());
+        assertEquals(ReflectionTestUtils.getField(incomingMessageConsumer, "topicName"),
+                config.getTopics().get(0));
         assertEquals(1, config.getTopics().size());
-        assertEquals(incomingMessageConsumer.topicName, config.getTopics().get(0));
-        assertEquals(incomingMessageConsumer.pollTimeout, config.getPollTimeout());
+        assertEquals(ReflectionTestUtils.getField(incomingMessageConsumer, "pollTimeout"),
+                config.getPollTimeout());
     }
 
     @Test
