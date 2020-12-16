@@ -12,13 +12,15 @@ public class Application implements CommandLineRunner {
     @Autowired
     private MessageConsumer incomingMessageConsumer;
 
+    private boolean isRunning = true;
+
     public static void main(String[] args) {
         SpringApplication.run(Application.class);
     }
 
     @Override
     public void run(String... args) {
-        while(true) {
+        while(isRunning) {
             incomingMessageConsumer.read();
         }
     }
