@@ -82,7 +82,7 @@ public class IncomingMessageConsumer implements MessageConsumer {
         return receivedList;
     }
 
-    private ChipsKafkaMessage deserialise(Message msg) throws IOException {
+    ChipsKafkaMessage deserialise(Message msg) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.readValue(msg.getValue(), ChipsKafkaMessage.class);
     }
