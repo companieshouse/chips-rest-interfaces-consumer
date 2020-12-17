@@ -1,14 +1,12 @@
 package uk.gov.companieshouse.chipsrestinterfacesconsumer.processor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.model.ChipsKafkaMessage;
 import uk.gov.companieshouse.kafka.consumer.CHConsumer;
 import uk.gov.companieshouse.kafka.consumer.CHKafkaConsumerGroup;
 import uk.gov.companieshouse.kafka.consumer.ConsumerConfig;
-import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
 import uk.gov.companieshouse.kafka.message.Message;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -37,9 +35,6 @@ public class IncomingMessageConsumer implements MessageConsumer {
 
     @Value("${kafka.consumer.pollTimeout:100}")
     private long pollTimeout = 100;
-
-    @Autowired
-    private DeserializerFactory deserializerFactory;
 
     private final Logger logger = LoggerFactory.getLogger("IncomingMessageConsumer");
 
