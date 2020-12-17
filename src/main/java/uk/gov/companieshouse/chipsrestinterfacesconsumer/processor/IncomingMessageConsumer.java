@@ -3,6 +3,7 @@ package uk.gov.companieshouse.chipsrestinterfacesconsumer.processor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import uk.gov.companieshouse.chipsrestinterfacesconsumer.Application;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.model.ChipsKafkaMessage;
 import uk.gov.companieshouse.kafka.consumer.CHConsumer;
 import uk.gov.companieshouse.kafka.consumer.CHKafkaConsumerGroup;
@@ -24,6 +25,8 @@ import java.util.Map;
 @Component
 public class IncomingMessageConsumer implements MessageConsumer {
 
+    private static final Logger logger = LoggerFactory.getLogger(Application.APPLICATION_NAME);
+
     @Value("${kafka.group.name}")
     private String groupName;
 
@@ -34,9 +37,7 @@ public class IncomingMessageConsumer implements MessageConsumer {
     private String topicName;
 
     @Value("${kafka.consumer.pollTimeout:100}")
-    private long pollTimeout = 100;
-
-    private final Logger logger = LoggerFactory.getLogger("IncomingMessageConsumer");
+    private long pollTimeout;
 
     private CHConsumer consumer;
 

@@ -9,6 +9,8 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.processor.MessageConsum
 @SpringBootApplication
 public class Application implements CommandLineRunner {
 
+    public static final String APPLICATION_NAME = "chips-rest-interfaces-consumer";
+
     @Autowired
     private MessageConsumer incomingMessageConsumer;
 
