@@ -204,7 +204,7 @@
                 <version>6.0.3</version>
                 <configuration>
                     <suppressionFiles>
-                        <suppressionFile>surpress.xml</suppressionFile>
+                        <suppressionFile>suppress.xml</suppressionFile>
                     </suppressionFiles>
                 </configuration>
                 <executions>
