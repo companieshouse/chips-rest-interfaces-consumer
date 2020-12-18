@@ -4,10 +4,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ChipsKafkaMessageUnitTest {
+class ChipsKafkaMessageUnitTest {
 
     @Test
-    public void testStrongValue()
+    void testStrongValue()
     {
         ChipsKafkaMessage chipsKafkaMessage = new ChipsKafkaMessage();
         assertEquals("hello", chipsKafkaMessage.toString());
