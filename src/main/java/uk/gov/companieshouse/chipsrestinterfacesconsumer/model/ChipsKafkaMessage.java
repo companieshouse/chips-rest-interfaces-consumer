@@ -4,7 +4,6 @@ public class ChipsKafkaMessage {
 
     @Override
     public String toString() {
-        //stuff
         return "hello";
     }
 }

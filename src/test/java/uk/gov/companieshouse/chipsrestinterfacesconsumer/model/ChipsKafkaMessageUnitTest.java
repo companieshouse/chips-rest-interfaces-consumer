@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ChipsKafkaMessageUnitTest {
 
     @Test
-    void testStrongValue()
+    void testStringValue()
     {
         ChipsKafkaMessage chipsKafkaMessage = new ChipsKafkaMessage();
         assertEquals("hello", chipsKafkaMessage.toString());
