@@ -55,6 +55,7 @@ class IncomingMessageConsumerUnitTest {
     void testReadValidMessage() {
         List<Message> messages = new ArrayList<>();
         Message message = new Message();
+        // TODO have a real message or something resembling it
         message.setValue("{}".getBytes());
         messages.add(message);
         when(consumer.consume()).thenReturn(messages);
