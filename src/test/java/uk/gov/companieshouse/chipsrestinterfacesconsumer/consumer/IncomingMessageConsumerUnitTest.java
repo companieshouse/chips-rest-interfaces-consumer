@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.chipsrestinterfacesconsumer.processor;
+package uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
