@@ -77,4 +77,18 @@ class IncomingMessageConsumerUnitTest {
                 .isInstanceOf(IOException.class);
         // TODO mock logger (autowire it in class being tested) and verify it is called when exception caught in read()
     }
+
+    @Test
+    void testDeserializeExceptionIsCaughtWithNullMessageValue() {
+        List<Message> messages = new ArrayList<>();
+        Message message = new Message();
+        message.setValue(null);
+        messages.add(message);
+        when(consumer.consume()).thenReturn(messages);
+
+        incomingMessageConsumer.read();
+        assertThatThrownBy(() -> incomingMessageConsumer.deserialise(message))
+                .isInstanceOf(IllegalArgumentException.class);
+        // TODO mock logger (autowire it in class being tested) and verify it is called when exception caught in read()
+    }
 }
