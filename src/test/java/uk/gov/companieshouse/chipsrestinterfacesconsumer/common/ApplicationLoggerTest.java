@@ -20,7 +20,7 @@ class ApplicationLoggerTest {
     private static final String LOG_MAP_VALUE = "00006400";
 
     @InjectMocks
-    private static ApplicationLogger apiLogger;
+    private static ApplicationLogger applicationLogger;
 
     private Map<String, Object> logMap;
 
@@ -32,7 +32,7 @@ class ApplicationLoggerTest {
 
     @Test
     void testDebugContextLoggingDoesNotModifyLogMap() {
-        apiLogger.debugContext(CONTEXT, TEST_MESSAGE, logMap);
+        applicationLogger.debugContext(CONTEXT, TEST_MESSAGE, logMap);
 
         assertEquals(1, logMap.size());
         assertEquals(LOG_MAP_VALUE, logMap.get(LOG_MAP_KEY));
@@ -40,7 +40,7 @@ class ApplicationLoggerTest {
 
     @Test
     void testInfoContextLoggingDoesNotModifyLogMap() {
-        apiLogger.infoContext(CONTEXT, TEST_MESSAGE, logMap);
+        applicationLogger.infoContext(CONTEXT, TEST_MESSAGE, logMap);
 
         assertEquals(1, logMap.size());
         assertEquals(LOG_MAP_VALUE, logMap.get(LOG_MAP_KEY));
@@ -48,9 +48,42 @@ class ApplicationLoggerTest {
 
     @Test
     void testErrorContextLoggingDoesNotModifyLogMap() {
-        apiLogger.errorContext(CONTEXT, TEST_MESSAGE, new Exception(TEST_MESSAGE), logMap);
+        applicationLogger.errorContext(CONTEXT, TEST_MESSAGE, new Exception(TEST_MESSAGE), logMap);
 
         assertEquals(1, logMap.size());
         assertEquals(LOG_MAP_VALUE, logMap.get(LOG_MAP_KEY));
+    }
+
+    @Test
+    void testErrorNoContextLoggingDoesNotModifyLogMap() {
+        applicationLogger.error(TEST_MESSAGE, new Exception(TEST_MESSAGE), logMap);
+
+        assertEquals(1, logMap.size());
+        assertEquals(LOG_MAP_VALUE, logMap.get(LOG_MAP_KEY));
+    }
+
+    @Test
+    void testDebugContext() {
+        applicationLogger.debugContext(CONTEXT, TEST_MESSAGE);
+    }
+
+    @Test
+    void testInfo() {
+        applicationLogger.info(TEST_MESSAGE);
+    }
+
+    @Test
+    void testInfoContext() {
+        applicationLogger.infoContext(CONTEXT, TEST_MESSAGE);
+    }
+
+    @Test
+    void testErrorContextNoMessage() {
+        applicationLogger.errorContext(CONTEXT, new Exception());
+    }
+
+    @Test
+    void testErrorContext() {
+        applicationLogger.errorContext(CONTEXT, TEST_MESSAGE, new Exception());
     }
 }
