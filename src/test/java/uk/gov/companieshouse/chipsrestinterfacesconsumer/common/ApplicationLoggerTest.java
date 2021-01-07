@@ -2,16 +2,12 @@ package uk.gov.companieshouse.chipsrestinterfacesconsumer.common;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@ExtendWith(MockitoExtension.class)
 class ApplicationLoggerTest {
 
     private static final String CONTEXT = "CONTEXT";
@@ -19,13 +15,13 @@ class ApplicationLoggerTest {
     private static final String LOG_MAP_KEY = "COMPANY_NUMBER";
     private static final String LOG_MAP_VALUE = "00006400";
 
-    @InjectMocks
-    private static ApplicationLogger applicationLogger;
+    private ApplicationLogger applicationLogger;
 
     private Map<String, Object> logMap;
 
     @BeforeEach
     void setup() {
+        applicationLogger = new ApplicationLogger();
         logMap = new HashMap<>();
         logMap.put(LOG_MAP_KEY, LOG_MAP_VALUE);
     }
