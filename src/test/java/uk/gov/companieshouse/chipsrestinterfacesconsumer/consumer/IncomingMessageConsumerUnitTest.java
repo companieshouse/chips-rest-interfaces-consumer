@@ -1,17 +1,12 @@
-package uk.gov.companieshouse.chipsrestinterfacesconsumer.processor;
+package uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.model.ChipsKafkaMessage;
 import uk.gov.companieshouse.kafka.consumer.CHConsumer;
-import uk.gov.companieshouse.kafka.consumer.ConsumerConfig;
 import uk.gov.companieshouse.kafka.message.Message;
 
 import java.io.IOException;
@@ -24,50 +19,28 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class IncomingMessageConsumerUnitTest {
 
-    @InjectMocks
-    @Spy
-    private IncomingMessageConsumer incomingMessageConsumer;
-
-    @Mock
-    private ConsumerConfig config;
-
     @Mock
     private CHConsumer consumer;
 
+    @InjectMocks
+    private IncomingMessageConsumer incomingMessageConsumer;
+
     @Test
-    void initialisationTest(){
-        doReturn(consumer).when(incomingMessageConsumer).createConsumer(Mockito.any());
-        ReflectionTestUtils.setField(incomingMessageConsumer, "groupName", "test-group");
-        ReflectionTestUtils.setField(incomingMessageConsumer, "brokerAddress", "kafka address");
-        ReflectionTestUtils.setField(incomingMessageConsumer, "topicName", "filing-received");
-        ReflectionTestUtils.setField(incomingMessageConsumer, "pollTimeout", 100);
+    void initialisationTest() {
         incomingMessageConsumer.init();
-
         verify(consumer).connect();
+    }
 
-        ArgumentCaptor<ConsumerConfig> consumerConfigCaptor = ArgumentCaptor.forClass(ConsumerConfig.class);
-        verify(incomingMessageConsumer).createConsumer(consumerConfigCaptor.capture());
-        ConsumerConfig config = consumerConfigCaptor.getValue();
-        assertNotNull(config.getBrokerAddresses());
-        assertEquals(1, config.getBrokerAddresses().length);
-
-        assertEquals(ReflectionTestUtils.getField(incomingMessageConsumer, "groupName"),
-                config.getGroupName());
-        assertEquals(ReflectionTestUtils.getField(incomingMessageConsumer, "brokerAddress"),
-                config.getBrokerAddresses()[0]);
-        assertNotNull(config.getTopics());
-        assertEquals(ReflectionTestUtils.getField(incomingMessageConsumer, "topicName"),
-                config.getTopics().get(0));
-        assertEquals(1, config.getTopics().size());
-        assertEquals(ReflectionTestUtils.getField(incomingMessageConsumer, "pollTimeout"),
-                config.getPollTimeout());
+    @Test
+    void destroyTest() {
+        incomingMessageConsumer.close();
+        verify(consumer).close();
     }
 
     @Test
@@ -80,11 +53,15 @@ class IncomingMessageConsumerUnitTest {
 
     @Test
     void testReadValidMessage() {
-        // TODO mock deserializer
         List<Message> messages = new ArrayList<>();
+        Message message = new Message();
+        // TODO have a real message or something resembling it
+        message.setValue("{}".getBytes());
+        messages.add(message);
         when(consumer.consume()).thenReturn(messages);
         Collection<ChipsKafkaMessage> result = incomingMessageConsumer.read();
-        assertTrue(result.isEmpty());
+        assertEquals(1, result.size());
+        assertNotNull(result.iterator().next());
     }
 
     @Test
@@ -98,6 +75,20 @@ class IncomingMessageConsumerUnitTest {
         incomingMessageConsumer.read();
         assertThatThrownBy(() -> incomingMessageConsumer.deserialise(message))
                 .isInstanceOf(IOException.class);
+        // TODO mock logger (autowire it in class being tested) and verify it is called when exception caught in read()
+    }
+
+    @Test
+    void testDeserializeExceptionIsCaughtWithNullMessageValue() {
+        List<Message> messages = new ArrayList<>();
+        Message message = new Message();
+        message.setValue(null);
+        messages.add(message);
+        when(consumer.consume()).thenReturn(messages);
+
+        incomingMessageConsumer.read();
+        assertThatThrownBy(() -> incomingMessageConsumer.deserialise(message))
+                .isInstanceOf(IllegalArgumentException.class);
         // TODO mock logger (autowire it in class being tested) and verify it is called when exception caught in read()
     }
 }
