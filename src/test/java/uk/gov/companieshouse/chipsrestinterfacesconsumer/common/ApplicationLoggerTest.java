@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,26 +65,26 @@ class ApplicationLoggerTest {
 
     @Test
     void testDebugContext() {
-        applicationLogger.debugContext(CONTEXT, TEST_MESSAGE);
+        assertDoesNotThrow(() -> applicationLogger.debugContext(CONTEXT, TEST_MESSAGE));
     }
 
     @Test
     void testInfo() {
-        applicationLogger.info(TEST_MESSAGE);
+        assertDoesNotThrow(() -> applicationLogger.info(TEST_MESSAGE));
     }
 
     @Test
     void testInfoContext() {
-        applicationLogger.infoContext(CONTEXT, TEST_MESSAGE);
+        assertDoesNotThrow(() -> applicationLogger.infoContext(CONTEXT, TEST_MESSAGE));
     }
 
     @Test
     void testErrorContextNoMessage() {
-        applicationLogger.errorContext(CONTEXT, new Exception());
+        assertDoesNotThrow(() -> applicationLogger.errorContext(CONTEXT, new Exception()));
     }
 
     @Test
     void testErrorContext() {
-        applicationLogger.errorContext(CONTEXT, TEST_MESSAGE, new Exception());
+        assertDoesNotThrow(() -> applicationLogger.errorContext(CONTEXT, TEST_MESSAGE, new Exception()));
     }
 }
