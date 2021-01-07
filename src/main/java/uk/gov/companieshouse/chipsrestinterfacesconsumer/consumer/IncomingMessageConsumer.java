@@ -7,7 +7,6 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogge
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.model.ChipsKafkaMessage;
 import uk.gov.companieshouse.kafka.consumer.CHConsumer;
 import uk.gov.companieshouse.kafka.message.Message;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
