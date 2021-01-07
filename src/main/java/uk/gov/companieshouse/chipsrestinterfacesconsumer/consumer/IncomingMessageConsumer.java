@@ -3,13 +3,10 @@ package uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.Application;
+import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.model.ChipsKafkaMessage;
 import uk.gov.companieshouse.kafka.consumer.CHConsumer;
 import uk.gov.companieshouse.kafka.message.Message;
-import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.logging.LoggerFactory;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
@@ -22,7 +19,8 @@ import java.util.Map;
 @Component
 public class IncomingMessageConsumer implements MessageConsumer {
 
-    private static final Logger logger = LoggerFactory.getLogger(Application.APPLICATION_NAME);
+    @Autowired
+    private ApplicationLogger logger;
 
     @Autowired
     private CHConsumer consumer;
@@ -43,7 +41,7 @@ public class IncomingMessageConsumer implements MessageConsumer {
         for (Message msg : consumer.consume()) {
             try {
                 logger.info(msg.toString());
-                receivedList.add(deserialise(msg));
+                receivedList.add(deserialize(msg));
             } catch (Exception e) {
                 Map<String, Object> data = new HashMap<>();
                 data.put("message", msg.getValue() == null ? "" : new String(msg.getValue()));
@@ -53,7 +51,7 @@ public class IncomingMessageConsumer implements MessageConsumer {
         return receivedList;
     }
 
-    ChipsKafkaMessage deserialise(Message msg) throws IOException {
+    private ChipsKafkaMessage deserialize(Message msg) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.readValue(msg.getValue(), ChipsKafkaMessage.class);
     }
