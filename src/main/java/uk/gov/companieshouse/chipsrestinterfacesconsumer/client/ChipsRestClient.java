@@ -28,11 +28,11 @@ public class ChipsRestClient {
     }
 
     public void sendToChips(ChipsKafkaMessage message) {
-            var messageData = message.getData();
-            var restEndpoint = message.getChipsRestEndpoint();
+        var messageData = message.getData();
+        var restEndpoint = message.getChipsRestEndpoint();
 
-            var uriVariables = Collections.singletonMap(CHIPS_REST_ENDPOINT_URI_VAR, restEndpoint);
+        var uriVariables = Collections.singletonMap(CHIPS_REST_ENDPOINT_URI_VAR, restEndpoint);
 
-            restTemplate.postForEntity(chipsRestUrl, messageData, String.class, uriVariables);
+        restTemplate.postForEntity(chipsRestUrl, messageData, String.class, uriVariables);
     }
 }
