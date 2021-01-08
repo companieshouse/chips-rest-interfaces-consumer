@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.Application;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +27,10 @@ public class ApplicationLogger {
 
     public void info(String message) {
         LOGGER.info(message, null);
+    }
+
+    public void info(String message, Map<String, Object> map) {
+        LOGGER.info(message, cloneMapData(map));
     }
 
     public void infoContext(String context, String message) {

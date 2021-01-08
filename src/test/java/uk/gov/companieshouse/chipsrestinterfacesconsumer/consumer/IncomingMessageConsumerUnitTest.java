@@ -8,18 +8,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.model.ChipsKafkaMessage;
-import uk.gov.companieshouse.kafka.consumer.CHConsumer;
+import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
+import uk.gov.companieshouse.kafka.consumer.CHKafkaConsumerGroup;
 import uk.gov.companieshouse.kafka.message.Message;
+
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,7 +35,10 @@ class IncomingMessageConsumerUnitTest {
     private ApplicationLogger logger;
 
     @Mock
-    private CHConsumer consumer;
+    private CHKafkaConsumerGroup consumer;
+
+    @Mock
+    private MessageProcessorService messageProcessorService;
 
     @InjectMocks
     private IncomingMessageConsumer incomingMessageConsumer;
@@ -62,9 +63,9 @@ class IncomingMessageConsumerUnitTest {
         List<Message> messages = Collections.emptyList();
         when(consumer.consume()).thenReturn(messages);
 
-        Collection<ChipsKafkaMessage> result = incomingMessageConsumer.read();
+        incomingMessageConsumer.readAndProcess();
 
-        assertTrue(result.isEmpty());
+        verify(messageProcessorService, times(0)).processMessage(any());
     }
 
     @Test
@@ -76,10 +77,11 @@ class IncomingMessageConsumerUnitTest {
         messages.add(message);
         when(consumer.consume()).thenReturn(messages);
 
-        Collection<ChipsKafkaMessage> result = incomingMessageConsumer.read();
+        incomingMessageConsumer.readAndProcess();
 
-        assertEquals(1, result.size());
-        assertNotNull(result.iterator().next());
+        verify(messageProcessorService, times(messages.size())).processMessage(any());
+        verify(consumer, times(messages.size())).commit(any());
+
     }
 
     @Test
@@ -91,7 +93,7 @@ class IncomingMessageConsumerUnitTest {
         messages.add(message);
         when(consumer.consume()).thenReturn(messages);
 
-        incomingMessageConsumer.read();
+        incomingMessageConsumer.readAndProcess();
 
         verify(logger, times(1)).info(anyString());
         verify(logger, times(1)).error(
@@ -110,7 +112,7 @@ class IncomingMessageConsumerUnitTest {
         messages.add(message);
         when(consumer.consume()).thenReturn(messages);
 
-        incomingMessageConsumer.read();
+        incomingMessageConsumer.readAndProcess();
         verify(logger, times(1)).info(anyString());
         verify(logger, times(1)).error(
                 eq(ERROR_MESSAGE),
