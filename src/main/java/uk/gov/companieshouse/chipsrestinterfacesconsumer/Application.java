@@ -23,7 +23,7 @@ public class Application implements CommandLineRunner {
     @Override
     public void run(String... args) {
         while(isRunning) {
-            incomingMessageConsumer.read();
+            incomingMessageConsumer.readAndProcess();
         }
     }
 }

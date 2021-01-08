@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.model.ChipsKafkaMessage;
+import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
 import uk.gov.companieshouse.kafka.consumer.CHConsumer;
+import uk.gov.companieshouse.kafka.consumer.CHKafkaConsumerGroup;
 import uk.gov.companieshouse.kafka.message.Message;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -23,7 +25,10 @@ public class IncomingMessageConsumer implements MessageConsumer {
     private ApplicationLogger logger;
 
     @Autowired
-    private CHConsumer consumer;
+    private CHKafkaConsumerGroup consumer;
+
+    @Autowired
+    private MessageProcessorService messageProcessorService;
 
     @PostConstruct
     void init() {
@@ -36,19 +41,19 @@ public class IncomingMessageConsumer implements MessageConsumer {
     }
 
     @Override
-    public Collection<ChipsKafkaMessage> read() {
-        List<ChipsKafkaMessage> receivedList = new ArrayList<>();
+    public void readAndProcess() {
         for (Message msg : consumer.consume()) {
             try {
                 logger.info(msg.toString());
-                receivedList.add(deserialize(msg));
+                ChipsKafkaMessage deserializedMsg = deserialize(msg);
+                messageProcessorService.processMessage(deserializedMsg);
+                consumer.commit(msg);
             } catch (Exception e) {
                 Map<String, Object> data = new HashMap<>();
                 data.put("message", msg.getValue() == null ? "" : new String(msg.getValue()));
                 logger.error("Failed to read message from queue", e, data);
             }
         }
-        return receivedList;
     }
 
     private ChipsKafkaMessage deserialize(Message msg) throws IOException {

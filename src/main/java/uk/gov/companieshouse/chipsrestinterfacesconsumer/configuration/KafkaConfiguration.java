@@ -31,7 +31,7 @@ class KafkaConfiguration {
     }
 
     @Bean
-    CHConsumer getIncomingConsumer() {
+    CHKafkaConsumerGroup getIncomingConsumer() {
         return new CHKafkaConsumerGroup(getIncomingConsumerConfig());
     }
 

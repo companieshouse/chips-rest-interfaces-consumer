@@ -28,6 +28,10 @@ public class ApplicationLogger {
         LOGGER.info(message, null);
     }
 
+    public void info(String message, Map<String, Object> map) {
+        LOGGER.info(message, cloneMapData(map));
+    }
+
     public void infoContext(String context, String message) {
         LOGGER.infoContext(context, message, null);
     }
