@@ -6,16 +6,13 @@ import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.model.ChipsKafkaMessage;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
-import uk.gov.companieshouse.kafka.consumer.CHConsumer;
 import uk.gov.companieshouse.kafka.consumer.CHKafkaConsumerGroup;
 import uk.gov.companieshouse.kafka.message.Message;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Component
