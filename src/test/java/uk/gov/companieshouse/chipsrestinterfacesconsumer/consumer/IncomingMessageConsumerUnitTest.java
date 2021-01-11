@@ -11,6 +11,7 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogge
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
 import uk.gov.companieshouse.kafka.consumer.CHKafkaConsumerGroup;
 import uk.gov.companieshouse.kafka.message.Message;
+import uk.gov.companieshouse.service.ServiceException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,7 +60,7 @@ class IncomingMessageConsumerUnitTest {
     }
 
     @Test
-    void testReadNoMessage() {
+    void testReadNoMessage() throws ServiceException {
         List<Message> messages = Collections.emptyList();
         when(consumer.consume()).thenReturn(messages);
 
@@ -69,7 +70,7 @@ class IncomingMessageConsumerUnitTest {
     }
 
     @Test
-    void testReadValidMessage() {
+    void testReadValidMessage() throws ServiceException {
         List<Message> messages = new ArrayList<>();
         Message message = new Message();
         // TODO have a real message or something resembling it

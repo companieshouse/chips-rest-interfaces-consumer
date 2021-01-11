@@ -7,6 +7,9 @@ public class ChipsKafkaMessage {
     @JsonProperty("app_id")
     private String appId;
 
+    @JsonProperty("attempt")
+    private int attempt;
+
     @JsonProperty("message_id")
     private String messageId;
 
@@ -25,6 +28,14 @@ public class ChipsKafkaMessage {
 
     public void setAppId(String appId) {
         this.appId = appId;
+    }
+
+    public int getAttempt() {
+        return attempt;
+    }
+
+    public void setAttempt(int attempt) {
+        this.attempt = attempt;
     }
 
     public String getMessageId() {
@@ -63,6 +74,7 @@ public class ChipsKafkaMessage {
     public String toString() {
         return "ChipsKafkaMessage{" +
                 "appId='" + appId + '\'' +
+                ", attempt='" + attempt + '\'' +
                 ", messageId='" + messageId + '\'' +
                 ", data='" + data + '\'' +
                 ", chipsRestEndpoint='" + chipsRestEndpoint + '\'' +

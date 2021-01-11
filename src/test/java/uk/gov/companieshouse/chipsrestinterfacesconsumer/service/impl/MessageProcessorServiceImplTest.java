@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.client.ChipsRestClient;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.model.ChipsKafkaMessage;
+import uk.gov.companieshouse.service.ServiceException;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -26,7 +27,7 @@ class MessageProcessorServiceImplTest {
     private MessageProcessorServiceImpl messageProcessorService;
 
     @Test
-    void processMessageTest() {
+    void processMessageTest() throws ServiceException {
         ChipsKafkaMessage chipsKafkaMessage = new ChipsKafkaMessage();
 
         messageProcessorService.processMessage(chipsKafkaMessage);

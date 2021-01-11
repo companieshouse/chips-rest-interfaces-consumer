@@ -3,6 +3,7 @@ package uk.gov.companieshouse.chipsrestinterfacesconsumer.client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.model.ChipsKafkaMessage;
 
@@ -27,7 +28,7 @@ public class ChipsRestClient {
         chipsRestUrl = chipsRestHost + CHIPS_REST_ENDPOINT_URI_VAR;
     }
 
-    public void sendToChips(ChipsKafkaMessage message) {
+    public void sendToChips(ChipsKafkaMessage message) throws RestClientException {
         var messageData = message.getData();
         var restEndpoint = message.getChipsRestEndpoint();
 

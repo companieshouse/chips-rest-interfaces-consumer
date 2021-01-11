@@ -6,6 +6,10 @@ import org.springframework.context.annotation.Configuration;
 import uk.gov.companieshouse.kafka.consumer.CHKafkaConsumerGroup;
 import uk.gov.companieshouse.kafka.consumer.ConsumerConfig;
 import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
+import uk.gov.companieshouse.kafka.producer.Acks;
+import uk.gov.companieshouse.kafka.producer.CHKafkaProducer;
+import uk.gov.companieshouse.kafka.producer.ProducerConfig;
+import uk.gov.companieshouse.kafka.producer.ProducerConfigHelper;
 
 import java.util.Collections;
 
@@ -24,6 +28,9 @@ class KafkaConfiguration {
     @Value("${kafka.consumer.pollTimeout:100}")
     private long pollTimeout;
 
+    @Value("${kafka.producer.retries}")
+    private int retries;
+
     @Bean
     DeserializerFactory getDeserializerFactory() {
         return new DeserializerFactory();
@@ -41,5 +48,15 @@ class KafkaConfiguration {
         config.setPollTimeout(pollTimeout);
         config.setGroupName(groupName);
         return config;
+    }
+
+    @Bean
+    CHKafkaProducer getOutgoingProducer() {
+        ProducerConfig config = new ProducerConfig();
+        ProducerConfigHelper.assignBrokerAddresses(config);
+        config.setRoundRobinPartitioner(true);
+        config.setAcks(Acks.WAIT_FOR_ALL);
+        config.setRetries(retries);
+        return new CHKafkaProducer(config);
     }
 }
