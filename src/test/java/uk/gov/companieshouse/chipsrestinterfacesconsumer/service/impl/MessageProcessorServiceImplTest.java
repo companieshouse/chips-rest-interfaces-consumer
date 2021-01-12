@@ -43,7 +43,7 @@ class MessageProcessorServiceImplTest {
     }
 
     @Test
-    void checkRetryIsCalled() throws ServiceException {
+    void testRetryIsCalled() throws ServiceException {
         ChipsKafkaMessage chipsKafkaMessage = new ChipsKafkaMessage();
         doThrow(RestClientException.class).when(chipsRestClient).sendToChips(chipsKafkaMessage);
         messageProcessorService.processMessage(chipsKafkaMessage);

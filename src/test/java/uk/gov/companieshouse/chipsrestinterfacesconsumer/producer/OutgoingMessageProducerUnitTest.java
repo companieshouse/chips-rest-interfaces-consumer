@@ -64,7 +64,7 @@ public class OutgoingMessageProducerUnitTest {
 
 
     @Test
-    void checkServiceExcpetionIsThrownWhenSerializerThrowsIOExcpetion()
+    void testServiceExcpetionIsThrownWhenSerializerThrowsIOExcpetion()
             throws IOException {
         OutgoingMessageProducer outgoingMessageProducer =
                 new OutgoingMessageProducer(logger, faultyAvroSerializer, producer);
@@ -75,7 +75,7 @@ public class OutgoingMessageProducerUnitTest {
     }
 
     @Test
-    void checkServiceExcpetionIsThrownWhenFutureThrowsExecutionException()
+    void testServiceExcpetionIsThrownWhenFutureThrowsExecutionException()
             throws ExecutionException, InterruptedException {
         OutgoingMessageProducer outgoingMessageProducer =
                 new OutgoingMessageProducer(logger, avroSerializer, producer);
