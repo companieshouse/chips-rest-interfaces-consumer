@@ -20,7 +20,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 @Component
-public class OutgoingMessageProducer implements MessageProducer {
+public class MessageProducerImpl implements MessageProducer {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
 
@@ -38,9 +38,9 @@ public class OutgoingMessageProducer implements MessageProducer {
     private String retryTopicName;
 
     @Autowired
-    public OutgoingMessageProducer(ApplicationLogger logger,
-                                   AvroSerializer avroSerializer,
-                                   CHKafkaProducer producer){
+    public MessageProducerImpl(ApplicationLogger logger,
+                               AvroSerializer avroSerializer,
+                               CHKafkaProducer producer){
         this.logger = logger;
         this.avroSerializer = avroSerializer;
         this.producer = producer;
@@ -48,8 +48,9 @@ public class OutgoingMessageProducer implements MessageProducer {
 
 
     @Override
-    public void writeToQueue(ChipsKafkaMessage chipsMessage) throws ServiceException {
+    public void writeToTopic(ChipsKafkaMessage chipsMessage) throws ServiceException {
         try {
+            logger.info(String.format("Writing message to topic: %s", retryTopicName));
             Message kafkaMessage = new Message();
             byte[] serializedData = avroSerializer.serialize(chipsMessage, schema);
             kafkaMessage.setValue(serializedData);

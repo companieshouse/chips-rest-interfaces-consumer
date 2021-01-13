@@ -12,7 +12,6 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.model.ChipsKafkaMessage
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.producer.MessageProducer;
 import uk.gov.companieshouse.service.ServiceException;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -36,10 +35,9 @@ class MessageProcessorServiceImplTest {
     @Test
     void processMessageTest() throws ServiceException {
         ChipsKafkaMessage chipsKafkaMessage = new ChipsKafkaMessage();
-
         messageProcessorService.processMessage(chipsKafkaMessage);
-
         verify(chipsRestClient, times(1)).sendToChips(eq(chipsKafkaMessage));
+        verify(retryMessageProducer, times(0)).writeToTopic(eq(chipsKafkaMessage));
     }
 
     @Test
@@ -47,6 +45,6 @@ class MessageProcessorServiceImplTest {
         ChipsKafkaMessage chipsKafkaMessage = new ChipsKafkaMessage();
         doThrow(RestClientException.class).when(chipsRestClient).sendToChips(chipsKafkaMessage);
         messageProcessorService.processMessage(chipsKafkaMessage);
-        verify(retryMessageProducer, times(1)).writeToQueue(eq(chipsKafkaMessage));
+        verify(retryMessageProducer, times(1)).writeToTopic(eq(chipsKafkaMessage));
     }
 }

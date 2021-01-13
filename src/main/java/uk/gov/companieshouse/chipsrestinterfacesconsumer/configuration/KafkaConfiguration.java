@@ -24,7 +24,7 @@ class KafkaConfiguration {
     @Value("${SCHEMA_REGISTRY_URL}")
     private String schemaRegistryUrl;
 
-    @Value("${CHIPS_SCHEMA_URI}")
+    @Value("${CHIPS_REST_INTERFACES_SCHEMA_URI}")
     private String chipsSchemaUri;
 
     @Value("${kafka.group.name}")
@@ -43,7 +43,6 @@ class KafkaConfiguration {
     private int retries;
 
     @Bean
-    @Qualifier("chips-kafka-send")
     public Schema fetchChipsKafkaSendSchema(KafkaRestClient restClient) throws JSONException {
         byte[] bytes = restClient.getSchema(schemaRegistryUrl, chipsSchemaUri);
         String schemaJson = new JSONObject(new String(bytes)).getString("schema");

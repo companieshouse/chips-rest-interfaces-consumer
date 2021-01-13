@@ -25,7 +25,7 @@ class ChipsRestClientTest {
     private static final String CHIPS_REST_HOST = "hostname/";
     private static final String CHIPS_REST_ENDPOINT = "test-endpoint";
     private static final String DATA = "data";
-    private static final String CHIPS_REST_ENDPOINT_URI_VAR_PLACEHOLDER = "test";
+    private static final String CHIPS_REST_ENDPOINT_URI_VAR_PLACEHOLDER = "{chips-rest-endpoint}";
 
     @Mock
     private RestTemplate restTemplate;
@@ -41,7 +41,6 @@ class ChipsRestClientTest {
 
     @Test
     void sendToChipsTest() {
-        ReflectionTestUtils.setField(chipsRestClient, "chipsRestEndpoint", CHIPS_REST_ENDPOINT_URI_VAR_PLACEHOLDER);
         ChipsKafkaMessage chipsKafkaMessage = new ChipsKafkaMessage();
         chipsKafkaMessage.setData(DATA);
         chipsKafkaMessage.setChipsRestEndpoint(CHIPS_REST_ENDPOINT);

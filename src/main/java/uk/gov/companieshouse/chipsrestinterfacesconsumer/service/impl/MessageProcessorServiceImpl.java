@@ -32,8 +32,8 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
         try {
             chipsRestClient.sendToChips(message);
         } catch (RestClientException restClientException) {
-            logger.error("Error seding message to chips will place on retry queue", restClientException, logMap);
-            retryMessageProducer.writeToQueue(message);
+            logger.error("Error sending message to chips, will place on retry queue", restClientException, logMap);
+            retryMessageProducer.writeToTopic(message);
         }
     }
 }

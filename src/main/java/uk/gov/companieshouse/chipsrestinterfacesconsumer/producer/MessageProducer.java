@@ -4,5 +4,5 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.model.ChipsKafkaMessage
 import uk.gov.companieshouse.service.ServiceException;
 
 public interface MessageProducer {
-    void writeToQueue(ChipsKafkaMessage message) throws ServiceException;
+    void writeToTopic(ChipsKafkaMessage message) throws ServiceException;
 }

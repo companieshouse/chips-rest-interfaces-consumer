@@ -17,8 +17,6 @@ import java.io.IOException;
 @Component
 public class AvroSerializer {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     public byte[] serialize(ChipsKafkaMessage message, Schema schema) throws IOException {
         GenericDatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<>(schema);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -30,8 +28,7 @@ public class AvroSerializer {
         return dataValue;
     }
 
-    private GenericRecord buildAvroGenericRecord(ChipsKafkaMessage message, Schema schema)
-            throws JsonProcessingException {
+    private GenericRecord buildAvroGenericRecord(ChipsKafkaMessage message, Schema schema) {
 
         GenericRecord documentData = new GenericData.Record(schema);
         documentData.put("app_id", message.getAppId());

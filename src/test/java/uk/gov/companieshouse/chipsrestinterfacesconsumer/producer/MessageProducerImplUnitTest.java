@@ -3,6 +3,7 @@ package uk.gov.companieshouse.chipsrestinterfacesconsumer.producer;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -23,13 +24,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class OutgoingMessageProducerUnitTest {
-
-    private static final Future<RecordMetadata> MOCKED_FUTURE = Mockito.mock(Future.class);
-    private static final Future<RecordMetadata> FAULTY_MOCKED_FUTURE = Mockito.mock(Future.class);
+public class MessageProducerImplUnitTest {
 
     private static final String APP_ID = "chips-rest-interfaces-consumer";
-    private static int ATTEMPT = 4;
+    private static final int ATTEMPT = 4;
     private static final String MESSAGE_ID = "abc";
     private static final String DATA = "{subject: testing}";
     private static final String CHIPS_REST_ENDPOINT = "http://nowhere:1234";
@@ -42,48 +40,36 @@ public class OutgoingMessageProducerUnitTest {
     private AvroSerializer avroSerializer;
 
     @Mock
-    private AvroSerializer faultyAvroSerializer;
-
-    @Mock
     private CHKafkaProducer producer;
 
+    @InjectMocks
+    private MessageProducerImpl messageProducerImpl;
 
     @Test
-    public void testSuccessfulWriteToQueue()
+    void testSuccessfulWriteToTopic()
             throws ServiceException, IOException, ExecutionException, InterruptedException {
-        OutgoingMessageProducer  outgoingMessageProducer =
-                new OutgoingMessageProducer(logger, avroSerializer, producer);
-        String avroDataString =
-                "{\"app_id\": \"chips-rest-interfaces-consumer\", \"attempt\": 4, \"message_id\": \"abc\", \"data\": \"{subject: testing}\", \"chips_rest_endpoint\": \"http://nowhere:1234\", \"created_at\": \"01 Jan 2021 08:00:00\"}";
-        byte[] avroByteArray = avroDataString.getBytes();
-        when(avroSerializer.serialize(any(), any())).thenReturn(avroByteArray);
-        when(producer.sendAndReturnFuture(any())).thenReturn(MOCKED_FUTURE);
-        outgoingMessageProducer.writeToQueue(getDummyChipsKafkaMessage());
-        verify(MOCKED_FUTURE, times(1)).get();
+        Future<RecordMetadata> mockedFuture = Mockito.mock(Future.class);
+
+        when(producer.sendAndReturnFuture(any())).thenReturn(mockedFuture);
+        messageProducerImpl.writeToTopic(getDummyChipsKafkaMessage());
+
+        verify(mockedFuture, times(1)).get();
     }
 
-
     @Test
-    void testServiceExcpetionIsThrownWhenSerializerThrowsIOExcpetion()
+    void testServiceExceptionIsThrownWhenSerializerThrowsIOExcpetion()
             throws IOException {
-        OutgoingMessageProducer outgoingMessageProducer =
-                new OutgoingMessageProducer(logger, faultyAvroSerializer, producer);
-        doThrow(IOException.class).when(faultyAvroSerializer).serialize(any(), any());
-        assertThrows(ServiceException.class, () -> {
-            outgoingMessageProducer.writeToQueue(getDummyChipsKafkaMessage());
-        });
+        doThrow(IOException.class).when(avroSerializer).serialize(any(), any());
+        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsKafkaMessage()));
     }
 
     @Test
-    void testServiceExcpetionIsThrownWhenFutureThrowsExecutionException()
+    void testServiceExceptionIsThrownWhenFutureThrowsExecutionException()
             throws ExecutionException, InterruptedException {
-        OutgoingMessageProducer outgoingMessageProducer =
-                new OutgoingMessageProducer(logger, avroSerializer, producer);
-        when(producer.sendAndReturnFuture(any())).thenReturn(FAULTY_MOCKED_FUTURE);
-        doThrow(ExecutionException.class).when(FAULTY_MOCKED_FUTURE).get();
-        assertThrows(ServiceException.class, () -> {
-            outgoingMessageProducer.writeToQueue(getDummyChipsKafkaMessage());
-        });
+        Future<RecordMetadata> faultyMockedFuture = Mockito.mock(Future.class);
+        when(producer.sendAndReturnFuture(any())).thenReturn(faultyMockedFuture );
+        doThrow(ExecutionException.class).when(faultyMockedFuture).get();
+        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsKafkaMessage()));
     }
 
     private ChipsKafkaMessage getDummyChipsKafkaMessage() {

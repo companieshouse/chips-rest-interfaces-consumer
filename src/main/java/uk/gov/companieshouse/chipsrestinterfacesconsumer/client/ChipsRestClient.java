@@ -13,8 +13,7 @@ import java.util.Collections;
 @Service
 public class ChipsRestClient {
 
-    @Value("${chips.rest.endpoint}")
-    private String chipsRestEndpoint;
+    private static final String CHIPS_REST_ENDPOINT_URI_VAR = "{chips-rest-endpoint}";
 
     @Value("${CHIPS_REST_INTERFACES_HOST}")
     private String chipsRestHost;
@@ -26,14 +25,14 @@ public class ChipsRestClient {
 
     @PostConstruct
     void init() {
-        chipsRestUrl = chipsRestHost + chipsRestEndpoint;
+        chipsRestUrl = chipsRestHost + CHIPS_REST_ENDPOINT_URI_VAR ;
     }
 
-    public void sendToChips(ChipsKafkaMessage message) throws RestClientException {
+    public void sendToChips(ChipsKafkaMessage message) {
         var messageData = message.getData();
         var restEndpoint = message.getChipsRestEndpoint();
 
-        var uriVariables = Collections.singletonMap(chipsRestEndpoint, restEndpoint);
+        var uriVariables = Collections.singletonMap(CHIPS_REST_ENDPOINT_URI_VAR , restEndpoint);
 
         restTemplate.postForEntity(chipsRestUrl, messageData, String.class, uriVariables);
     }

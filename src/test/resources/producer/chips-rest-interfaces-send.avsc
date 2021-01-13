@@ -1,7 +1,7 @@
 {
   "type": "record",
-  "namespace": "chips",
-  "name": "chips_rest_interfaces_send",
+  "namespace": "uk.gov.companieshouse.chips",
+  "name": "ChipsRestInterfacesSend",
   "fields": [
     {
      "name": "app_id",
