@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -61,6 +62,16 @@ public class MessageProducerImplUnitTest {
             throws IOException {
         doThrow(IOException.class).when(avroSerializer).serialize(any(), any());
         assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsKafkaMessage()));
+    }
+
+    @Test
+    void testServiceExceptionIsThrownWhenFutureThrowsInterruptedException()
+            throws ExecutionException, InterruptedException {
+        Future<RecordMetadata> faultyMockedFuture = Mockito.mock(Future.class);
+        when(producer.sendAndReturnFuture(any())).thenReturn(faultyMockedFuture);
+        doThrow(InterruptedException.class).when(faultyMockedFuture).get();
+        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsKafkaMessage()));
+        assertTrue(Thread.currentThread().isInterrupted());
     }
 
     @Test

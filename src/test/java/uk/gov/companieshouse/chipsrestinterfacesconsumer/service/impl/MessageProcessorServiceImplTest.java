@@ -45,6 +45,7 @@ class MessageProcessorServiceImplTest {
         ChipsKafkaMessage chipsKafkaMessage = new ChipsKafkaMessage();
         doThrow(RestClientException.class).when(chipsRestClient).sendToChips(chipsKafkaMessage);
         messageProcessorService.processMessage(chipsKafkaMessage);
+        verify(chipsRestClient, times(1)).sendToChips(eq(chipsKafkaMessage));
         verify(retryMessageProducer, times(1)).writeToTopic(eq(chipsKafkaMessage));
     }
 }

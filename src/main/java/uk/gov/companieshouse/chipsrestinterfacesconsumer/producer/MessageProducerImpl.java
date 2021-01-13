@@ -22,7 +22,7 @@ import java.util.concurrent.Future;
 @Component
 public class MessageProducerImpl implements MessageProducer {
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
 
     private ApplicationLogger logger;
 
@@ -46,24 +46,23 @@ public class MessageProducerImpl implements MessageProducer {
         this.producer = producer;
     }
 
-
     @Override
     public void writeToTopic(ChipsKafkaMessage chipsMessage) throws ServiceException {
         try {
             logger.info(String.format("Writing message to topic: %s", retryTopicName));
-            Message kafkaMessage = new Message();
             byte[] serializedData = avroSerializer.serialize(chipsMessage, schema);
+            Message kafkaMessage = new Message();
             kafkaMessage.setValue(serializedData);
             kafkaMessage.setTopic(retryTopicName);
             kafkaMessage.setTimestamp(LocalDateTime.parse(chipsMessage.getCreatedAt(),
-                    formatter).atZone(ZoneId.systemDefault()).toEpochSecond());
+                    FORMATTER).atZone(ZoneId.systemDefault()).toEpochSecond());
             Future<RecordMetadata> future = producer.sendAndReturnFuture(kafkaMessage);
             future.get();
         } catch (IOException | ExecutionException e) {
-            throw new ServiceException(e.getMessage());
+            throw new ServiceException(e.getMessage(), e);
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
-            throw new ServiceException("Thread Interrupted when future was sent and returned");
+            throw new ServiceException("Thread Interrupted when future was sent and returned", ie);
         }
     }
 }
