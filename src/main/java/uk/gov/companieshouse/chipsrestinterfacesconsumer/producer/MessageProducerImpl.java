@@ -22,8 +22,6 @@ import java.util.concurrent.Future;
 @Component
 public class MessageProducerImpl implements MessageProducer {
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
-
     private ApplicationLogger logger;
 
     private AvroSerializer avroSerializer;
@@ -53,8 +51,7 @@ public class MessageProducerImpl implements MessageProducer {
             Message kafkaMessage = new Message();
             kafkaMessage.setValue(serializedData);
             kafkaMessage.setTopic(retryTopicName);
-            kafkaMessage.setTimestamp(LocalDateTime.parse(chipsMessage.getCreatedAt(),
-                    FORMATTER).atZone(ZoneId.systemDefault()).toEpochSecond());
+            kafkaMessage.setTimestamp(Long.valueOf(chipsMessage.getCreatedAt()));
             Future<RecordMetadata> future = producer.sendAndReturnFuture(kafkaMessage);
             future.get();
         } catch (IOException | ExecutionException e) {
