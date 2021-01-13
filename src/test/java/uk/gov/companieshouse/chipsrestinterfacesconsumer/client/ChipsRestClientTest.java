@@ -26,7 +26,6 @@ class ChipsRestClientTest {
     private static final String CHIPS_REST_ENDPOINT = "test-endpoint";
     private static final String DATA = "data";
     private static final String CHIPS_REST_ENDPOINT_URI_VAR_PLACEHOLDER = "{chips-rest-endpoint}";
-
     private static final String CHIPS_REST_ENDPOINT_URI_VAR = "chips-rest-endpoint";
 
     @Mock
