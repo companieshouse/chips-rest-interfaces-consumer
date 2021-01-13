@@ -1,17 +1,18 @@
 package uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.model.ChipsKafkaMessage;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
 import uk.gov.companieshouse.kafka.consumer.CHKafkaConsumerGroup;
+import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
+import uk.gov.companieshouse.kafka.exceptions.DeserializationException;
 import uk.gov.companieshouse.kafka.message.Message;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +27,9 @@ public class IncomingMessageConsumer implements MessageConsumer {
 
     @Autowired
     private MessageProcessorService messageProcessorService;
+
+    @Autowired
+    private DeserializerFactory deserializerFactory;
 
     @PostConstruct
     void init() {
@@ -42,8 +46,10 @@ public class IncomingMessageConsumer implements MessageConsumer {
         for (Message msg : consumer.consume()) {
             try {
                 logger.info(msg.toString());
-                ChipsKafkaMessage deserializedMsg = deserialize(msg);
+                ChipsRestInterfacesSend deserializedMsg = deserialize(msg);
+                logger.info("Deserialised message", Collections.singletonMap("Message", deserializedMsg));
                 messageProcessorService.processMessage(deserializedMsg);
+                logger.info(String.format("Message %s processed, committing offset", msg.getKey()));
                 consumer.commit(msg);
             } catch (Exception e) {
                 Map<String, Object> data = new HashMap<>();
@@ -53,8 +59,8 @@ public class IncomingMessageConsumer implements MessageConsumer {
         }
     }
 
-    private ChipsKafkaMessage deserialize(Message msg) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.readValue(msg.getValue(), ChipsKafkaMessage.class);
+    private ChipsRestInterfacesSend deserialize(Message msg) throws DeserializationException {
+        return deserializerFactory.getSpecificRecordDeserializer(ChipsRestInterfacesSend.class).fromBinary(msg,
+                ChipsRestInterfacesSend.getClassSchema());
     }
 }

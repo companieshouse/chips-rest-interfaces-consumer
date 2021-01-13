@@ -9,7 +9,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.model.ChipsKafkaMessage;
+import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
+import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 
 import java.util.Map;
 
@@ -25,8 +26,13 @@ class ChipsRestClientTest {
     private static final String CHIPS_REST_ENDPOINT = "test-endpoint";
     private static final String DATA = "data";
     private static final String CHIPS_REST_ENDPOINT_URI_VAR_PLACEHOLDER = "{chips-rest-endpoint}";
+    private static final String CHIPS_REST_ENDPOINT_URI_VAR = "chips-rest-endpoint";
+
     @Mock
     private RestTemplate restTemplate;
+
+    @Mock
+    private ApplicationLogger logger;
 
     @InjectMocks
     private ChipsRestClient chipsRestClient;
@@ -39,7 +45,7 @@ class ChipsRestClientTest {
 
     @Test
     void sendToChipsTest() {
-        ChipsKafkaMessage chipsKafkaMessage = new ChipsKafkaMessage();
+        ChipsRestInterfacesSend chipsKafkaMessage = new ChipsRestInterfacesSend();
         chipsKafkaMessage.setData(DATA);
         chipsKafkaMessage.setChipsRestEndpoint(CHIPS_REST_ENDPOINT);
         ReflectionTestUtils.setField(chipsRestClient, "chipsRestHost", CHIPS_REST_HOST);
@@ -54,6 +60,6 @@ class ChipsRestClientTest {
         var uriVariables = uriVariablesArgCaptor.getValue();
 
         assertEquals(DATA, messageData);
-        assertEquals(CHIPS_REST_ENDPOINT, uriVariables.get(CHIPS_REST_ENDPOINT_URI_VAR_PLACEHOLDER));
+        assertEquals(CHIPS_REST_ENDPOINT, uriVariables.get(CHIPS_REST_ENDPOINT_URI_VAR));
     }
 }
