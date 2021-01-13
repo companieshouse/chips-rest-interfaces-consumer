@@ -28,7 +28,6 @@ public class ChipsRestClient {
 
     @PostConstruct
     void init() {
-        chipsRestUrl = chipsRestHost + CHIPS_REST_ENDPOINT_URI_VAR ;
         chipsRestUrl = String.format("%s{%s}", chipsRestHost, CHIPS_REST_ENDPOINT_URI_VAR);
     }
 
