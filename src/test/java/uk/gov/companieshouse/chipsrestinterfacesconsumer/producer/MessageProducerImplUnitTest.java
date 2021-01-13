@@ -58,7 +58,7 @@ class MessageProducerImplUnitTest {
     }
 
     @Test
-    void testServiceExceptionIsThrownWhenSerializerThrowsIOExcpetion()
+    void testServiceExceptionIsThrownWhenSerializerThrowsIOException()
             throws IOException {
         doThrow(IOException.class).when(avroSerializer).serialize(any(), any());
         assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsKafkaMessage()));
