@@ -15,6 +15,7 @@ import uk.gov.companieshouse.kafka.deserialization.AvroDeserializer;
 import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
 import uk.gov.companieshouse.kafka.exceptions.DeserializationException;
 import uk.gov.companieshouse.kafka.message.Message;
+import uk.gov.companieshouse.service.ServiceException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,7 +70,7 @@ class IncomingMessageConsumerUnitTest {
     }
 
     @Test
-    void testReadNoMessage() {
+    void testReadNoMessage() throws ServiceException {
         List<Message> messages = Collections.emptyList();
         when(consumer.consume()).thenReturn(messages);
 
@@ -79,7 +80,7 @@ class IncomingMessageConsumerUnitTest {
     }
 
     @Test
-    void testReadValidMessage() throws DeserializationException {
+    void testReadValidMessage() throws ServiceException, DeserializationException {
         List<Message> messages = new ArrayList<>();
         Message message = new Message();
         ChipsRestInterfacesSend deserializedMessage = new ChipsRestInterfacesSend();

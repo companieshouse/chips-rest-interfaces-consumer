@@ -45,12 +45,12 @@ class ChipsRestClientTest {
 
     @Test
     void sendToChipsTest() {
-        ChipsRestInterfacesSend chipsKafkaMessage = new ChipsRestInterfacesSend();
-        chipsKafkaMessage.setData(DATA);
-        chipsKafkaMessage.setChipsRestEndpoint(CHIPS_REST_ENDPOINT);
+        ChipsRestInterfacesSend chipsRestInterfacesSend = new ChipsRestInterfacesSend();
+        chipsRestInterfacesSend.setData(DATA);
+        chipsRestInterfacesSend.setChipsRestEndpoint(CHIPS_REST_ENDPOINT);
         ReflectionTestUtils.setField(chipsRestClient, "chipsRestHost", CHIPS_REST_HOST);
         chipsRestClient.init();
-        chipsRestClient.sendToChips(chipsKafkaMessage);
+        chipsRestClient.sendToChips(chipsRestInterfacesSend);
 
         verify(restTemplate, times(1)).postForEntity(
                 eq(CHIPS_REST_HOST + CHIPS_REST_ENDPOINT_URI_VAR_PLACEHOLDER), messageDataArgCaptor.capture(),
