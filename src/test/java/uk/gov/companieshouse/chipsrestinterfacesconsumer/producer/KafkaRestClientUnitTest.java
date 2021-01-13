@@ -15,7 +15,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class KafkaRestClientUnitTest {
+class KafkaRestClientUnitTest {
     private String schemaRegistryUrl = "http://testSchema:1000";
     private String emailSchemaUri = "/subjects/test-email-send";
     private ResponseEntity response;

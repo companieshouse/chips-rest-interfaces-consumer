@@ -31,7 +31,6 @@ public class MessageProducerImpl implements MessageProducer {
     private CHKafkaProducer producer;
 
     @Autowired
-    @Qualifier("chips-kafka-send")
     private Schema schema;
 
     @Value("${kafka.retry.topic}")

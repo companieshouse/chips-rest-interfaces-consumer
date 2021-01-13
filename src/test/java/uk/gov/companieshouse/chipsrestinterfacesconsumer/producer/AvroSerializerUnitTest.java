@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(MockitoExtension.class)
-public class AvroSerializerUnitTest {
+class AvroSerializerUnitTest {
 
     private static final String APP_ID = "chips-rest-interfaces-consumer";
     private static int ATTEMPT = 4;

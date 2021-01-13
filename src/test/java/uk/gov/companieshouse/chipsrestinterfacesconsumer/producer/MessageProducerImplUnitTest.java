@@ -25,7 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class MessageProducerImplUnitTest {
+class MessageProducerImplUnitTest {
 
     private static final String APP_ID = "chips-rest-interfaces-consumer";
     private static final int ATTEMPT = 4;
