@@ -1,10 +1,8 @@
 package uk.gov.companieshouse.chipsrestinterfacesconsumer.producer;
 
 import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericDatumWriter;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.io.BinaryEncoder;
+import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
@@ -16,25 +14,18 @@ import java.io.IOException;
 public class AvroSerializer {
 
     public byte[] serialize(ChipsRestInterfacesSend message, Schema schema) throws IOException {
-        GenericDatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<>(schema);
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(stream, null);
-        datumWriter.write(buildAvroGenericRecord(message, schema), encoder);
-        encoder.flush();
-        byte[] dataValue = stream.toByteArray();
-        stream.close();
-        return dataValue;
-    }
+        GenericDatumWriter<ChipsRestInterfacesSend> datumWriter = new GenericDatumWriter<>();
 
-    private GenericRecord buildAvroGenericRecord(ChipsRestInterfacesSend message, Schema schema) {
+        try (ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
+            Encoder encoder = EncoderFactory.get().binaryEncoder(stream, null);
+            datumWriter.setSchema(schema);
+            datumWriter.write(message, encoder);
+            encoder.flush();
 
-        GenericRecord documentData = new GenericData.Record(schema);
-        documentData.put("app_id", message.getAppId());
-        documentData.put("attempt", message.getAttempt());
-        documentData.put("message_id", message.getMessageId());
-        documentData.put("data", message.getData());
-        documentData.put("chips_rest_endpoint", message.getChipsRestEndpoint());
-        documentData.put("created_at", message.getCreatedAt());
-        return documentData;
+            byte[] dataValue = stream.toByteArray();
+            encoder.flush();
+
+            return dataValue;
+        }
     }
 }
