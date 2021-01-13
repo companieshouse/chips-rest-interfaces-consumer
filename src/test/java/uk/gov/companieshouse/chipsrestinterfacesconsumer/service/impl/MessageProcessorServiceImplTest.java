@@ -5,9 +5,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.client.ChipsRestClient;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.model.ChipsKafkaMessage;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -27,7 +27,7 @@ class MessageProcessorServiceImplTest {
 
     @Test
     void processMessageTest() {
-        ChipsKafkaMessage chipsKafkaMessage = new ChipsKafkaMessage();
+        ChipsRestInterfacesSend chipsKafkaMessage = new ChipsRestInterfacesSend();
 
         messageProcessorService.processMessage(chipsKafkaMessage);
 
