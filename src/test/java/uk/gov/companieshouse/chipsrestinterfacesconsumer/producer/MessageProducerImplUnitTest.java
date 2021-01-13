@@ -48,7 +48,7 @@ class MessageProducerImplUnitTest {
 
     @Test
     void testSuccessfulWriteToTopic()
-            throws ServiceException, IOException, ExecutionException, InterruptedException {
+            throws ServiceException, ExecutionException, InterruptedException {
         Future<RecordMetadata> mockedFuture = Mockito.mock(Future.class);
 
         when(producer.sendAndReturnFuture(any())).thenReturn(mockedFuture);

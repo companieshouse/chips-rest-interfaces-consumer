@@ -42,7 +42,7 @@ public class MessageProducerImpl implements MessageProducer {
     @Override
     public void writeToTopic(ChipsKafkaMessage chipsMessage) throws ServiceException {
         try {
-            logger.info(String.format("Writing message to topic: %s", retryTopicName));
+            logger.info(String.format("Message %s: Writing message to topic: %s", chipsMessage.getMessageId(), retryTopicName));
             byte[] serializedData = avroSerializer.serialize(chipsMessage, schema);
             Message kafkaMessage = new Message();
             kafkaMessage.setValue(serializedData);
