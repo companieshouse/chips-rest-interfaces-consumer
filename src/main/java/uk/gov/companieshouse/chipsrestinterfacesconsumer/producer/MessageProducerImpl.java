@@ -5,8 +5,8 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.model.ChipsKafkaMessage;
 import uk.gov.companieshouse.kafka.message.Message;
 import uk.gov.companieshouse.kafka.producer.CHKafkaProducer;
 import uk.gov.companieshouse.service.ServiceException;
@@ -40,7 +40,7 @@ public class MessageProducerImpl implements MessageProducer {
     }
 
     @Override
-    public void writeToTopic(ChipsKafkaMessage chipsMessage) throws ServiceException {
+    public void writeToTopic(ChipsRestInterfacesSend chipsMessage) throws ServiceException {
         try {
             logger.info(String.format("Message %s: Writing message to topic: %s", chipsMessage.getMessageId(), retryTopicName));
             byte[] serializedData = avroSerializer.serialize(chipsMessage, schema);

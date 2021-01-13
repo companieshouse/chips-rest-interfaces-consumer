@@ -6,9 +6,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.RestClientException;
+import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.client.ChipsRestClient;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.model.ChipsKafkaMessage;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.producer.MessageProducer;
 import uk.gov.companieshouse.service.ServiceException;
 
@@ -34,18 +34,19 @@ class MessageProcessorServiceImplTest {
 
     @Test
     void processMessageTest() throws ServiceException {
-        ChipsKafkaMessage chipsKafkaMessage = new ChipsKafkaMessage();
-        messageProcessorService.processMessage(chipsKafkaMessage);
-        verify(chipsRestClient, times(1)).sendToChips(eq(chipsKafkaMessage));
-        verify(retryMessageProducer, times(0)).writeToTopic(eq(chipsKafkaMessage));
+        ChipsRestInterfacesSend chipsRestInterfacesSend = new ChipsRestInterfacesSend();
+
+        messageProcessorService.processMessage(chipsRestInterfacesSend);
+        verify(chipsRestClient, times(1)).sendToChips(eq(chipsRestInterfacesSend));
+        verify(retryMessageProducer, times(0)).writeToTopic(eq(chipsRestInterfacesSend));
     }
 
     @Test
     void testRetryIsCalled() throws ServiceException {
-        ChipsKafkaMessage chipsKafkaMessage = new ChipsKafkaMessage();
-        doThrow(RestClientException.class).when(chipsRestClient).sendToChips(chipsKafkaMessage);
-        messageProcessorService.processMessage(chipsKafkaMessage);
-        verify(chipsRestClient, times(1)).sendToChips(eq(chipsKafkaMessage));
-        verify(retryMessageProducer, times(1)).writeToTopic(eq(chipsKafkaMessage));
+        ChipsRestInterfacesSend chipsRestInterfacesSend = new ChipsRestInterfacesSend();
+        doThrow(RestClientException.class).when(chipsRestClient).sendToChips(chipsRestInterfacesSend );
+        messageProcessorService.processMessage(chipsRestInterfacesSend );
+        verify(chipsRestClient, times(1)).sendToChips(eq(chipsRestInterfacesSend ));
+        verify(retryMessageProducer, times(1)).writeToTopic(eq(chipsRestInterfacesSend ));
     }
 }

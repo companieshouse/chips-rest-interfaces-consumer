@@ -3,9 +3,9 @@ package uk.gov.companieshouse.chipsrestinterfacesconsumer.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
+import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.client.ChipsRestClient;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.model.ChipsKafkaMessage;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.producer.MessageProducer;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
 import uk.gov.companieshouse.service.ServiceException;
@@ -26,7 +26,7 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
     private MessageProducer retryMessageProducer;
 
     @Override
-    public void processMessage(ChipsKafkaMessage message) throws ServiceException {
+    public void processMessage(ChipsRestInterfacesSend message) throws ServiceException {
         Map<String, Object> logMap = Collections.singletonMap("Message", message);
         logger.info("About to send message to Chips", logMap);
         try {

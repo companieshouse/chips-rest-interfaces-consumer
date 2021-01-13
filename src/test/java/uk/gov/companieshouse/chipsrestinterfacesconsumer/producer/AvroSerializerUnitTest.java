@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.model.ChipsKafkaMessage;
+import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -40,7 +40,7 @@ class AvroSerializerUnitTest {
             throws IOException {
         Schema schema = getDummySchema(this.getClass().getClassLoader().getResource(
                 "producer/chips-rest-interfaces-send.avsc"));
-        ChipsKafkaMessage message = buildChipsMessageContent();
+        ChipsRestInterfacesSend message = buildChipsMessageContent();
 
         byte[] byteArray = avroSerializer.serialize(message, schema);
         String result = decode(schema, byteArray);
@@ -74,8 +74,8 @@ class AvroSerializerUnitTest {
         return parser.parse(new File(avroSchemaPath));
     }
 
-    private ChipsKafkaMessage buildChipsMessageContent() {
-        ChipsKafkaMessage message = new ChipsKafkaMessage();
+    private ChipsRestInterfacesSend buildChipsMessageContent() {
+        ChipsRestInterfacesSend message = new ChipsRestInterfacesSend();
         message.setAppId(APP_ID);
         message.setAttempt(ATTEMPT);
         message.setMessageId(MESSAGE_ID);

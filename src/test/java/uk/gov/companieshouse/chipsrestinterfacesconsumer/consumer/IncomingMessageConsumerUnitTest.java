@@ -7,9 +7,13 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
 import uk.gov.companieshouse.kafka.consumer.CHKafkaConsumerGroup;
+import uk.gov.companieshouse.kafka.deserialization.AvroDeserializer;
+import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
+import uk.gov.companieshouse.kafka.exceptions.DeserializationException;
 import uk.gov.companieshouse.kafka.message.Message;
 import uk.gov.companieshouse.service.ServiceException;
 
@@ -34,6 +38,12 @@ class IncomingMessageConsumerUnitTest {
 
     @Mock
     private ApplicationLogger logger;
+
+    @Mock
+    private DeserializerFactory deserializerFactory;
+
+    @Mock
+    private AvroDeserializer<ChipsRestInterfacesSend> avroDeserializer;
 
     @Mock
     private CHKafkaConsumerGroup consumer;
@@ -70,12 +80,15 @@ class IncomingMessageConsumerUnitTest {
     }
 
     @Test
-    void testReadValidMessage() throws ServiceException {
+    void testReadValidMessage() throws ServiceException, DeserializationException {
         List<Message> messages = new ArrayList<>();
         Message message = new Message();
+        ChipsRestInterfacesSend deserializedMessage = new ChipsRestInterfacesSend();
         // TODO have a real message or something resembling it
         message.setValue("{}".getBytes());
         messages.add(message);
+        when(deserializerFactory.getSpecificRecordDeserializer(ChipsRestInterfacesSend.class)).thenReturn(avroDeserializer);
+        when(avroDeserializer.fromBinary(any(), any())).thenReturn(deserializedMessage);
         when(consumer.consume()).thenReturn(messages);
 
         incomingMessageConsumer.readAndProcess();

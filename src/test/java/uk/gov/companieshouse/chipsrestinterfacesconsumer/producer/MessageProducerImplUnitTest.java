@@ -7,8 +7,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.model.ChipsKafkaMessage;
 import uk.gov.companieshouse.kafka.producer.CHKafkaProducer;
 import uk.gov.companieshouse.service.ServiceException;
 
@@ -52,7 +52,7 @@ class MessageProducerImplUnitTest {
         Future<RecordMetadata> mockedFuture = Mockito.mock(Future.class);
 
         when(producer.sendAndReturnFuture(any())).thenReturn(mockedFuture);
-        messageProducerImpl.writeToTopic(getDummyChipsKafkaMessage());
+        messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend());
 
         verify(mockedFuture, times(1)).get();
     }
@@ -61,7 +61,7 @@ class MessageProducerImplUnitTest {
     void testServiceExceptionIsThrownWhenSerializerThrowsIOException()
             throws IOException {
         doThrow(IOException.class).when(avroSerializer).serialize(any(), any());
-        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsKafkaMessage()));
+        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend()));
     }
 
     @Test
@@ -70,7 +70,7 @@ class MessageProducerImplUnitTest {
         Future<RecordMetadata> faultyMockedFuture = Mockito.mock(Future.class);
         when(producer.sendAndReturnFuture(any())).thenReturn(faultyMockedFuture);
         doThrow(InterruptedException.class).when(faultyMockedFuture).get();
-        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsKafkaMessage()));
+        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend()));
         assertTrue(Thread.currentThread().isInterrupted());
     }
 
@@ -80,17 +80,17 @@ class MessageProducerImplUnitTest {
         Future<RecordMetadata> faultyMockedFuture = Mockito.mock(Future.class);
         when(producer.sendAndReturnFuture(any())).thenReturn(faultyMockedFuture );
         doThrow(ExecutionException.class).when(faultyMockedFuture).get();
-        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsKafkaMessage()));
+        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend()));
     }
 
-    private ChipsKafkaMessage getDummyChipsKafkaMessage() {
-        ChipsKafkaMessage chipsKafkaMessage = new ChipsKafkaMessage();
-        chipsKafkaMessage.setAppId(APP_ID);
-        chipsKafkaMessage.setAttempt(ATTEMPT);
-        chipsKafkaMessage.setMessageId(MESSAGE_ID);
-        chipsKafkaMessage.setData(DATA);
-        chipsKafkaMessage.setChipsRestEndpoint(CHIPS_REST_ENDPOINT);
-        chipsKafkaMessage.setCreatedAt(CREATED_AT);
-        return chipsKafkaMessage;
+    private ChipsRestInterfacesSend getDummyChipsRestInterfacesSend() {
+        ChipsRestInterfacesSend chipsRestInterfacesSend = new ChipsRestInterfacesSend();
+        chipsRestInterfacesSend.setAppId(APP_ID);
+        chipsRestInterfacesSend.setAttempt(ATTEMPT);
+        chipsRestInterfacesSend.setMessageId(MESSAGE_ID);
+        chipsRestInterfacesSend.setData(DATA);
+        chipsRestInterfacesSend.setChipsRestEndpoint(CHIPS_REST_ENDPOINT);
+        chipsRestInterfacesSend.setCreatedAt(CREATED_AT);
+        return chipsRestInterfacesSend;
     }
 }

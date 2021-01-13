@@ -7,7 +7,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.EncoderFactory;
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.model.ChipsKafkaMessage;
+import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -15,7 +15,7 @@ import java.io.IOException;
 @Component
 public class AvroSerializer {
 
-    public byte[] serialize(ChipsKafkaMessage message, Schema schema) throws IOException {
+    public byte[] serialize(ChipsRestInterfacesSend message, Schema schema) throws IOException {
         GenericDatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<>(schema);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(stream, null);
@@ -26,7 +26,7 @@ public class AvroSerializer {
         return dataValue;
     }
 
-    private GenericRecord buildAvroGenericRecord(ChipsKafkaMessage message, Schema schema) {
+    private GenericRecord buildAvroGenericRecord(ChipsRestInterfacesSend message, Schema schema) {
 
         GenericRecord documentData = new GenericData.Record(schema);
         documentData.put("app_id", message.getAppId());

@@ -1,8 +1,8 @@
 package uk.gov.companieshouse.chipsrestinterfacesconsumer.service;
 
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.model.ChipsKafkaMessage;
 import uk.gov.companieshouse.service.ServiceException;
+import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 
 public interface MessageProcessorService {
-    void processMessage(ChipsKafkaMessage message) throws ServiceException;
+    void processMessage(ChipsRestInterfacesSend message) throws ServiceException;
 }
