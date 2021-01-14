@@ -68,7 +68,7 @@ class KafkaConfiguration {
     }
 
     @Bean
-    CHKafkaProducer getOutgoingProducer() {
+    CHKafkaProducer getRetryMessageProducer() {
         ProducerConfig config = new ProducerConfig();
         ProducerConfigHelper.assignBrokerAddresses(config);
         config.setRoundRobinPartitioner(true);
