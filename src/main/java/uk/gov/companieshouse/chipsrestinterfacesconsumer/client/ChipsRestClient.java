@@ -2,8 +2,13 @@ package uk.gov.companieshouse.chipsrestinterfacesconsumer.client;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriTemplate;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 
@@ -24,11 +29,11 @@ public class ChipsRestClient {
     @Autowired
     private ApplicationLogger logger;
 
-    private String chipsRestUrl;
+    private UriTemplate chipsRestUrl;
 
     @PostConstruct
     void init() {
-        chipsRestUrl = String.format("%s{%s}", chipsRestHost, CHIPS_REST_ENDPOINT_URI_VAR);
+        chipsRestUrl = new UriTemplate(String.format("%s{%s}", chipsRestHost, CHIPS_REST_ENDPOINT_URI_VAR));
     }
 
     public void sendToChips(ChipsRestInterfacesSend message) {
@@ -36,6 +41,16 @@ public class ChipsRestClient {
         var restEndpoint = message.getChipsRestEndpoint();
 
         var uriVariables = Collections.singletonMap(CHIPS_REST_ENDPOINT_URI_VAR, restEndpoint);
-        restTemplate.postForEntity(chipsRestUrl, messageData, String.class, uriVariables);
+
+        HttpHeaders requestHeaders = new HttpHeaders();
+        //Chips rest requires content type to be json
+        requestHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<String> requestEntity = new HttpEntity<>(messageData, requestHeaders);
+        restTemplate.exchange(chipsRestUrl.expand(uriVariables),
+                HttpMethod.POST,
+                requestEntity,
+                String.class
+        );
     }
 }
