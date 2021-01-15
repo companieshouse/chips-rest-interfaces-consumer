@@ -47,6 +47,10 @@ public class IncomingMessageConsumer implements MessageConsumer {
             try {
                 logger.info(String.format("Message offset %s retrieved, processing", msg.getOffset()));
                 ChipsRestInterfacesSend deserializedMsg = deserialize(msg);
+                Map<String, Object> logMap = new HashMap<>();
+                logMap.put("Message Offset", msg.getOffset());
+                logMap.put("Deserialised message id", deserializedMsg.getMessageId());
+                logger.info("Message deserialised successfully", logMap);
                 messageProcessorService.processMessage(deserializedMsg);
                 logger.info(String.format("Message offset %s processed, committing offset", msg.getOffset()));
                 consumer.commit(msg);
