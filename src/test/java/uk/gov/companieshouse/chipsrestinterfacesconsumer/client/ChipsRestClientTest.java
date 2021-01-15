@@ -9,7 +9,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
@@ -19,9 +21,11 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogge
 import java.net.URI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ChipsRestClientTest {
@@ -49,6 +53,9 @@ class ChipsRestClientTest {
         chipsRestInterfacesSend.setData(DATA);
         chipsRestInterfacesSend.setChipsRestEndpoint(CHIPS_REST_ENDPOINT);
         ReflectionTestUtils.setField(chipsRestClient, "chipsRestHost", CHIPS_REST_HOST);
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(HttpStatus.ACCEPTED);
+        when(restTemplate.exchange(any(URI.class), eq(HttpMethod.POST), any(), eq(String.class))).thenReturn(responseEntity);
+
         chipsRestClient.init();
         chipsRestClient.sendToChips(chipsRestInterfacesSend);
 
