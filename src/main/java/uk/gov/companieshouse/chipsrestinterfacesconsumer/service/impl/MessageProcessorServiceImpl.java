@@ -27,7 +27,7 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
 
     @Override
     public void processMessage(ChipsRestInterfacesSend message) throws ServiceException {
-        Map<String, Object> logMap = Collections.singletonMap("Message", message);
+        Map<String, Object> logMap = Collections.singletonMap("Message", message.getData());
         logger.info("About to send message to Chips", logMap);
         try {
             chipsRestClient.sendToChips(message);
