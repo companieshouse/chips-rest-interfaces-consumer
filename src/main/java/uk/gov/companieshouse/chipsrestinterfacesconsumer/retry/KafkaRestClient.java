@@ -13,8 +13,8 @@ public class KafkaRestClient {
         this.restTemplate = restTemplate;
     }
 
-    public byte[] getSchema(String schemaRegistryUrl, String emailSchemaUri) {
-        String schemaUrl = String.format("%s%s", schemaRegistryUrl, emailSchemaUri);
+    public byte[] getSchema(String schemaRegistryUrl, String schemaUri) {
+        String schemaUrl = String.format("%s%s", schemaRegistryUrl, schemaUri);
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<byte[]> response = restTemplate.exchange(schemaUrl, HttpMethod.GET, entity, byte[].class);
