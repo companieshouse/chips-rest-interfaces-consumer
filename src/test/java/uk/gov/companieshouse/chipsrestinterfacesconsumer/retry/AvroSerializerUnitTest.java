@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.chipsrestinterfacesconsumer.producer;
+package uk.gov.companieshouse.chipsrestinterfacesconsumer.retry;
 
 import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Schema;
