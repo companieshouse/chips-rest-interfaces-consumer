@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.chipsrestinterfacesconsumer.producer;
+package uk.gov.companieshouse.chipsrestinterfacesconsumer.retry;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
