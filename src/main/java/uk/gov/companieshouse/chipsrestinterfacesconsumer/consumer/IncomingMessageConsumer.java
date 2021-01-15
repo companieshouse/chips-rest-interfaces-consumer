@@ -49,7 +49,7 @@ public class IncomingMessageConsumer implements MessageConsumer {
                 ChipsRestInterfacesSend deserializedMsg = deserialize(msg);
                 logger.info("Deserialised message", Collections.singletonMap("Message", deserializedMsg));
                 messageProcessorService.processMessage(deserializedMsg);
-                logger.info(String.format("Message %s processed, committing offset", msg.getKey()));
+                logger.info(String.format("Message %s processed, committing offset", msg.getOffset()));
                 consumer.commit(msg);
             } catch (Exception e) {
                 Map<String, Object> data = new HashMap<>();
