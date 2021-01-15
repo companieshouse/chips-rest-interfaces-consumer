@@ -46,11 +46,17 @@ public class ChipsRestClient {
         //Chips rest requires content type to be json
         requestHeaders.setContentType(MediaType.APPLICATION_JSON);
 
+        var expandedUrl = chipsRestUrl.expand(uriVariables);
+        logger.info(String.format("Posting message id %s to %s", message.getMessageId(), expandedUrl));
         HttpEntity<String> requestEntity = new HttpEntity<>(messageData, requestHeaders);
-        restTemplate.exchange(chipsRestUrl.expand(uriVariables),
+        var response = restTemplate.exchange(
+                expandedUrl,
                 HttpMethod.POST,
                 requestEntity,
                 String.class
         );
+
+        logger.info(String.format("Chips Rest Response Status: %s", response.getStatusCode()));
+        logger.info(String.format("Chips Rest Response Body: %s", response.getBody()));
     }
 }
