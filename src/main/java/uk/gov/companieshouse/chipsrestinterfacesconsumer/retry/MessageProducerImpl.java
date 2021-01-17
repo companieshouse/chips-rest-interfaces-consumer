@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.chipsrestinterfacesconsumer.retry;
 
-import org.apache.avro.Schema;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,9 +23,6 @@ public class MessageProducerImpl implements MessageProducer {
 
     private CHKafkaProducer producer;
 
-    @Autowired
-    private Schema schema;
-
     @Value("${kafka.retry.topic}")
     private String retryTopicName;
 
@@ -43,7 +39,7 @@ public class MessageProducerImpl implements MessageProducer {
     public void writeToTopic(ChipsRestInterfacesSend chipsMessage) throws ServiceException {
         try {
             logger.info(String.format("Message %s: Writing message to topic: %s", chipsMessage.getMessageId(), retryTopicName));
-            byte[] serializedData = avroSerializer.serialize(chipsMessage, schema);
+            byte[] serializedData = avroSerializer.serialize(chipsMessage);
             Message kafkaMessage = new Message();
             kafkaMessage.setValue(serializedData);
             kafkaMessage.setTopic(retryTopicName);

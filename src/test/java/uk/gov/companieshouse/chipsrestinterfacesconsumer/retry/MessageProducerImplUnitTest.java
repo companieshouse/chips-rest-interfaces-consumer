@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
@@ -43,15 +42,17 @@ class MessageProducerImplUnitTest {
     @Mock
     private CHKafkaProducer producer;
 
+    @Mock
+    private Future<RecordMetadata> mockedFuture;
+
     @InjectMocks
     private MessageProducerImpl messageProducerImpl;
 
     @Test
     void testSuccessfulWriteToTopic()
             throws ServiceException, ExecutionException, InterruptedException {
-        Future<RecordMetadata> mockedFuture = Mockito.mock(Future.class);
-
         when(producer.sendAndReturnFuture(any())).thenReturn(mockedFuture);
+
         messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend());
 
         verify(mockedFuture, times(1)).get();
@@ -60,16 +61,17 @@ class MessageProducerImplUnitTest {
     @Test
     void testServiceExceptionIsThrownWhenSerializerThrowsIOException()
             throws IOException {
-        doThrow(IOException.class).when(avroSerializer).serialize(any(), any());
+        doThrow(IOException.class).when(avroSerializer).serialize(any());
+
         assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend()));
     }
 
     @Test
     void testServiceExceptionIsThrownWhenFutureThrowsInterruptedException()
             throws ExecutionException, InterruptedException {
-        Future<RecordMetadata> faultyMockedFuture = Mockito.mock(Future.class);
-        when(producer.sendAndReturnFuture(any())).thenReturn(faultyMockedFuture);
-        doThrow(InterruptedException.class).when(faultyMockedFuture).get();
+        when(producer.sendAndReturnFuture(any())).thenReturn(mockedFuture);
+        doThrow(InterruptedException.class).when(mockedFuture).get();
+
         assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend()));
         assertTrue(Thread.currentThread().isInterrupted());
     }
@@ -77,9 +79,9 @@ class MessageProducerImplUnitTest {
     @Test
     void testServiceExceptionIsThrownWhenFutureThrowsExecutionException()
             throws ExecutionException, InterruptedException {
-        Future<RecordMetadata> faultyMockedFuture = Mockito.mock(Future.class);
-        when(producer.sendAndReturnFuture(any())).thenReturn(faultyMockedFuture );
-        doThrow(ExecutionException.class).when(faultyMockedFuture).get();
+        when(producer.sendAndReturnFuture(any())).thenReturn(mockedFuture );
+        doThrow(ExecutionException.class).when(mockedFuture).get();
+
         assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend()));
     }
 
