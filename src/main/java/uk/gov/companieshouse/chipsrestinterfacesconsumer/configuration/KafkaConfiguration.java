@@ -16,9 +16,6 @@ import java.util.Collections;
 @Configuration
 class KafkaConfiguration {
 
-    @Value("${SCHEMA_REGISTRY_URL}")
-    private String schemaRegistryUrl;
-
     @Value("${kafka.group.name}")
     private String groupName;
 
