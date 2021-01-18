@@ -52,7 +52,7 @@ class IncomingMessageConsumerUnitTest {
     private MessageProcessorService messageProcessorService;
 
     @InjectMocks
-    private IncomingMessageConsumer incomingMessageConsumer;
+    private MessageConsumerImpl incomingMessageConsumer;
 
     @Captor
     private ArgumentCaptor<Map<String, Object>> loggingDataMapCaptor;

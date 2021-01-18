@@ -1,8 +1,5 @@
 package uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
@@ -16,20 +13,14 @@ import javax.annotation.PreDestroy;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component("retry-message-consumer")
-public class RetryMessageConsumer implements MessageConsumer {
+public class MessageConsumerImpl implements MessageConsumer {
 
-    @Autowired
     private ApplicationLogger logger;
 
-    @Autowired
-    @Qualifier("retry-consumer-group")
     private CHKafkaConsumerGroup consumer;
 
-    @Autowired
     private MessageProcessorService messageProcessorService;
 
-    @Autowired
     private DeserializerFactory deserializerFactory;
 
     @PostConstruct
@@ -42,18 +33,28 @@ public class RetryMessageConsumer implements MessageConsumer {
         consumer.close();
     }
 
+    public MessageConsumerImpl(ApplicationLogger logger,
+                               CHKafkaConsumerGroup consumer,
+                               MessageProcessorService messageProcessorService,
+                               DeserializerFactory deserializerFactory) {
+        this.logger = logger;
+        this.consumer = consumer;
+        this.messageProcessorService = messageProcessorService;
+        this.deserializerFactory = deserializerFactory;
+    }
+
     @Override
     public void readAndProcess() {
         for (Message msg : consumer.consume()) {
             try {
-                logger.info(String.format("%s Message offset %s retrieved, processing", this.getClass(), msg.getOffset()));
+                logger.info(String.format("Message offset %s retrieved, processing", msg.getOffset()));
                 ChipsRestInterfacesSend deserializedMsg = deserialize(msg);
                 Map<String, Object> logMap = new HashMap<>();
                 logMap.put("Message Offset", msg.getOffset());
                 logMap.put("Deserialised message id", deserializedMsg.getMessageId());
                 logger.info("Message deserialised successfully", logMap);
                 messageProcessorService.processMessage(deserializedMsg);
-                logger.info(String.format("%s Message offset %s processed, committing offset", this.getClass(), msg.getOffset()));
+                logger.info(String.format("Message offset %s processed, committing offset", msg.getOffset()));
                 consumer.commit(msg);
             } catch (Exception e) {
                 Map<String, Object> data = new HashMap<>();
