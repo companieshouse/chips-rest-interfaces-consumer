@@ -16,14 +16,14 @@ import javax.annotation.PreDestroy;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component("incoming-message-consumer")
-public class IncomingMessageConsumer implements MessageConsumer {
+@Component("retry-message-consumer")
+public class RetryMessageConsumer implements MessageConsumer {
 
     @Autowired
     private ApplicationLogger logger;
 
     @Autowired
-    @Qualifier("incoming-consumer-group")
+    @Qualifier("retry-consumer-group")
     private CHKafkaConsumerGroup consumer;
 
     @Autowired
@@ -46,7 +46,7 @@ public class IncomingMessageConsumer implements MessageConsumer {
     public void readAndProcess() {
         for (Message msg : consumer.consume()) {
             try {
-                logger.info(String.format("Message offset %s retrieved, procesgising", msg.getOffset()));
+                logger.info(String.format("Message offset %s retrieved, processing", msg.getOffset()));
                 ChipsRestInterfacesSend deserializedMsg = deserialize(msg);
                 Map<String, Object> logMap = new HashMap<>();
                 logMap.put("Message Offset", msg.getOffset());
