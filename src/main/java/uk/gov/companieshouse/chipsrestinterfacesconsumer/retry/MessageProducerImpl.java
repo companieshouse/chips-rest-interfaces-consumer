@@ -17,11 +17,11 @@ import java.util.concurrent.Future;
 @Component
 public class MessageProducerImpl implements MessageProducer {
 
-    private ApplicationLogger logger;
+    private final ApplicationLogger logger;
 
-    private AvroSerializer avroSerializer;
+    private final AvroSerializer avroSerializer;
 
-    private CHKafkaProducer producer;
+    private final CHKafkaProducer producer;
 
     @Value("${kafka.retry.topic}")
     private String retryTopicName;
