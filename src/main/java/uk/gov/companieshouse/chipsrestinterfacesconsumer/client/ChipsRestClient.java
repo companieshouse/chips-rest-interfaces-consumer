@@ -57,6 +57,5 @@ public class ChipsRestClient {
         );
 
         logger.info(String.format("Chips Rest Response Status: %s", response.getStatusCode()));
-        logger.info(String.format("Chips Rest Response Body: %s", response.getBody()));
     }
 }
