@@ -7,9 +7,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.companieshouse.kafka.consumer.ConsumerConfig;
 import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
+import uk.gov.companieshouse.kafka.producer.Acks;
+import uk.gov.companieshouse.kafka.producer.ProducerConfig;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class KafkaConfigurationTest {
@@ -20,6 +21,7 @@ class KafkaConfigurationTest {
     private static final String INCOMING_TOPIC_NAME_VALUE = "incoming-topic";
     private static final String RETRY_TOPIC_NAME_VALUE = "retry-topic";
     private static final int POLL_TIMEOUT_VALUE = 100;
+    private static final int RETRIES = 10;
 
     private KafkaConfiguration kafkaConfiguration;
 
@@ -32,6 +34,7 @@ class KafkaConfigurationTest {
         ReflectionTestUtils.setField(kafkaConfiguration, "incomingTopicName", INCOMING_TOPIC_NAME_VALUE);
         ReflectionTestUtils.setField(kafkaConfiguration, "retryTopicName", RETRY_TOPIC_NAME_VALUE);
         ReflectionTestUtils.setField(kafkaConfiguration, "pollTimeout", POLL_TIMEOUT_VALUE);
+        ReflectionTestUtils.setField(kafkaConfiguration, "retries", RETRIES);
     }
 
     @Test
@@ -58,6 +61,17 @@ class KafkaConfigurationTest {
         assertEquals(1, consumerConfig.getTopics().size());
         assertEquals(RETRY_TOPIC_NAME_VALUE, consumerConfig.getTopics().get(0));
         assertEquals(100, consumerConfig.getPollTimeout());
+    }
+
+    @Test
+    void getRetryMessageProducerConfigTest() {
+        ProducerConfig producerConfig = kafkaConfiguration.getRetryMessageProducerConfig();
+
+        assertNotNull(producerConfig.getBrokerAddresses());
+        assertEquals(1, producerConfig.getBrokerAddresses().length);
+        assertEquals(BROKER_ADDRESS_VALUE, producerConfig.getBrokerAddresses()[0]);        assertTrue(producerConfig.isRoundRobinPartitioner());
+        assertEquals(Acks.WAIT_FOR_ALL, producerConfig.getAcks());
+        assertEquals(RETRIES, producerConfig.getRetries());
     }
 
     @Test

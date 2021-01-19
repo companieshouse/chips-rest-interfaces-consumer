@@ -72,11 +72,15 @@ class KafkaConfiguration {
 
     @Bean
     CHKafkaProducer getRetryMessageProducer() {
+        return new CHKafkaProducer(getRetryMessageProducerConfig());
+    }
+
+    ProducerConfig getRetryMessageProducerConfig() {
         ProducerConfig config = new ProducerConfig();
-        ProducerConfigHelper.assignBrokerAddresses(config);
+        config.setBrokerAddresses(new String[] { brokerAddress });
         config.setRoundRobinPartitioner(true);
         config.setAcks(Acks.WAIT_FOR_ALL);
         config.setRetries(retries);
-        return new CHKafkaProducer(config);
+        return config;
     }
 }
