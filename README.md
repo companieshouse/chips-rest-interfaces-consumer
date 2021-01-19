@@ -21,7 +21,7 @@ To checkout and build the service:
 5. Use spacebar in the command line to open tilt window - wait for chips-rest-interfaces-consumer to become green.
 6. Run [strike-off-objections](https://github.com/companieshouse/strike-off-objections-web) or an application of your choice that sends data to CHIPS.
 7. Once you have reached the end of the journey or the point where CHIPS has been contacted look in the tilt logs for chips-rest-interfaces-consumer.
-and check that the logs contain a message similar to "Message offset ... retrieved, processing".
+and check that the logs contain a message similar to "Message offset < OFFSET > retrieved, processing".
 
 These instructions are for a local docker environment.
 
