@@ -1,12 +1,10 @@
 package uk.gov.companieshouse.chipsrestinterfacesconsumer.retry;
 
-import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericDatumReader;
-import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
+import org.apache.avro.specific.SpecificDatumReader;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,13 +12,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 class AvroSerializerUnitTest {
@@ -36,42 +30,28 @@ class AvroSerializerUnitTest {
     private AvroSerializer avroSerializer;
 
     @Test
-    void testAvroSerializer()
-            throws IOException {
-        Schema schema = getDummySchema(this.getClass().getClassLoader().getResource(
-                "producer/chips-rest-interfaces-send.avsc"));
-        ChipsRestInterfacesSend message = buildChipsMessageContent();
+    void testAvroSerializer() throws IOException {
+        ChipsRestInterfacesSend messageContent = buildChipsMessageContent();
 
-        byte[] byteArray = avroSerializer.serialize(message, schema);
-        String result = decode(schema, byteArray);
-        assertTrue(result.contains(APP_ID));
-        assertTrue(result.contains(String.valueOf(ATTEMPT)));
-        assertTrue(result.contains(MESSAGE_ID));
-        assertTrue(result.contains(DATA));
-        assertTrue(result.contains(CHIPS_REST_ENDPOINT));
-        assertTrue(result.contains(CREATED_AT));
+        byte[] byteArray = avroSerializer.serialize(messageContent);
+
+        ChipsRestInterfacesSend result = decode(messageContent.getSchema(), byteArray);
+        assertEquals(APP_ID, result.getAppId());
+        assertEquals(ATTEMPT, result.getAttempt());
+        assertEquals(MESSAGE_ID, result.getMessageId());
+        assertEquals(DATA, result.getData());
+        assertEquals(CHIPS_REST_ENDPOINT, result.getChipsRestEndpoint());
+        assertEquals(CREATED_AT, result.getCreatedAt());
     }
 
-    private String decode(Schema schema, byte[] byteArray) throws IOException {
-        DatumReader<GenericRecord> reader = new GenericDatumReader<>(schema);
-        ByteArrayInputStream in = new ByteArrayInputStream(byteArray);
-        Decoder decoder = DecoderFactory.get().binaryDecoder(in, null);
+    private ChipsRestInterfacesSend decode(Schema schema, byte[] byteArray) throws IOException {
+        DatumReader<ChipsRestInterfacesSend> reader = new SpecificDatumReader<>(schema);
 
-        try {
-            GenericRecord datum = reader.read(null, decoder);
-            return datum.toString();
-        } catch (AvroRuntimeException | ArrayIndexOutOfBoundsException adex) {
-            fail("Malformed message - Failed to deserialize", adex);
-        } finally {
-            in.close();
+        try(ByteArrayInputStream in = new ByteArrayInputStream(byteArray)) {
+            Decoder decoder = DecoderFactory.get().binaryDecoder(in, null);
+
+            return reader.read(null, decoder);
         }
-        return null;
-    }
-
-    private Schema getDummySchema(URL url) throws IOException {
-        String avroSchemaPath = Objects.requireNonNull(url).getFile();
-        Schema.Parser parser = new Schema.Parser();
-        return parser.parse(new File(avroSchemaPath));
     }
 
     private ChipsRestInterfacesSend buildChipsMessageContent() {
