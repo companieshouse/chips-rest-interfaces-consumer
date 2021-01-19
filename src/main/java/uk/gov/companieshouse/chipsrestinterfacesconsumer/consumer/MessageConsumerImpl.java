@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
@@ -16,13 +15,10 @@ import java.util.Map;
 
 public class MessageConsumerImpl implements MessageConsumer {
 
-    @Autowired
     private ApplicationLogger logger;
 
-    @Autowired
     private MessageProcessorService messageProcessorService;
 
-    @Autowired
     private DeserializerFactory deserializerFactory;
 
     private CHKafkaConsumerGroup consumer;
@@ -39,8 +35,14 @@ public class MessageConsumerImpl implements MessageConsumer {
         consumer.close();
     }
 
-    public MessageConsumerImpl(CHKafkaConsumerGroup consumer,
+    public MessageConsumerImpl(ApplicationLogger logger,
+                               MessageProcessorService messageProcessorService,
+                               DeserializerFactory deserializerFactory,
+                               CHKafkaConsumerGroup consumer,
                                String id) {
+        this.logger = logger;
+        this.messageProcessorService = messageProcessorService;
+        this.deserializerFactory = deserializerFactory;
         this.consumer = consumer;
         this.id = id;
     }
