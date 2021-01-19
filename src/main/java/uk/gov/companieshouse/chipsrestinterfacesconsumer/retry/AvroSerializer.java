@@ -16,7 +16,7 @@ class AvroSerializer {
     byte[] serialize(ChipsRestInterfacesSend data) throws IOException {
         DatumWriter<ChipsRestInterfacesSend> datumWriter = new SpecificDatumWriter<>();
 
-        try(ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Encoder encoder = EncoderFactory.get().binaryEncoder(out, null);
             datumWriter.setSchema(data.getSchema());
             datumWriter.write(data, encoder);
