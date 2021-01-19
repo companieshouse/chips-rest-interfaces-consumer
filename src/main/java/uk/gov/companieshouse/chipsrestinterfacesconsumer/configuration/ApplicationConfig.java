@@ -30,6 +30,6 @@ public class ApplicationConfig {
 
     @Bean("retry-message-consumer")
     public MessageConsumer retryMessageConsumer(@Qualifier("retry-consumer-group") CHKafkaConsumerGroup consumer) {
-        return new MessageConsumerImpl(consumer, "incoming-message-consumer");
+        return new MessageConsumerImpl(consumer, "retry-message-consumer");
     }
 }
