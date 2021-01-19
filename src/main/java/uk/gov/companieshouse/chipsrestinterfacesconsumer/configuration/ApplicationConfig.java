@@ -13,18 +13,18 @@ import uk.gov.companieshouse.kafka.consumer.CHKafkaConsumerGroup;
 import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
 
 @Configuration
-public class ApplicationConfig {
+class ApplicationConfig {
 
     @Bean
-    public RestTemplate restTemplate(RestTemplateBuilder builder) {
+    RestTemplate restTemplate(RestTemplateBuilder builder) {
         return builder.build();
     }
 
     @Bean("incoming-message-consumer")
     MessageConsumer incomingMessageConsumer(ApplicationLogger logger,
-                                                   MessageProcessorService messageProcessorService,
-                                                   DeserializerFactory deserializerFactory,
-                                                   @Qualifier("incoming-consumer-group") CHKafkaConsumerGroup consumer) {
+                                            MessageProcessorService messageProcessorService,
+                                            DeserializerFactory deserializerFactory,
+                                            @Qualifier("incoming-consumer-group") CHKafkaConsumerGroup consumer) {
         return new MessageConsumerImpl(
                 logger,
                 messageProcessorService,
@@ -35,9 +35,9 @@ public class ApplicationConfig {
 
     @Bean("retry-message-consumer")
     MessageConsumer retryMessageConsumer(ApplicationLogger logger,
-                                                MessageProcessorService messageProcessorService,
-                                                DeserializerFactory deserializerFactory,
-                                                @Qualifier("retry-consumer-group") CHKafkaConsumerGroup consumer) {
+                                         MessageProcessorService messageProcessorService,
+                                         DeserializerFactory deserializerFactory,
+                                         @Qualifier("retry-consumer-group") CHKafkaConsumerGroup consumer) {
         return new MessageConsumerImpl(
                 logger,
                 messageProcessorService,
