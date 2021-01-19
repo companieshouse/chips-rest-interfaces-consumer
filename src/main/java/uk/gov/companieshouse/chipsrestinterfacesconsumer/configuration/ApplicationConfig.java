@@ -27,7 +27,7 @@ public class ApplicationConfig {
     }
 
     @Bean("incoming-message-consumer")
-    public MessageConsumer incomingMessageConsumer(ApplicationLogger logger,
+    MessageConsumer incomingMessageConsumer(ApplicationLogger logger,
                                                    MessageProcessorService messageProcessorService,
                                                    DeserializerFactory deserializerFactory,
                                                    @Qualifier("incoming-consumer-group") CHKafkaConsumerGroup consumer) {
@@ -40,7 +40,7 @@ public class ApplicationConfig {
     }
 
     @Bean("retry-message-consumer")
-    public MessageConsumer retryMessageConsumer(ApplicationLogger logger,
+    MessageConsumer retryMessageConsumer(ApplicationLogger logger,
                                                 MessageProcessorService messageProcessorService,
                                                 DeserializerFactory deserializerFactory,
                                                 @Qualifier("retry-consumer-group") CHKafkaConsumerGroup consumer) {

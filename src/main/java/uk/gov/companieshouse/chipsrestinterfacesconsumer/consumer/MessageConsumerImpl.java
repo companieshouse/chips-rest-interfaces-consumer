@@ -72,4 +72,8 @@ public class MessageConsumerImpl implements MessageConsumer {
         return deserializerFactory.getSpecificRecordDeserializer(ChipsRestInterfacesSend.class).fromBinary(msg,
                 ChipsRestInterfacesSend.getClassSchema());
     }
+
+    public String getId() {
+        return id;
+    }
 }
