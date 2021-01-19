@@ -10,13 +10,11 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MessageConsumer;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MessageConsumerImpl;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.retry.KafkaRestClient;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
 import uk.gov.companieshouse.kafka.consumer.CHKafkaConsumerGroup;
 import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -60,13 +58,6 @@ class ApplicationConfigTest {
 
         verify(restTemplateBuilder, times(1)).build();
         assertEquals(restTemplate, result);
-    }
-
-    @Test
-    void testRestClient() {
-        KafkaRestClient kafkaRestClient = applicationConfig.restClient(restTemplate);
-
-        assertNotNull(kafkaRestClient);
     }
 
     @Test

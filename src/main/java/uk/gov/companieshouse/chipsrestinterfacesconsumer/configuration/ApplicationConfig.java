@@ -8,7 +8,6 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MessageConsumer;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MessageConsumerImpl;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.retry.KafkaRestClient;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
 import uk.gov.companieshouse.kafka.consumer.CHKafkaConsumerGroup;
 import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
@@ -19,11 +18,6 @@ public class ApplicationConfig {
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
         return builder.build();
-    }
-
-    @Bean
-    public KafkaRestClient restClient(RestTemplate restTemplate) {
-        return new KafkaRestClient(restTemplate);
     }
 
     @Bean("incoming-message-consumer")

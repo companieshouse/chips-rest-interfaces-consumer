@@ -1,12 +1,8 @@
 package uk.gov.companieshouse.chipsrestinterfacesconsumer.configuration;
 
-import org.apache.avro.Schema;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.retry.KafkaRestClient;
 import uk.gov.companieshouse.kafka.consumer.CHKafkaConsumerGroup;
 import uk.gov.companieshouse.kafka.consumer.ConsumerConfig;
 import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
@@ -19,12 +15,6 @@ import java.util.Collections;
 
 @Configuration
 class KafkaConfiguration {
-
-    @Value("${SCHEMA_REGISTRY_URL}")
-    private String schemaRegistryUrl;
-
-    @Value("${CHIPS_REST_INTERFACES_SCHEMA_URI}")
-    private String chipsSchemaUri;
 
     @Value("${kafka.incoming.consumer.group.name}")
     private String incomingConsumerGroupName;
@@ -46,13 +36,6 @@ class KafkaConfiguration {
 
     @Value("${kafka.producer.retries}")
     private int retries;
-
-    @Bean
-    public Schema fetchChipsKafkaSendSchema(KafkaRestClient restClient) throws JSONException {
-        byte[] bytes = restClient.getSchema(schemaRegistryUrl, chipsSchemaUri);
-        String schemaJson = new JSONObject(new String(bytes)).getString("schema");
-        return new Schema.Parser().parse(schemaJson);
-    }
 
     @Bean
     DeserializerFactory getDeserializerFactory() {
