@@ -10,7 +10,9 @@ import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
 import uk.gov.companieshouse.kafka.producer.Acks;
 import uk.gov.companieshouse.kafka.producer.ProducerConfig;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class KafkaConfigurationTest {
@@ -69,7 +71,8 @@ class KafkaConfigurationTest {
 
         assertNotNull(producerConfig.getBrokerAddresses());
         assertEquals(1, producerConfig.getBrokerAddresses().length);
-        assertEquals(BROKER_ADDRESS_VALUE, producerConfig.getBrokerAddresses()[0]);        assertTrue(producerConfig.isRoundRobinPartitioner());
+        assertEquals(BROKER_ADDRESS_VALUE, producerConfig.getBrokerAddresses()[0]);
+        assertTrue(producerConfig.isRoundRobinPartitioner());
         assertEquals(Acks.WAIT_FOR_ALL, producerConfig.getAcks());
         assertEquals(RETRIES, producerConfig.getRetries());
     }
