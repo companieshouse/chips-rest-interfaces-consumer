@@ -29,7 +29,7 @@ public class MessageProducerImpl implements MessageProducer {
     @Autowired
     public MessageProducerImpl(ApplicationLogger logger,
                                AvroSerializer avroSerializer,
-                               CHKafkaProducer producer){
+                               CHKafkaProducer producer) {
         this.logger = logger;
         this.avroSerializer = avroSerializer;
         this.producer = producer;
