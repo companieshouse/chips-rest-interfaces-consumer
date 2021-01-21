@@ -9,7 +9,6 @@ import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
 import uk.gov.companieshouse.kafka.producer.Acks;
 import uk.gov.companieshouse.kafka.producer.CHKafkaProducer;
 import uk.gov.companieshouse.kafka.producer.ProducerConfig;
-import uk.gov.companieshouse.kafka.producer.ProducerConfigHelper;
 
 import java.util.Collections;
 
