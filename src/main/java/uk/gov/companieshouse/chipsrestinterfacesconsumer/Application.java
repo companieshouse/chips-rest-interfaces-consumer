@@ -20,7 +20,7 @@ public class Application implements CommandLineRunner {
     @Qualifier("retry-message-consumer")
     private MessageConsumer retryMessageConsumer;
 
-    private boolean isRunning = true;
+    private final boolean isRunning = true;
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class);
@@ -28,7 +28,7 @@ public class Application implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        while(isRunning) {
+        while (isRunning) {
             incomingMessageConsumer.readAndProcess();
             retryMessageConsumer.readAndProcess();
         }

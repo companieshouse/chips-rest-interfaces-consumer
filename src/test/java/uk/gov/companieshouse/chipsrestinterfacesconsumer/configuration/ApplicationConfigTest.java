@@ -46,7 +46,7 @@ class ApplicationConfigTest {
     private ApplicationConfig applicationConfig;
 
     @BeforeEach
-    void setup () {
+    void setup() {
         applicationConfig = new ApplicationConfig();
     }
 
@@ -68,7 +68,7 @@ class ApplicationConfigTest {
                 deserializerFactory,
                 consumer);
 
-        assertEquals(INCOMING_CONSUMER_ID, ((MessageConsumerImpl)messageConsumer).getId());
+        assertEquals(INCOMING_CONSUMER_ID, ((MessageConsumerImpl) messageConsumer).getId());
     }
 
     @Test
@@ -79,6 +79,6 @@ class ApplicationConfigTest {
                 deserializerFactory,
                 consumer);
 
-        assertEquals(RETRY_CONSUMER_ID, ((MessageConsumerImpl)messageConsumer).getId());
+        assertEquals(RETRY_CONSUMER_ID, ((MessageConsumerImpl) messageConsumer).getId());
     }
 }

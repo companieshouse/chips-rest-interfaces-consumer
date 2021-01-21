@@ -20,12 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class AvroSerializerUnitTest {
 
     private static final String APP_ID = "chips-rest-interfaces-consumer";
-    private static int ATTEMPT = 4;
     private static final String MESSAGE_ID = "abc";
     private static final String DATA = "{subject: testing}";
     private static final String CHIPS_REST_ENDPOINT = "http://nowhere:1234";
     private static final String CREATED_AT = "1610543925";
-
+    private static final int ATTEMPT = 4;
     @InjectMocks
     private AvroSerializer avroSerializer;
 
@@ -47,7 +46,7 @@ class AvroSerializerUnitTest {
     private ChipsRestInterfacesSend decode(Schema schema, byte[] byteArray) throws IOException {
         DatumReader<ChipsRestInterfacesSend> reader = new SpecificDatumReader<>(schema);
 
-        try(ByteArrayInputStream in = new ByteArrayInputStream(byteArray)) {
+        try (ByteArrayInputStream in = new ByteArrayInputStream(byteArray)) {
             Decoder decoder = DecoderFactory.get().binaryDecoder(in, null);
 
             return reader.read(null, decoder);

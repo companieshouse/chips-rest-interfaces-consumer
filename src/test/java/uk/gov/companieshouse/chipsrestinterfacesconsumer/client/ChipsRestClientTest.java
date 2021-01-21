@@ -33,7 +33,7 @@ class ChipsRestClientTest {
     private static final String CHIPS_REST_HOST = "hostname/";
     private static final String CHIPS_REST_ENDPOINT = "test-endpoint";
     private static final String DATA = "data";
-    private static final URI FULL_EXPANDED_CHIPS_REST_URL = new UriTemplate(CHIPS_REST_HOST+CHIPS_REST_ENDPOINT).expand();
+    private static final URI FULL_EXPANDED_CHIPS_REST_URL = new UriTemplate(CHIPS_REST_HOST + CHIPS_REST_ENDPOINT).expand();
 
     @Mock
     private RestTemplate restTemplate;
