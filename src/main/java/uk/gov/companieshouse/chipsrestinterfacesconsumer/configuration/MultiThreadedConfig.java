@@ -12,7 +12,7 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.impl.LoopingMes
 import java.util.concurrent.Executor;
 
 @Configuration
-public class MultiThreadedConfig {
+class MultiThreadedConfig {
 
     @Bean("main-looping-consumer")
     LoopingMessageProcessor mainLoopingConsumer(ApplicationLogger logger,
@@ -34,7 +34,7 @@ public class MultiThreadedConfig {
         executor.setCorePoolSize(2);
         executor.setMaxPoolSize(2);
         executor.setQueueCapacity(500);
-        executor.setThreadNamePrefix("KafkaConsumer-");
+        executor.setThreadNamePrefix("CRICMessageProcessor-");
         executor.initialize();
         return executor;
     }
