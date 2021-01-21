@@ -1,10 +1,10 @@
 package uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
@@ -31,10 +31,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class IncomingMessageConsumerUnitTest {
+class MessageConsumerImplTest {
 
-    private final static String ERROR_MESSAGE = "Failed to read message from queue";
     private final static String LOG_MESSAGE_KEY = "message";
+    private final static String MESSAGE_CONSUMER_ID = "consumer id";
+    private final static String ERROR_MESSAGE = MESSAGE_CONSUMER_ID + " - Failed to read message from queue";
 
     @Mock
     private ApplicationLogger logger;
@@ -51,21 +52,31 @@ class IncomingMessageConsumerUnitTest {
     @Mock
     private MessageProcessorService messageProcessorService;
 
-    @InjectMocks
-    private IncomingMessageConsumer incomingMessageConsumer;
+    private MessageConsumerImpl messageConsumer;
 
     @Captor
     private ArgumentCaptor<Map<String, Object>> loggingDataMapCaptor;
 
+    @BeforeEach
+    void setup() {
+        messageConsumer = new MessageConsumerImpl(
+                logger,
+                messageProcessorService,
+                deserializerFactory,
+                consumer,
+                MESSAGE_CONSUMER_ID
+        );
+    }
+
     @Test
     void initialisationTest() {
-        incomingMessageConsumer.init();
+        messageConsumer.init();
         verify(consumer).connect();
     }
 
     @Test
     void destroyTest() {
-        incomingMessageConsumer.close();
+        messageConsumer.close();
         verify(consumer).close();
     }
 
@@ -74,7 +85,7 @@ class IncomingMessageConsumerUnitTest {
         List<Message> messages = Collections.emptyList();
         when(consumer.consume()).thenReturn(messages);
 
-        incomingMessageConsumer.readAndProcess();
+        messageConsumer.readAndProcess();
 
         verify(messageProcessorService, times(0)).processMessage(any());
     }
@@ -91,7 +102,7 @@ class IncomingMessageConsumerUnitTest {
         when(avroDeserializer.fromBinary(any(), any())).thenReturn(deserializedMessage);
         when(consumer.consume()).thenReturn(messages);
 
-        incomingMessageConsumer.readAndProcess();
+        messageConsumer.readAndProcess();
 
         verify(messageProcessorService, times(messages.size())).processMessage(any());
         verify(consumer, times(messages.size())).commit(any());
@@ -107,7 +118,7 @@ class IncomingMessageConsumerUnitTest {
         messages.add(message);
         when(consumer.consume()).thenReturn(messages);
 
-        incomingMessageConsumer.readAndProcess();
+        messageConsumer.readAndProcess();
 
         verify(logger, times(1)).info(anyString());
         verify(logger, times(1)).error(
@@ -126,7 +137,7 @@ class IncomingMessageConsumerUnitTest {
         messages.add(message);
         when(consumer.consume()).thenReturn(messages);
 
-        incomingMessageConsumer.readAndProcess();
+        messageConsumer.readAndProcess();
         verify(logger, times(1)).info(anyString());
         verify(logger, times(1)).error(
                 eq(ERROR_MESSAGE),

@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.chipsrestinterfacesconsumer.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
@@ -15,6 +16,9 @@ import java.util.Map;
 
 @Service
 public class MessageProcessorServiceImpl implements MessageProcessorService {
+
+    @Value("${MAX_RETRY_ATTEMPTS}")
+    private int maxRetryAttempts;
 
     @Autowired
     private ChipsRestClient chipsRestClient;
@@ -32,8 +36,14 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
         try {
             chipsRestClient.sendToChips(message);
         } catch (RestClientException restClientException) {
-            logger.error("Error sending message to chips, will place on retry queue", restClientException, logMap);
-            retryMessageProducer.writeToTopic(message);
+            var attempts = message.getAttempt();
+            if (attempts < maxRetryAttempts) {
+                logger.error("Error sending message to chips, will place on retry queue", restClientException, logMap);
+                message.setAttempt(attempts + 1);
+                retryMessageProducer.writeToTopic(message);
+            } else {
+                logger.error("Error max attempts reached", restClientException, logMap);
+            }
         }
     }
 }

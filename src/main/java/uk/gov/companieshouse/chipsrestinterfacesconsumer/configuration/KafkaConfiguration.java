@@ -16,14 +16,20 @@ import java.util.Collections;
 @Configuration
 class KafkaConfiguration {
 
-    @Value("${kafka.group.name}")
-    private String groupName;
+    @Value("${kafka.incoming.consumer.group.name}")
+    private String incomingConsumerGroupName;
+
+    @Value("${kafka.retry.consumer.group.name}")
+    private String retryConsumerGroupName;
 
     @Value("${kafka.broker.address}")
     private String brokerAddress;
 
     @Value("${kafka.consumer.topic}")
-    private String topicName;
+    private String incomingTopicName;
+
+    @Value("${kafka.retry.topic}")
+    private String retryTopicName;
 
     @Value("${kafka.consumer.pollTimeout:100}")
     private long pollTimeout;
@@ -36,7 +42,7 @@ class KafkaConfiguration {
         return new DeserializerFactory();
     }
 
-    @Bean
+    @Bean("incoming-consumer-group")
     CHKafkaConsumerGroup getIncomingConsumer() {
         return new CHKafkaConsumerGroup(getIncomingConsumerConfig());
     }
@@ -44,19 +50,37 @@ class KafkaConfiguration {
     ConsumerConfig getIncomingConsumerConfig() {
         ConsumerConfig config = new ConsumerConfig();
         config.setBrokerAddresses(new String[] { brokerAddress });
-        config.setTopics(Collections.singletonList(topicName));
+        config.setTopics(Collections.singletonList(incomingTopicName));
         config.setPollTimeout(pollTimeout);
-        config.setGroupName(groupName);
+        config.setGroupName(incomingConsumerGroupName);
+        return config;
+    }
+
+    @Bean("retry-consumer-group")
+    CHKafkaConsumerGroup getRetryConsumer() {
+        return new CHKafkaConsumerGroup(getRetryConsumerConfig());
+    }
+
+    ConsumerConfig getRetryConsumerConfig() {
+        ConsumerConfig config = new ConsumerConfig();
+        config.setBrokerAddresses(new String[] { brokerAddress });
+        config.setTopics(Collections.singletonList(retryTopicName));
+        config.setPollTimeout(pollTimeout);
+        config.setGroupName(retryConsumerGroupName);
         return config;
     }
 
     @Bean
     CHKafkaProducer getRetryMessageProducer() {
+        return new CHKafkaProducer(getRetryMessageProducerConfig());
+    }
+
+    ProducerConfig getRetryMessageProducerConfig() {
         ProducerConfig config = new ProducerConfig();
-        ProducerConfigHelper.assignBrokerAddresses(config);
+        config.setBrokerAddresses(new String[] { brokerAddress });
         config.setRoundRobinPartitioner(true);
         config.setAcks(Acks.WAIT_FOR_ALL);
         config.setRetries(retries);
-        return new CHKafkaProducer(config);
+        return config;
     }
 }
