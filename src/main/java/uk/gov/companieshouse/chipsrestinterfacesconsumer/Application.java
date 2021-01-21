@@ -11,16 +11,13 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MessageConsume
 public class Application implements CommandLineRunner {
 
     public static final String APPLICATION_NAME = "chips-rest-interfaces-consumer";
-
+    private final boolean isRunning = true;
     @Autowired
     @Qualifier("incoming-message-consumer")
     private MessageConsumer incomingMessageConsumer;
-
     @Autowired
     @Qualifier("retry-message-consumer")
     private MessageConsumer retryMessageConsumer;
-
-    private final boolean isRunning = true;
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class);
