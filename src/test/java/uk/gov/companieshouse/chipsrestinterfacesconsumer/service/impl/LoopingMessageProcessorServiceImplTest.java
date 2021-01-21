@@ -9,6 +9,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MessageConsumer;
 
+import java.util.concurrent.ExecutionException;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doAnswer;
@@ -35,7 +37,7 @@ class LoopingMessageProcessorServiceImplTest {
     }
 
     @Test
-    void loopReadAndProcessTest() {
+    void loopReadAndProcessTest() throws ExecutionException, InterruptedException {
         doAnswer(invocation -> {
             ReflectionTestUtils.setField(loopingMessageProcessorService, "isRunning", false);
             return null;
@@ -45,5 +47,6 @@ class LoopingMessageProcessorServiceImplTest {
                 loopingMessageProcessorService.loopReadAndProcess();
 
         verify(messageConsumer, times(1)).readAndProcess();
+        assertTrue(loopingMessageProcessorServiceResult.get());
     }
 }
