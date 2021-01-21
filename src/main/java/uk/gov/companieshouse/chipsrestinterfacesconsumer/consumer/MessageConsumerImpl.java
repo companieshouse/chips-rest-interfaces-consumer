@@ -15,25 +15,15 @@ import java.util.Map;
 
 public class MessageConsumerImpl implements MessageConsumer {
 
-    private ApplicationLogger logger;
+    private final ApplicationLogger logger;
 
-    private MessageProcessorService messageProcessorService;
+    private final MessageProcessorService messageProcessorService;
 
-    private DeserializerFactory deserializerFactory;
+    private final DeserializerFactory deserializerFactory;
 
-    private CHKafkaConsumerGroup consumer;
+    private final CHKafkaConsumerGroup consumer;
 
-    private String id;
-
-    @PostConstruct
-    void init() {
-        consumer.connect();
-    }
-
-    @PreDestroy
-    void close() {
-        consumer.close();
-    }
+    private final String id;
 
     public MessageConsumerImpl(ApplicationLogger logger,
                                MessageProcessorService messageProcessorService,
@@ -45,6 +35,16 @@ public class MessageConsumerImpl implements MessageConsumer {
         this.deserializerFactory = deserializerFactory;
         this.consumer = consumer;
         this.id = id;
+    }
+
+    @PostConstruct
+    void init() {
+        consumer.connect();
+    }
+
+    @PreDestroy
+    void close() {
+        consumer.close();
     }
 
     @Override

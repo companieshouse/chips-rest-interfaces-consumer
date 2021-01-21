@@ -9,7 +9,6 @@ import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
 import uk.gov.companieshouse.kafka.producer.Acks;
 import uk.gov.companieshouse.kafka.producer.CHKafkaProducer;
 import uk.gov.companieshouse.kafka.producer.ProducerConfig;
-import uk.gov.companieshouse.kafka.producer.ProducerConfigHelper;
 
 import java.util.Collections;
 
@@ -49,7 +48,7 @@ class KafkaConfiguration {
 
     ConsumerConfig getIncomingConsumerConfig() {
         ConsumerConfig config = new ConsumerConfig();
-        config.setBrokerAddresses(new String[] { brokerAddress });
+        config.setBrokerAddresses(new String[]{brokerAddress});
         config.setTopics(Collections.singletonList(incomingTopicName));
         config.setPollTimeout(pollTimeout);
         config.setGroupName(incomingConsumerGroupName);
@@ -63,7 +62,7 @@ class KafkaConfiguration {
 
     ConsumerConfig getRetryConsumerConfig() {
         ConsumerConfig config = new ConsumerConfig();
-        config.setBrokerAddresses(new String[] { brokerAddress });
+        config.setBrokerAddresses(new String[]{brokerAddress});
         config.setTopics(Collections.singletonList(retryTopicName));
         config.setPollTimeout(pollTimeout);
         config.setGroupName(retryConsumerGroupName);
@@ -77,7 +76,7 @@ class KafkaConfiguration {
 
     ProducerConfig getRetryMessageProducerConfig() {
         ProducerConfig config = new ProducerConfig();
-        config.setBrokerAddresses(new String[] { brokerAddress });
+        config.setBrokerAddresses(new String[]{brokerAddress});
         config.setRoundRobinPartitioner(true);
         config.setAcks(Acks.WAIT_FOR_ALL);
         config.setRetries(retries);

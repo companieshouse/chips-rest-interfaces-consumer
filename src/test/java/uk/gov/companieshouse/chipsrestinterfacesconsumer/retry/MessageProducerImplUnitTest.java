@@ -79,7 +79,7 @@ class MessageProducerImplUnitTest {
     @Test
     void testServiceExceptionIsThrownWhenFutureThrowsExecutionException()
             throws ExecutionException, InterruptedException {
-        when(producer.sendAndReturnFuture(any())).thenReturn(mockedFuture );
+        when(producer.sendAndReturnFuture(any())).thenReturn(mockedFuture);
         doThrow(ExecutionException.class).when(mockedFuture).get();
 
         assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend()));
