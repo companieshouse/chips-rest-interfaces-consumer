@@ -11,7 +11,7 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MessageConsume
 public class Application implements CommandLineRunner {
 
     public static final String APPLICATION_NAME = "chips-rest-interfaces-consumer";
-    private final boolean isRunning = true;
+    private static final boolean IS_RUNNING = true;
     @Autowired
     @Qualifier("incoming-message-consumer")
     private MessageConsumer incomingMessageConsumer;
@@ -25,7 +25,7 @@ public class Application implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        while (isRunning) {
+        while (IS_RUNNING) {
             incomingMessageConsumer.readAndProcess();
             retryMessageConsumer.readAndProcess();
         }
