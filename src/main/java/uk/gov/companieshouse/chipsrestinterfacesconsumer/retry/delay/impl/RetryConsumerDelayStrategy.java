@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Value;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.retry.delay.ConsumerDelayStrategy;
 
+import java.util.HashMap;
+
 public class RetryConsumerDelayStrategy implements ConsumerDelayStrategy {
 
     private final ApplicationLogger logger;
@@ -23,6 +25,7 @@ public class RetryConsumerDelayStrategy implements ConsumerDelayStrategy {
             Thread.sleep(retryThrottleRateMilliseconds);
             logger.info("Delay period over");
         } catch(InterruptedException ie) {
+            logger.error("Error putting retry thread to sleep", ie, new HashMap<>());
             Thread.currentThread().interrupt();
         }
     }
