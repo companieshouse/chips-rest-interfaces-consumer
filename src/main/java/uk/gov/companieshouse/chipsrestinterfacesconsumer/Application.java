@@ -33,7 +33,7 @@ public class Application implements CommandLineRunner {
     private ApplicationLogger logger;
 
     @Value("${RUN_APP_IN_ERROR_MODE:false}")
-    private boolean isErrorConsumer;
+    private boolean runAppInErrorMode;
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class);
@@ -41,7 +41,7 @@ public class Application implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (!isErrorConsumer) {
+        if (!runAppInErrorMode) {
             logger.info(String.format("%s started in normal processing mode", APPLICATION_NAME));
             var mainCompletableFuture = loopingMainMessageConsumer.loopReadAndProcess();
             var retryCompletableFuture = loopingRetryMessageConsumer.loopReadAndProcess();

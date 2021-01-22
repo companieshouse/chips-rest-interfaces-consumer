@@ -32,7 +32,7 @@ class ApplicationTest {
 
     @Test
     void runErrorProcessingTrueTest() {
-        ReflectionTestUtils.setField(application, "isErrorConsumer", true);
+        ReflectionTestUtils.setField(application, "runAppInErrorMode", true);
         application.run();
 
         verify(loopingMainMessageConsumer, times(0)).loopReadAndProcess();
@@ -46,7 +46,7 @@ class ApplicationTest {
         when(loopingMainMessageConsumer.loopReadAndProcess()).thenReturn(CompletableFuture.completedFuture(true));
         when(loopingRetryMessageConsumer.loopReadAndProcess()).thenReturn(CompletableFuture.completedFuture(true));
 
-        ReflectionTestUtils.setField(application, "isErrorConsumer", false);
+        ReflectionTestUtils.setField(application, "runAppInErrorMode", false);
         application.run();
 
         verify(loopingMainMessageConsumer, times(1)).loopReadAndProcess();
