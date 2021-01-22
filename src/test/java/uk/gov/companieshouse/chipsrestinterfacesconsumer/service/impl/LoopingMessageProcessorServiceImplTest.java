@@ -52,5 +52,6 @@ class LoopingMessageProcessorServiceImplTest {
 
         verify(messageConsumer, times(1)).readAndProcess();
         assertTrue(loopingMessageProcessorServiceResult.get());
+        verify(consumerDelayStrategy, times(1)).throttle();
     }
 }

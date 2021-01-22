@@ -40,7 +40,7 @@ class MultiThreadedConfig {
 
     @Bean("retry-consumer-delay-strategy")
     ConsumerDelayStrategy mainConsumerDelayStrategy(ApplicationLogger logger){
-        return new RetryConsumerDelayStrategy(logger);
+        return new RetryConsumerDelayStrategy("retry-consumer-delay-strategy", logger);
     }
 
     @Bean
