@@ -32,7 +32,7 @@ public class Application implements CommandLineRunner {
     @Autowired
     private ApplicationLogger logger;
 
-    @Value("${IS_ERROR_CONSUMER}")
+    @Value("${IS_ERROR_CONSUMER:false}")
     private boolean isErrorConsumer;
 
     public static void main(String[] args) {
