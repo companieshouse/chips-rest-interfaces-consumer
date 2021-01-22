@@ -3,6 +3,7 @@ package uk.gov.companieshouse.chipsrestinterfacesconsumer.configuration;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MessageConsumer;
@@ -15,6 +16,7 @@ import java.util.concurrent.Executor;
 class MultiThreadedConfig {
 
     @Bean("main-looping-consumer")
+    @Lazy
     LoopingMessageProcessor mainLoopingConsumer(ApplicationLogger logger,
                                                 @Qualifier("incoming-message-consumer") MessageConsumer messageConsumer
     ) {
@@ -22,6 +24,7 @@ class MultiThreadedConfig {
     }
 
     @Bean("retry-looping-consumer")
+    @Lazy
     LoopingMessageProcessor retryLoopingConsumer(ApplicationLogger logger,
                                                  @Qualifier("retry-message-consumer") MessageConsumer messageConsumer
     ) {

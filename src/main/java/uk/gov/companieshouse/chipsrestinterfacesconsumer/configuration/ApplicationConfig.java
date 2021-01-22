@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MessageConsumer;
@@ -21,6 +22,7 @@ class ApplicationConfig {
     }
 
     @Bean("incoming-message-consumer")
+    @Lazy
     MessageConsumer incomingMessageConsumer(ApplicationLogger logger,
                                             MessageProcessorService messageProcessorService,
                                             DeserializerFactory deserializerFactory,
@@ -34,6 +36,7 @@ class ApplicationConfig {
     }
 
     @Bean("retry-message-consumer")
+    @Lazy
     MessageConsumer retryMessageConsumer(ApplicationLogger logger,
                                          MessageProcessorService messageProcessorService,
                                          DeserializerFactory deserializerFactory,
