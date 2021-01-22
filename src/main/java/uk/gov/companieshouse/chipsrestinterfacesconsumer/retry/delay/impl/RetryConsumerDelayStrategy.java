@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Value;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.retry.delay.ConsumerDelayStrategy;
 
-
 public class RetryConsumerDelayStrategy implements ConsumerDelayStrategy {
 
     private final ApplicationLogger logger;
@@ -24,7 +23,7 @@ public class RetryConsumerDelayStrategy implements ConsumerDelayStrategy {
             Thread.sleep(retryThrottleRateMilliseconds);
             logger.info("Delay period over");
         } catch(InterruptedException ie) {
-
+            Thread.currentThread().interrupt();
         }
     }
 }
