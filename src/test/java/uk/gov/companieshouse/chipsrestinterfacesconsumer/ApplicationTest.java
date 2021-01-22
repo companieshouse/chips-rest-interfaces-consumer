@@ -37,6 +37,8 @@ class ApplicationTest {
 
         verify(loopingMainMessageConsumer, times(0)).loopReadAndProcess();
         verify(loopingRetryMessageConsumer, times(0)).loopReadAndProcess();
+
+        //ToDo Ensure error consumer is called
     }
 
     @Test
@@ -49,5 +51,7 @@ class ApplicationTest {
 
         verify(loopingMainMessageConsumer, times(1)).loopReadAndProcess();
         verify(loopingRetryMessageConsumer, times(1)).loopReadAndProcess();
+
+        //ToDo Ensure error consumer is not called
     }
 }
