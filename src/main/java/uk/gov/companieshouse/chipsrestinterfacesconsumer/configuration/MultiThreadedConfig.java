@@ -17,12 +17,15 @@ import java.util.concurrent.Executor;
 @Configuration
 class MultiThreadedConfig {
 
+    private static final String MAIN_CONSUMER_ID = "main-looping-consumer";
+    private static final String RETRY_CONSUMER_ID = "retry-looping-consumer";
+
     @Bean("main-looping-consumer")
     LoopingMessageProcessor mainLoopingConsumer(ApplicationLogger logger,
                                                 @Qualifier("incoming-message-consumer") MessageConsumer messageConsumer,
                                                 @Qualifier("main-consumer-throttle-strategy") ConsumerThrottleStrategy throttleStrategy
     ) {
-        return new LoopingMessageProcessorServiceImpl(messageConsumer, throttleStrategy, logger, "main-looping-consumer");
+        return new LoopingMessageProcessorServiceImpl(messageConsumer, throttleStrategy, logger, MAIN_CONSUMER_ID);
     }
 
     @Bean("retry-looping-consumer")
@@ -30,17 +33,17 @@ class MultiThreadedConfig {
                                                  @Qualifier("retry-message-consumer") MessageConsumer messageConsumer,
                                                  @Qualifier("retry-consumer-throttle-strategy") ConsumerThrottleStrategy throttleStrategy
     ) {
-        return new LoopingMessageProcessorServiceImpl(messageConsumer, throttleStrategy, logger, "retry-looping-consumer");
+        return new LoopingMessageProcessorServiceImpl(messageConsumer, throttleStrategy, logger, RETRY_CONSUMER_ID);
     }
 
     @Bean("main-consumer-throttle-strategy")
-    ConsumerThrottleStrategy mainConsumerThrottleStrategy(){
+    ConsumerThrottleStrategy mainConsumerThrottleStrategy() {
         return new MainConsumerThrottleStrategy();
     }
 
     @Bean("retry-consumer-throttle-strategy")
-    ConsumerThrottleStrategy mainConsumerThrottleStrategy(ApplicationLogger logger){
-        return new RetryConsumerThrottleStrategy("retry-consumer-throttle-strategy", logger);
+    ConsumerThrottleStrategy retryConsumerThrottleStrategy(ApplicationLogger logger) {
+        return new RetryConsumerThrottleStrategy(RETRY_CONSUMER_ID, logger);
     }
 
     @Bean
