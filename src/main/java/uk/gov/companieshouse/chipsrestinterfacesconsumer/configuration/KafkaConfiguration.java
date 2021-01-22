@@ -3,6 +3,7 @@ package uk.gov.companieshouse.chipsrestinterfacesconsumer.configuration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import uk.gov.companieshouse.kafka.consumer.CHKafkaConsumerGroup;
 import uk.gov.companieshouse.kafka.consumer.ConsumerConfig;
 import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
@@ -42,6 +43,7 @@ class KafkaConfiguration {
     }
 
     @Bean("incoming-consumer-group")
+    @Lazy
     CHKafkaConsumerGroup getIncomingConsumer() {
         return new CHKafkaConsumerGroup(getIncomingConsumerConfig());
     }
@@ -56,6 +58,7 @@ class KafkaConfiguration {
     }
 
     @Bean("retry-consumer-group")
+    @Lazy
     CHKafkaConsumerGroup getRetryConsumer() {
         return new CHKafkaConsumerGroup(getRetryConsumerConfig());
     }

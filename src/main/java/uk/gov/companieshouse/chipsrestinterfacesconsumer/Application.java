@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.EnableAsync;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.LoopingMessageProcessor;
@@ -19,10 +20,12 @@ public class Application implements CommandLineRunner {
     public static final String APPLICATION_NAME = "chips-rest-interfaces-consumer";
 
     @Autowired
+    @Lazy
     @Qualifier("main-looping-consumer")
     private LoopingMessageProcessor loopingMainMessageConsumer;
 
     @Autowired
+    @Lazy
     @Qualifier("retry-looping-consumer")
     private LoopingMessageProcessor loopingRetryMessageConsumer;
 
