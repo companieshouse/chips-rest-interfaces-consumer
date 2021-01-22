@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MessageConsumer;
+import uk.gov.companieshouse.chipsrestinterfacesconsumer.retry.delay.ConsumerDelayStrategy;
 
 import java.util.concurrent.ExecutionException;
 
@@ -25,6 +26,9 @@ class LoopingMessageProcessorServiceImplTest {
 
     @Mock
     private MessageConsumer messageConsumer;
+
+    @Mock
+    private ConsumerDelayStrategy consumerDelayStrategy;
 
     @InjectMocks
     private LoopingMessageProcessorServiceImpl loopingMessageProcessorService;

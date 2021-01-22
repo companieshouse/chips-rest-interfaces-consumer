@@ -3,6 +3,7 @@ package uk.gov.companieshouse.chipsrestinterfacesconsumer.service.impl;
 import org.springframework.scheduling.annotation.Async;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MessageConsumer;
+import uk.gov.companieshouse.chipsrestinterfacesconsumer.retry.delay.ConsumerDelayStrategy;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.LoopingMessageProcessor;
 
 import javax.annotation.PreDestroy;
@@ -11,12 +12,17 @@ import java.util.concurrent.CompletableFuture;
 public class LoopingMessageProcessorServiceImpl implements LoopingMessageProcessor {
 
     private final MessageConsumer consumer;
+    private final ConsumerDelayStrategy delayStrategy;
     private final ApplicationLogger logger;
     private final String id;
     private boolean isRunning = true;
 
-    public LoopingMessageProcessorServiceImpl(MessageConsumer consumer, ApplicationLogger logger, String id) {
+    public LoopingMessageProcessorServiceImpl(MessageConsumer consumer,
+                                              ConsumerDelayStrategy delayStrategy,
+                                              ApplicationLogger logger,
+                                              String id) {
         this.consumer = consumer;
+        this.delayStrategy = delayStrategy;
         this.logger = logger;
         this.id = id;
     }
@@ -32,7 +38,7 @@ public class LoopingMessageProcessorServiceImpl implements LoopingMessageProcess
         logger.info(String.format("%s - Read and process loop starting", id));
         while (isRunning) {
             this.consumer.readAndProcess();
-            // ToDo Throttle
+            delayStrategy.throttle();
         }
 
         logger.info(String.format("%s - Read and process loop ended", id));
