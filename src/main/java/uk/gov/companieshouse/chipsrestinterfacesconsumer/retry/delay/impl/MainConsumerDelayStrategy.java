@@ -5,5 +5,7 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.retry.delay.ConsumerDel
 public class MainConsumerDelayStrategy implements ConsumerDelayStrategy {
 
     @Override
-    public void throttle() {}
+    public void throttle() {
+        return;
+    }
 }
