@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.chipsrestinterfacesconsumer.service.impl;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,6 +36,14 @@ class MessageProcessorServiceImplTest {
     @InjectMocks
     private MessageProcessorServiceImpl messageProcessorService;
 
+    @BeforeEach
+    void Setup(){
+        ReflectionTestUtils.setField(messageProcessorService, "maxRetryAttempts", 10);
+        ReflectionTestUtils.setField(messageProcessorService, "retryTopicName", "chips-rest-interfaces-send-retry");
+        ReflectionTestUtils.setField(messageProcessorService, "errorTopicName", "chips-rest-interfaces-send-error");
+    }
+
+
     @Test
     void processMessageTest() throws ServiceException {
         ChipsRestInterfacesSend chipsRestInterfacesSend = new ChipsRestInterfacesSend();
@@ -48,9 +57,6 @@ class MessageProcessorServiceImplTest {
 
     @Test
     void testRetryIsCalled() throws ServiceException {
-        ReflectionTestUtils.setField(messageProcessorService, "maxRetryAttempts", 10);
-        ReflectionTestUtils.setField(messageProcessorService, "retryTopicName", "chips-rest-interfaces-send-retry");
-        ReflectionTestUtils.setField(messageProcessorService, "errorTopicName", "chips-rest-interfaces-send-error");
         ChipsRestInterfacesSend chipsRestInterfacesSend = new ChipsRestInterfacesSend();
         chipsRestInterfacesSend.setAttempt(0);
         RestClientException restClientException = new RestClientException("restClientException");
@@ -67,9 +73,6 @@ class MessageProcessorServiceImplTest {
 
     @Test
     void testMaxAttemptsReached() throws ServiceException {
-        ReflectionTestUtils.setField(messageProcessorService, "maxRetryAttempts", 10);
-        ReflectionTestUtils.setField(messageProcessorService, "retryTopicName", "chips-rest-interfaces-send-retry");
-        ReflectionTestUtils.setField(messageProcessorService, "errorTopicName", "chips-rest-interfaces-send-error");
         ChipsRestInterfacesSend chipsRestInterfacesSend = new ChipsRestInterfacesSend();
         chipsRestInterfacesSend.setAttempt(10);
         RestClientException restClientException = new RestClientException("restClientException");

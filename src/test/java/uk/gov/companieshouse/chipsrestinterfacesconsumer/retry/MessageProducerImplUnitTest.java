@@ -64,7 +64,7 @@ class MessageProducerImplUnitTest {
             throws IOException {
         doThrow(IOException.class).when(avroSerializer).serialize(any());
 
-        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), anyString()));
+        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(),""));
     }
 
     @Test
@@ -73,7 +73,7 @@ class MessageProducerImplUnitTest {
         when(producer.sendAndReturnFuture(any())).thenReturn(mockedFuture);
         doThrow(InterruptedException.class).when(mockedFuture).get();
 
-        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), anyString()));
+        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), ""));
         assertTrue(Thread.currentThread().isInterrupted());
     }
 
@@ -83,7 +83,7 @@ class MessageProducerImplUnitTest {
         when(producer.sendAndReturnFuture(any())).thenReturn(mockedFuture);
         doThrow(ExecutionException.class).when(mockedFuture).get();
 
-        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), anyString()));
+        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), ""));
     }
 
     private ChipsRestInterfacesSend getDummyChipsRestInterfacesSend() {
