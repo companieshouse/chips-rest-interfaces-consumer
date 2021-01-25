@@ -52,13 +52,18 @@ public class MessageConsumerImpl implements MessageConsumer {
         for (Message msg : consumer.consume()) {
             try {
                 logger.info(String.format("%s - Message offset %s retrieved, processing", id, msg.getOffset()));
+
                 ChipsRestInterfacesSend deserializedMsg = deserialize(msg);
+
                 Map<String, Object> logMap = new HashMap<>();
                 logMap.put("Message Offset", msg.getOffset());
                 logMap.put("Deserialised message id", deserializedMsg.getMessageId());
                 logger.info(String.format("%s - Message deserialised successfully", id), logMap);
+
                 messageProcessorService.processMessage(deserializedMsg);
+
                 logger.info(String.format("%s - Message offset %s processed, committing offset", id, msg.getOffset()));
+
                 consumer.commit(msg);
             } catch (Exception e) {
                 Map<String, Object> data = new HashMap<>();
@@ -69,8 +74,9 @@ public class MessageConsumerImpl implements MessageConsumer {
     }
 
     private ChipsRestInterfacesSend deserialize(Message msg) throws DeserializationException {
-        return deserializerFactory.getSpecificRecordDeserializer(ChipsRestInterfacesSend.class).fromBinary(msg,
-                ChipsRestInterfacesSend.getClassSchema());
+        return deserializerFactory
+                .getSpecificRecordDeserializer(ChipsRestInterfacesSend.class)
+                .fromBinary(msg, ChipsRestInterfacesSend.getClassSchema());
     }
 
     public String getId() {

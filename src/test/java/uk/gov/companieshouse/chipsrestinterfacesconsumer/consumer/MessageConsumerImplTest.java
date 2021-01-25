@@ -34,6 +34,8 @@ import static org.mockito.Mockito.when;
 class MessageConsumerImplTest {
 
     private final static String LOG_MESSAGE_KEY = "message";
+    private final static String LOG_OFFSET_KEY = "Message Offset";
+    private final static String LOG_MESSAGE_ID_KEY = "Deserialised message id";
     private final static String MESSAGE_CONSUMER_ID = "consumer id";
     private final static String ERROR_MESSAGE = MESSAGE_CONSUMER_ID + " - Failed to read message from queue";
 
@@ -94,36 +96,55 @@ class MessageConsumerImplTest {
     void testReadValidMessage() throws ServiceException, DeserializationException {
         List<Message> messages = new ArrayList<>();
         Message message = new Message();
-        ChipsRestInterfacesSend deserializedMessage = new ChipsRestInterfacesSend();
-        // TODO have a real message or something resembling it
-        message.setValue("{}".getBytes());
+        Long offset = 123L;
+        message.setOffset(offset);
         messages.add(message);
-        when(deserializerFactory.getSpecificRecordDeserializer(ChipsRestInterfacesSend.class)).thenReturn(avroDeserializer);
-        when(avroDeserializer.fromBinary(any(), any())).thenReturn(deserializedMessage);
+
+        ChipsRestInterfacesSend deserializedMessage = new ChipsRestInterfacesSend();
+        String messageId = "H747J848J33DSF";
+        deserializedMessage.setMessageId(messageId);
+
         when(consumer.consume()).thenReturn(messages);
+        when(deserializerFactory.getSpecificRecordDeserializer(ChipsRestInterfacesSend.class)).thenReturn(avroDeserializer);
+        when(avroDeserializer.fromBinary(message, ChipsRestInterfacesSend.getClassSchema())).thenReturn(deserializedMessage);
 
         messageConsumer.readAndProcess();
 
-        verify(messageProcessorService, times(messages.size())).processMessage(any());
-        verify(consumer, times(messages.size())).commit(any());
+        verify(messageProcessorService, times(messages.size())).processMessage(deserializedMessage);
+        verify(consumer, times(messages.size())).commit(message);
 
+        verify(logger, times(1)).info(
+                String.format("%s - Message offset %s retrieved, processing", MESSAGE_CONSUMER_ID, offset));
+        verify(logger, times(1)).info(
+                eq(String.format("%s - Message deserialised successfully", MESSAGE_CONSUMER_ID)),
+                loggingDataMapCaptor.capture());
+        Map<String, Object> loggingDataMap = loggingDataMapCaptor.getValue();
+        assertEquals(offset, loggingDataMap.get(LOG_OFFSET_KEY));
+        assertEquals(messageId, loggingDataMap.get(LOG_MESSAGE_ID_KEY));
+        verify(logger, times(1)).info(
+                String.format("%s - Message offset %s processed, committing offset", MESSAGE_CONSUMER_ID, offset));
     }
 
     @Test
-    void testDeserializeExceptionIsCaught() {
+    void testDeserializeExceptionIsCaught() throws DeserializationException {
         String messageValue = "bad message";
         List<Message> messages = new ArrayList<>();
         Message message = new Message();
         message.setValue(messageValue.getBytes());
         messages.add(message);
+
         when(consumer.consume()).thenReturn(messages);
+        Exception e = new Exception();
+        DeserializationException deserializationException = new DeserializationException("error", e);
+        when(deserializerFactory.getSpecificRecordDeserializer(ChipsRestInterfacesSend.class)).thenReturn(avroDeserializer);
+        when(avroDeserializer.fromBinary(message, ChipsRestInterfacesSend.getClassSchema())).thenThrow(deserializationException);
 
         messageConsumer.readAndProcess();
 
         verify(logger, times(1)).info(anyString());
         verify(logger, times(1)).error(
                 eq(ERROR_MESSAGE),
-                any(Exception.class),
+                eq(deserializationException),
                 loggingDataMapCaptor.capture());
         Map<String, Object> loggingDataMap = loggingDataMapCaptor.getValue();
         assertEquals(messageValue, loggingDataMap.get(LOG_MESSAGE_KEY));
@@ -135,13 +156,15 @@ class MessageConsumerImplTest {
         Message message = new Message();
         message.setValue(null);
         messages.add(message);
+
         when(consumer.consume()).thenReturn(messages);
 
         messageConsumer.readAndProcess();
+
         verify(logger, times(1)).info(anyString());
         verify(logger, times(1)).error(
                 eq(ERROR_MESSAGE),
-                any(Exception.class),
+                any(NullPointerException.class),
                 loggingDataMapCaptor.capture());
         Map<String, Object> loggingDataMap = loggingDataMapCaptor.getValue();
         assertEquals("", loggingDataMap.get(LOG_MESSAGE_KEY));
