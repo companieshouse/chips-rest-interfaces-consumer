@@ -43,7 +43,6 @@ class MessageProcessorServiceImplTest {
         ReflectionTestUtils.setField(messageProcessorService, "errorTopicName", "chips-rest-interfaces-send-error");
     }
 
-
     @Test
     void processMessageTest() throws ServiceException {
         ChipsRestInterfacesSend chipsRestInterfacesSend = new ChipsRestInterfacesSend();
