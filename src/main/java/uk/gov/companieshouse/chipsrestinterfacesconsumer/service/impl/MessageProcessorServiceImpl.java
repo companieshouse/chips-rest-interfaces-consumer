@@ -38,25 +38,26 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
         logger.info("About to send message to Chips", logMap);
         try {
             chipsRestClient.sendToChips(message);
-        } catch (HttpClientErrorException httpStatusCodeException) {
-            logMap.put("HTTP Status Code", httpStatusCodeException.getStatusCode());
-            logMap.put("HTTP Status Text", httpStatusCodeException.getStatusText());
-            logger.error(SEND_FAILURE_MESSAGE, httpStatusCodeException, logMap);
-        } catch (Exception exception) {
-            logger.error(SEND_FAILURE_MESSAGE, exception, logMap);
-        } finally {
-            moveToCorrectTopic(message, logMap);
+        } catch (HttpClientErrorException hcee) {
+            logMap.put("HTTP Status Code", hcee.getStatusCode());
+            logMap.put("HTTP Status Text", hcee.getStatusText());
+            handleFailedMessage(message, hcee, logMap);
+        } catch (Exception e) {
+            handleFailedMessage(message, e, logMap);
         }
     }
 
-    private void moveToCorrectTopic(ChipsRestInterfacesSend message, Map<String, Object> logMap) throws ServiceException {
+    private void handleFailedMessage(ChipsRestInterfacesSend message, Exception e, Map<String, Object> logMap) throws ServiceException {
+        logger.error(SEND_FAILURE_MESSAGE, e, logMap);
+
         var attempts = message.getAttempt();
         if (attempts < maxRetryAttempts) {
-            logger.info("Moving message to RETRY topic", logMap);
-            message.setAttempt(attempts + 1);
+            attempts++;
+            logger.info(String.format("Placing message on RETRY topic for attempt %s", attempts), logMap);
+            message.setAttempt(attempts);
             retryMessageProducer.writeToTopic(message);
         } else {
-            logger.info("Maximum retry attempts reached, moving message to ERROR topic", logMap);
+            logger.info(String.format("Maximum retry attempts %s reached, moving message to ERROR topic", maxRetryAttempts), logMap);
             // TODO move to Error topic
         }
     }

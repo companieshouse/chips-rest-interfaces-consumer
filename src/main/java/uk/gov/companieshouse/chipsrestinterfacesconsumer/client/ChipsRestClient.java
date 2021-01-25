@@ -47,7 +47,8 @@ public class ChipsRestClient {
         requestHeaders.setContentType(MediaType.APPLICATION_JSON);
 
         var expandedUrl = chipsRestUrl.expand(uriVariables);
-        logger.info(String.format("Posting message id %s to %s", message.getMessageId(), expandedUrl));
+        var messageId = message.getMessageId();
+        logger.info(String.format("Posting message id %s to %s", messageId, expandedUrl));
         HttpEntity<String> requestEntity = new HttpEntity<>(messageData, requestHeaders);
         var response = restTemplate.exchange(
                 expandedUrl,
@@ -56,6 +57,9 @@ public class ChipsRestClient {
                 String.class
         );
 
-        logger.info(String.format("Chips Rest Response Status: %s", response.getStatusCode()));
+        logger.info(String.format(
+                "Message id %s successfully sent, Chips Rest Response Status: %s",
+                messageId,
+                response.getStatusCode()));
     }
 }
