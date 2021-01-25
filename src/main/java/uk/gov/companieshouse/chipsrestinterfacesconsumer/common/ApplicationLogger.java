@@ -53,6 +53,10 @@ public class ApplicationLogger {
         LOGGER.errorContext(context, message, e, cloneMapData(dataMap));
     }
 
+    public void error(String message, Exception e) {
+        LOGGER.error(message, e);
+    }
+
     public void error(String message, Exception e, Map<String, Object> dataMap) {
         LOGGER.error(message, e, cloneMapData(dataMap));
     }
