@@ -42,12 +42,15 @@ class MessageProcessorServiceImplTest {
         messageProcessorService.processMessage(chipsRestInterfacesSend);
 
         verify(chipsRestClient, times(1)).sendToChips(eq(chipsRestInterfacesSend));
-        verify(retryMessageProducer, times(0)).writeToTopic(eq(chipsRestInterfacesSend));
+        verify(retryMessageProducer, times(0)).writeToTopic(eq(chipsRestInterfacesSend), eq("chips-rest-interfaces-send-retry"));
+        verify(retryMessageProducer, times(0)).writeToTopic(eq(chipsRestInterfacesSend), eq("chips-rest-interfaces-send-error"));
     }
 
     @Test
     void testRetryIsCalled() throws ServiceException {
         ReflectionTestUtils.setField(messageProcessorService, "maxRetryAttempts", 10);
+        ReflectionTestUtils.setField(messageProcessorService, "retryTopicName", "chips-rest-interfaces-send-retry");
+        ReflectionTestUtils.setField(messageProcessorService, "errorTopicName", "chips-rest-interfaces-send-error");
         ChipsRestInterfacesSend chipsRestInterfacesSend = new ChipsRestInterfacesSend();
         chipsRestInterfacesSend.setAttempt(0);
         RestClientException restClientException = new RestClientException("restClientException");
@@ -58,12 +61,15 @@ class MessageProcessorServiceImplTest {
         verify(chipsRestClient, times(1)).sendToChips(eq(chipsRestInterfacesSend));
         verify(logger, times(1)).error(eq("Error sending message to chips, will place on retry queue"), eq(restClientException), anyMap());
         assertEquals(1, chipsRestInterfacesSend.getAttempt());
-        verify(retryMessageProducer, times(1)).writeToTopic(eq(chipsRestInterfacesSend));
+        verify(retryMessageProducer, times(1)).writeToTopic(eq(chipsRestInterfacesSend), eq("chips-rest-interfaces-send-retry"));
+        verify(retryMessageProducer, times(0)).writeToTopic(eq(chipsRestInterfacesSend), eq("chips-rest-interfaces-send-error"));
     }
 
     @Test
     void testMaxAttemptsReached() throws ServiceException {
         ReflectionTestUtils.setField(messageProcessorService, "maxRetryAttempts", 10);
+        ReflectionTestUtils.setField(messageProcessorService, "retryTopicName", "chips-rest-interfaces-send-retry");
+        ReflectionTestUtils.setField(messageProcessorService, "errorTopicName", "chips-rest-interfaces-send-error");
         ChipsRestInterfacesSend chipsRestInterfacesSend = new ChipsRestInterfacesSend();
         chipsRestInterfacesSend.setAttempt(10);
         RestClientException restClientException = new RestClientException("restClientException");
@@ -72,7 +78,8 @@ class MessageProcessorServiceImplTest {
         messageProcessorService.processMessage(chipsRestInterfacesSend);
 
         verify(chipsRestClient, times(1)).sendToChips(eq(chipsRestInterfacesSend));
-        verify(retryMessageProducer, times(0)).writeToTopic(eq(chipsRestInterfacesSend));
+        verify(retryMessageProducer, times(0)).writeToTopic(eq(chipsRestInterfacesSend), eq("chips-rest-interfaces-send-retry"));
+        verify(retryMessageProducer, times(1)).writeToTopic(eq(chipsRestInterfacesSend), eq("chips-rest-interfaces-send-error"));
         verify(logger, times(1)).error(eq("Error max attempts reached"), eq(restClientException), anyMap());
     }
 }

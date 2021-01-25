@@ -18,6 +18,7 @@ import java.util.concurrent.Future;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -53,7 +54,7 @@ class MessageProducerImplUnitTest {
             throws ServiceException, ExecutionException, InterruptedException {
         when(producer.sendAndReturnFuture(any())).thenReturn(mockedFuture);
 
-        messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend());
+        messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), anyString());
 
         verify(mockedFuture, times(1)).get();
     }
@@ -63,7 +64,7 @@ class MessageProducerImplUnitTest {
             throws IOException {
         doThrow(IOException.class).when(avroSerializer).serialize(any());
 
-        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend()));
+        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), anyString()));
     }
 
     @Test
@@ -72,7 +73,7 @@ class MessageProducerImplUnitTest {
         when(producer.sendAndReturnFuture(any())).thenReturn(mockedFuture);
         doThrow(InterruptedException.class).when(mockedFuture).get();
 
-        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend()));
+        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), anyString()));
         assertTrue(Thread.currentThread().isInterrupted());
     }
 
@@ -82,7 +83,7 @@ class MessageProducerImplUnitTest {
         when(producer.sendAndReturnFuture(any())).thenReturn(mockedFuture);
         doThrow(ExecutionException.class).when(mockedFuture).get();
 
-        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend()));
+        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), anyString()));
     }
 
     private ChipsRestInterfacesSend getDummyChipsRestInterfacesSend() {
