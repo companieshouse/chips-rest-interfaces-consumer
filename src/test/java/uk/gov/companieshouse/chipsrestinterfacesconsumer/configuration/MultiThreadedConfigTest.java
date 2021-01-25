@@ -8,7 +8,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MessageConsumer;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.retry.throttle.ConsumerThrottleStrategy;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.retry.throttle.impl.MainConsumerThrottleStrategy;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.retry.throttle.impl.RetryConsumerThrottleStrategy;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.LoopingMessageProcessor;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.impl.LoopingMessageProcessorServiceImpl;
@@ -41,7 +40,7 @@ class MultiThreadedConfigTest {
 
     @Test
     void mainLoopingConsumerTest() {
-        LoopingMessageProcessor loopingMessageProcessor = multiThreadedConfig.mainLoopingConsumer(applicationLogger, messageConsumer, consumerThrottleStrategy);
+        LoopingMessageProcessor loopingMessageProcessor = multiThreadedConfig.mainLoopingConsumer(applicationLogger, messageConsumer);
 
         assertTrue(loopingMessageProcessor instanceof LoopingMessageProcessorServiceImpl);
         assertEquals(applicationLogger, ReflectionTestUtils.getField(loopingMessageProcessor, LOGGER_FIELD));
@@ -59,11 +58,6 @@ class MultiThreadedConfigTest {
         assertEquals(messageConsumer, ReflectionTestUtils.getField(loopingMessageProcessor, CONSUMER_FIELD));
         assertEquals(consumerThrottleStrategy, ReflectionTestUtils.getField(loopingMessageProcessor, THROTTLE_STRATEGY_FIELD));
         assertEquals("retry-looping-consumer", ReflectionTestUtils.getField(loopingMessageProcessor, ID_FIELD));
-    }
-
-    @Test
-    void mainConsumerThrottleStrategyTest() {
-        assertTrue(multiThreadedConfig.mainConsumerThrottleStrategy() instanceof MainConsumerThrottleStrategy);
     }
 
     @Test

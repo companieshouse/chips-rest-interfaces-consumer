@@ -7,7 +7,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MessageConsumer;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.retry.throttle.ConsumerThrottleStrategy;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.retry.throttle.impl.MainConsumerThrottleStrategy;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.retry.throttle.impl.RetryConsumerThrottleStrategy;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.LoopingMessageProcessor;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.impl.LoopingMessageProcessorServiceImpl;
@@ -22,10 +21,9 @@ class MultiThreadedConfig {
 
     @Bean("main-looping-consumer")
     LoopingMessageProcessor mainLoopingConsumer(ApplicationLogger logger,
-                                                @Qualifier("incoming-message-consumer") MessageConsumer messageConsumer,
-                                                @Qualifier("main-consumer-throttle-strategy") ConsumerThrottleStrategy throttleStrategy
+                                                @Qualifier("incoming-message-consumer") MessageConsumer messageConsumer
     ) {
-        return new LoopingMessageProcessorServiceImpl(messageConsumer, throttleStrategy, logger, MAIN_CONSUMER_ID);
+        return new LoopingMessageProcessorServiceImpl(messageConsumer, null, logger, MAIN_CONSUMER_ID);
     }
 
     @Bean("retry-looping-consumer")
@@ -34,11 +32,6 @@ class MultiThreadedConfig {
                                                  @Qualifier("retry-consumer-throttle-strategy") ConsumerThrottleStrategy throttleStrategy
     ) {
         return new LoopingMessageProcessorServiceImpl(messageConsumer, throttleStrategy, logger, RETRY_CONSUMER_ID);
-    }
-
-    @Bean("main-consumer-throttle-strategy")
-    ConsumerThrottleStrategy mainConsumerThrottleStrategy() {
-        return new MainConsumerThrottleStrategy();
     }
 
     @Bean("retry-consumer-throttle-strategy")

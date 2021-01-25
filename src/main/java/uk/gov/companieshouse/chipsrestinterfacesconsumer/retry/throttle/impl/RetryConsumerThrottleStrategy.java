@@ -27,7 +27,6 @@ public class RetryConsumerThrottleStrategy implements ConsumerThrottleStrategy {
         } catch(InterruptedException ie) {
             logger.error(String.format("%s - interrupted whilst sleeping", Thread.currentThread().getName()), ie);
             Thread.currentThread().interrupt();
-            return;
         }
     }
 }

@@ -38,7 +38,9 @@ public class LoopingMessageProcessorServiceImpl implements LoopingMessageProcess
         logger.info(String.format("%s - Read and process loop starting", id));
         while (isRunning) {
             this.consumer.readAndProcess();
-            throttleStrategy.throttle();
+            if(throttleStrategy != null) {
+                throttleStrategy.throttle();
+            }
         }
 
         logger.info(String.format("%s - Read and process loop ended", id));
