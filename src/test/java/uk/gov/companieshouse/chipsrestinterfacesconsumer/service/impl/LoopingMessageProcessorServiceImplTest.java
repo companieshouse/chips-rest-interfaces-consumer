@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MessageConsumer;
+import uk.gov.companieshouse.chipsrestinterfacesconsumer.retry.throttle.ConsumerThrottleStrategy;
 
 import java.util.concurrent.ExecutionException;
 
@@ -25,6 +26,9 @@ class LoopingMessageProcessorServiceImplTest {
 
     @Mock
     private MessageConsumer messageConsumer;
+
+    @Mock
+    private ConsumerThrottleStrategy consumerThrottleStrategy;
 
     @InjectMocks
     private LoopingMessageProcessorServiceImpl loopingMessageProcessorService;
@@ -48,5 +52,6 @@ class LoopingMessageProcessorServiceImplTest {
 
         verify(messageConsumer, times(1)).readAndProcess();
         assertTrue(loopingMessageProcessorServiceResult.get());
+        verify(consumerThrottleStrategy, times(1)).throttle();
     }
 }

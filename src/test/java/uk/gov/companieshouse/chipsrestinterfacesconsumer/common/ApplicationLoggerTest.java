@@ -52,6 +52,14 @@ class ApplicationLoggerTest {
     }
 
     @Test
+    void testErrorNoContextNoMap() {
+        applicationLogger.error(TEST_MESSAGE, new Exception(TEST_MESSAGE));
+
+        assertEquals(1, logMap.size());
+        assertEquals(LOG_MAP_VALUE, logMap.get(LOG_MAP_KEY));
+    }
+
+    @Test
     void testErrorNoContextLoggingDoesNotModifyLogMap() {
         applicationLogger.error(TEST_MESSAGE, new Exception(TEST_MESSAGE), logMap);
 
