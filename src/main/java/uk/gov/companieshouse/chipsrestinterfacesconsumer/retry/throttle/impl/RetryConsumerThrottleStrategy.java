@@ -20,12 +20,12 @@ public class RetryConsumerThrottleStrategy implements ConsumerThrottleStrategy {
     @Override
     public void throttle() {
         try {
-            logger.info(String.format("%s Throttling retry consumer for %d seconds", consumerId, retryThrottleRateSeconds));
+            logger.info(String.format("%s - Throttling retry consumer for %d seconds", consumerId, retryThrottleRateSeconds));
             long retryThrottleRateMilliseconds = retryThrottleRateSeconds * 1000;
             Thread.sleep(retryThrottleRateMilliseconds);
-            logger.info(String.format("%s Throttle period over", consumerId));
+            logger.info(String.format("%s - Throttle period over", consumerId));
         } catch(InterruptedException ie) {
-            logger.error(String.format("%s interrupted whilst sleeping", Thread.currentThread().getName()), ie);
+            logger.error(String.format("%s - interrupted whilst sleeping", Thread.currentThread().getName()), ie);
             Thread.currentThread().interrupt();
             return;
         }
