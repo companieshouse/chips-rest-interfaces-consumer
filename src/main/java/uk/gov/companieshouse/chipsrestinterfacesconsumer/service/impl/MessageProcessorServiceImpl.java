@@ -40,7 +40,6 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
             chipsRestClient.sendToChips(message);
         } catch (HttpClientErrorException hcee) {
             logMap.put("HTTP Status Code", hcee.getStatusCode());
-            logMap.put("HTTP Status Text", hcee.getStatusText());
             handleFailedMessage(message, hcee, logMap);
         } catch (Exception e) {
             handleFailedMessage(message, e, logMap);
@@ -57,7 +56,7 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
             message.setAttempt(attempts);
             retryMessageProducer.writeToTopic(message);
         } else {
-            logger.info(String.format("Maximum retry attempts %s reached, moving message to ERROR topic", maxRetryAttempts), logMap);
+            logger.error(String.format("Maximum retry attempts %s reached, moving message to ERROR topic", maxRetryAttempts), e, logMap);
             // TODO move to Error topic
         }
     }
