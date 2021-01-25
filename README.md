@@ -33,9 +33,8 @@ CHIPS_REST_INTERFACES_HOST | <CHIPS_REST_INTERFACES_URL> | Exit point to CHIPS f
 HUMAN_LOG | 1 |
 KAFKA_BROKER_ADDR | kafka:9092 |
 KAFKA_GROUP_NAME | chips-rest-interfaces-consumer-group |
-KAFKA_CONSUMER_TOPIC | chips-rest-interfaces-send | Directs messages to and from the main topic.
+KAFKA_CONSUMER_TOPIC | chips-rest-interfaces-send | The main topic to consume
 KAFKA_CONSUMER_POLL_TIMEOUT_MS | 100 |
-KAFKA_RETRY_TOPIC | chips-rest-interfaces-retry | Directs messages to and from the retry topic.
 KAFKA_PRODUCER_RETRIES | 5 |
 LOG_LEVEL | DEBUG |
 MAX_RETRY_ATTEMPTS | 10 | Number of retries before the message is added to the error topic.
