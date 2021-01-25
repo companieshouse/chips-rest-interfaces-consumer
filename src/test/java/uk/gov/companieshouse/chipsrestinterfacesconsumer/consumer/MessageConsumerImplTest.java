@@ -164,7 +164,7 @@ class MessageConsumerImplTest {
         verify(logger, times(1)).info(anyString());
         verify(logger, times(1)).error(
                 eq(ERROR_MESSAGE),
-                any(Exception.class),
+                any(NullPointerException.class),
                 loggingDataMapCaptor.capture());
         Map<String, Object> loggingDataMap = loggingDataMapCaptor.getValue();
         assertEquals("", loggingDataMap.get(LOG_MESSAGE_KEY));
