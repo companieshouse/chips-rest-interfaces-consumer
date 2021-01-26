@@ -66,7 +66,7 @@ class MessageProducerImplUnitTest {
         verify(mockedFuture, times(1)).get();
         verify(producer, times(1)).sendAndReturnFuture(kafkaMessageCaptor.capture());
         Message kafkaMessage = kafkaMessageCaptor.getValue();
-        assertEquals(kafkaMessage.getTopic(), TEST_TOPIC);
+        assertEquals(TEST_TOPIC, kafkaMessage.getTopic());
     }
 
     @Test
@@ -87,7 +87,7 @@ class MessageProducerImplUnitTest {
         assertTrue(Thread.currentThread().isInterrupted());
         verify(producer, times(1)).sendAndReturnFuture(kafkaMessageCaptor.capture());
         Message kafkaMessage = kafkaMessageCaptor.getValue();
-        assertEquals(kafkaMessage.getTopic(), TEST_TOPIC);
+        assertEquals(TEST_TOPIC, kafkaMessage.getTopic());
     }
 
     @Test
@@ -99,7 +99,7 @@ class MessageProducerImplUnitTest {
         assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), TEST_TOPIC));
         verify(producer, times(1)).sendAndReturnFuture(kafkaMessageCaptor.capture());
         Message kafkaMessage = kafkaMessageCaptor.getValue();
-        assertEquals(kafkaMessage.getTopic(), TEST_TOPIC);
+        assertEquals(TEST_TOPIC, kafkaMessage.getTopic());
     }
 
     private ChipsRestInterfacesSend getDummyChipsRestInterfacesSend() {
