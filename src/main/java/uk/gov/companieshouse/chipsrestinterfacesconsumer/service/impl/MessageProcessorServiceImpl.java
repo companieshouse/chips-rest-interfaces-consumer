@@ -20,6 +20,12 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
     @Value("${MAX_RETRY_ATTEMPTS}")
     private int maxRetryAttempts;
 
+    @Value("${kafka.retry.topic}")
+    private String retryTopicName;
+
+    @Value("${kafka.error.topic}")
+    private String errorTopicName;
+
     @Autowired
     private ChipsRestClient chipsRestClient;
 
@@ -27,7 +33,7 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
     private ApplicationLogger logger;
 
     @Autowired
-    private MessageProducer retryMessageProducer;
+    private MessageProducer messageProducer;
 
     @Override
     public void processMessage(ChipsRestInterfacesSend message) throws ServiceException {
@@ -40,9 +46,10 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
             if (attempts < maxRetryAttempts) {
                 logger.error("Error sending message to chips, will place on retry queue", restClientException, logMap);
                 message.setAttempt(attempts + 1);
-                retryMessageProducer.writeToTopic(message);
+                messageProducer.writeToTopic(message, retryTopicName);
             } else {
                 logger.error("Error max attempts reached", restClientException, logMap);
+                messageProducer.writeToTopic(message, errorTopicName);
             }
         }
     }
