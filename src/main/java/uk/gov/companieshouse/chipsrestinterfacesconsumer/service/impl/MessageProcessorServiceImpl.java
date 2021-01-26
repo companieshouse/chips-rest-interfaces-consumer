@@ -17,7 +17,7 @@ import java.util.Map;
 @Service
 public class MessageProcessorServiceImpl implements MessageProcessorService {
 
-    private static final String SEND_FAILURE_MESSAGE = "Error sending message to chips";
+    private static final String SEND_FAILURE_MESSAGE = "Error sending message id %s to chips";
 
     @Value("${MAX_RETRY_ATTEMPTS}")
     private int maxRetryAttempts;
@@ -52,11 +52,10 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
     }
 
     private void handleFailedMessage(ChipsRestInterfacesSend message, Exception e, Map<String, Object> logMap) throws ServiceException {
-        logger.error(SEND_FAILURE_MESSAGE, e, logMap);
-
         var messageId = message.getMessageId();
-        var attempts = message.getAttempt();
+        logger.error(String.format(SEND_FAILURE_MESSAGE, messageId), e, logMap);
 
+        var attempts = message.getAttempt();
         logger.info(String.format("Attempt %s failed for message id %s", attempts, messageId), logMap);
 
         if (attempts < maxRetryAttempts) {

@@ -34,7 +34,7 @@ class MessageProcessorServiceImplTest {
     private static final String DUMMY_DATA = "{test:data}";
     private static final String LOG_KEY_MESSAGE = "Message";
     private static final String LOG_KEY_HTTP_CODE = "HTTP Status Code";
-    private static final String CHIPS_ERROR_MESSAGE = "Error sending message to chips";
+    private static final String CHIPS_ERROR_MESSAGE = "Error sending message id %s to chips";
     private static final String RETRY_TOPIC = "chips-rest-interfaces-send-retry";
     private static final String ERROR_TOPIC = "chips-rest-interfaces-send-error";
 
@@ -86,7 +86,7 @@ class MessageProcessorServiceImplTest {
         messageProcessorService.processMessage(chipsRestInterfacesSend);
 
         verify(chipsRestClient, times(1)).sendToChips(eq(chipsRestInterfacesSend));
-        verify(logger, times(1)).error(eq(CHIPS_ERROR_MESSAGE), eq(runtimeException), mapArgumentCaptor.capture());
+        verify(logger, times(1)).error(eq(String.format(CHIPS_ERROR_MESSAGE, MESSAGE_ID)), eq(runtimeException), mapArgumentCaptor.capture());
         verifyLogData(mapArgumentCaptor.getValue());
 
         verify(logger, times(1)).info(eq("Attempt 0 failed for message id " + MESSAGE_ID), mapArgumentCaptor.capture());
@@ -105,7 +105,7 @@ class MessageProcessorServiceImplTest {
         messageProcessorService.processMessage(chipsRestInterfacesSend);
 
         verify(chipsRestClient, times(1)).sendToChips(eq(chipsRestInterfacesSend));
-        verify(logger, times(1)).error(eq(CHIPS_ERROR_MESSAGE), eq(httpClientErrorException), mapArgumentCaptor.capture());
+        verify(logger, times(1)).error(eq(String.format(CHIPS_ERROR_MESSAGE, MESSAGE_ID)), eq(httpClientErrorException), mapArgumentCaptor.capture());
         Map<String, Object> logMap = mapArgumentCaptor.getValue();
         verifyLogData(logMap);
         verifyLogHttpCode(logMap);
@@ -130,7 +130,7 @@ class MessageProcessorServiceImplTest {
 
         verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend);
         verify(messageProducer, times(0)).writeToTopic(chipsRestInterfacesSend, RETRY_TOPIC);
-        verify(logger, times(1)).error(eq(CHIPS_ERROR_MESSAGE), eq(restClientException), mapArgumentCaptor.capture());
+        verify(logger, times(1)).error(eq(String.format(CHIPS_ERROR_MESSAGE, MESSAGE_ID)), eq(restClientException), mapArgumentCaptor.capture());
         verifyLogData(mapArgumentCaptor.getValue());
 
         verify(logger, times(1)).info(eq("Attempt 10 failed for message id " + MESSAGE_ID), mapArgumentCaptor.capture());
