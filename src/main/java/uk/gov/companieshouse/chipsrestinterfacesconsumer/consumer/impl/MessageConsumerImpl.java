@@ -14,7 +14,7 @@ import javax.annotation.PreDestroy;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MessageConsumerImpl implements MessageConsumer {
+public class MessageConsumerImpl implements MessageConsumer, Runnable {
 
     private final ApplicationLogger logger;
 
@@ -40,12 +40,18 @@ public class MessageConsumerImpl implements MessageConsumer {
 
     @PostConstruct
     void init() {
+        logger.info(id + " initialised");
         consumer.connect();
     }
 
     @PreDestroy
     void close() {
         consumer.close();
+    }
+
+    @Override
+    public void run() {
+        this.readAndProcess();
     }
 
     @Override
@@ -59,6 +65,8 @@ public class MessageConsumerImpl implements MessageConsumer {
                 Map<String, Object> logMap = new HashMap<>();
                 logMap.put("Message Offset", msg.getOffset());
                 logMap.put("Deserialised message id", deserializedMsg.getMessageId());
+                logMap.put("Thread Name", Thread.currentThread().getName());
+                logMap.put("Class ID", id);
                 logger.info(String.format("%s - Message deserialised successfully", id), logMap);
 
                 messageProcessorService.processMessage(deserializedMsg);

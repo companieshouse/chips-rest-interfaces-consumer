@@ -8,10 +8,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.LoopingMessageProcessor;
-
-import java.util.concurrent.CompletableFuture;
+import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MessageConsumer;
 
 @SpringBootApplication
 @EnableAsync
@@ -20,20 +19,26 @@ public class Application implements CommandLineRunner {
     public static final String APPLICATION_NAME = "chips-rest-interfaces-consumer";
 
     @Autowired
-    @Lazy
-    @Qualifier("main-looping-consumer")
-    private LoopingMessageProcessor loopingMainMessageConsumer;
-
-    @Autowired
-    @Lazy
-    @Qualifier("retry-looping-consumer")
-    private LoopingMessageProcessor loopingRetryMessageConsumer;
-
-    @Autowired
     private ApplicationLogger logger;
+
+    @Autowired
+    private ThreadPoolTaskScheduler taskScheduler;
+
+    @Autowired
+    @Lazy
+    @Qualifier("incoming-message-consumer")
+    private MessageConsumer incomingMessageConsumer;
+
+    @Autowired
+    @Lazy
+    @Qualifier("retry-message-consumer")
+    private MessageConsumer retryMessageConsumer;
 
     @Value("${RUN_APP_IN_ERROR_MODE:false}")
     private boolean runAppInErrorMode;
+
+    @Value("${RETRY_THROTTLE_RATE_SECONDS}")
+    private long retryThrottleSeconds;
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class);
@@ -43,11 +48,9 @@ public class Application implements CommandLineRunner {
     public void run(String... args) {
         if (!runAppInErrorMode) {
             logger.info(String.format("%s started in normal processing mode", APPLICATION_NAME));
-            var mainCompletableFuture = loopingMainMessageConsumer.loopReadAndProcess();
-            var retryCompletableFuture = loopingRetryMessageConsumer.loopReadAndProcess();
-
-            // Wait until they are all done
-            CompletableFuture.allOf(mainCompletableFuture, retryCompletableFuture).join();
+            var retryThrottleMillis = retryThrottleSeconds * 1000L;
+            taskScheduler.scheduleWithFixedDelay(incomingMessageConsumer, 1L);
+            taskScheduler.scheduleWithFixedDelay(retryMessageConsumer, retryThrottleMillis);
         } else {
             logger.info(String.format("%s started in error processing mode", APPLICATION_NAME));
 
