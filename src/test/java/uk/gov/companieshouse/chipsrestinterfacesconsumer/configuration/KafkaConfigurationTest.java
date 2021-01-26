@@ -17,10 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(MockitoExtension.class)
 class KafkaConfigurationTest {
 
-    private static final String INCOMING_GROUP_NAME_VALUE = "incoming-test-group";
+    private static final String MAIN_GROUP_NAME_VALUE = "main-test-group";
     private static final String RETRY_GROUP_NAME_VALUE = "retry-test-group";
     private static final String BROKER_ADDRESS_VALUE = "kafka address";
-    private static final String INCOMING_TOPIC_NAME_VALUE = "incoming-topic";
+    private static final String MAIN_TOPIC_NAME_VALUE = "main-topic";
     private static final String RETRY_TOPIC_NAME_VALUE = "retry-topic";
     private static final int POLL_TIMEOUT_VALUE = 100;
     private static final int RETRIES = 10;
@@ -30,25 +30,25 @@ class KafkaConfigurationTest {
     @BeforeEach
     void setup() {
         kafkaConfiguration = new KafkaConfiguration();
-        ReflectionTestUtils.setField(kafkaConfiguration, "incomingConsumerGroupName", INCOMING_GROUP_NAME_VALUE);
+        ReflectionTestUtils.setField(kafkaConfiguration, "mainConsumerGroupName", MAIN_GROUP_NAME_VALUE);
         ReflectionTestUtils.setField(kafkaConfiguration, "retryConsumerGroupName", RETRY_GROUP_NAME_VALUE);
         ReflectionTestUtils.setField(kafkaConfiguration, "brokerAddress", BROKER_ADDRESS_VALUE);
-        ReflectionTestUtils.setField(kafkaConfiguration, "incomingTopicName", INCOMING_TOPIC_NAME_VALUE);
+        ReflectionTestUtils.setField(kafkaConfiguration, "mainTopicName", MAIN_TOPIC_NAME_VALUE);
         ReflectionTestUtils.setField(kafkaConfiguration, "retryTopicName", RETRY_TOPIC_NAME_VALUE);
         ReflectionTestUtils.setField(kafkaConfiguration, "pollTimeout", POLL_TIMEOUT_VALUE);
         ReflectionTestUtils.setField(kafkaConfiguration, "retries", RETRIES);
     }
 
     @Test
-    void getIncomingConsumerConfigTest() {
-        ConsumerConfig consumerConfig = kafkaConfiguration.getIncomingConsumerConfig();
+    void getMainConsumerConfigTest() {
+        ConsumerConfig consumerConfig = kafkaConfiguration.getMainConsumerConfig();
 
-        assertEquals(INCOMING_GROUP_NAME_VALUE, consumerConfig.getGroupName());
+        assertEquals(MAIN_GROUP_NAME_VALUE, consumerConfig.getGroupName());
         assertNotNull(consumerConfig.getBrokerAddresses());
         assertEquals(1, consumerConfig.getBrokerAddresses().length);
         assertEquals(BROKER_ADDRESS_VALUE, consumerConfig.getBrokerAddresses()[0]);
         assertEquals(1, consumerConfig.getTopics().size());
-        assertEquals(INCOMING_TOPIC_NAME_VALUE, consumerConfig.getTopics().get(0));
+        assertEquals(MAIN_TOPIC_NAME_VALUE, consumerConfig.getTopics().get(0));
         assertEquals(100, consumerConfig.getPollTimeout());
     }
 

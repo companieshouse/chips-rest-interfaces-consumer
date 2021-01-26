@@ -24,8 +24,8 @@ public class Application implements CommandLineRunner {
 
     @Autowired
     @Lazy
-    @Qualifier("incoming-message-consumer")
-    private MessageConsumer incomingMessageConsumer;
+    @Qualifier("main-message-consumer")
+    private MessageConsumer mainMessageConsumer;
 
     @Autowired
     @Lazy
@@ -47,7 +47,7 @@ public class Application implements CommandLineRunner {
         if (!runAppInErrorMode) {
             logger.info(String.format("%s started in normal processing mode", APPLICATION_NAME));
             var retryThrottleMillis = retryThrottleSeconds * 1000L;
-            taskScheduler.scheduleWithFixedDelay(incomingMessageConsumer, 1L);
+            taskScheduler.scheduleWithFixedDelay(mainMessageConsumer, 1L);
             taskScheduler.scheduleWithFixedDelay(retryMessageConsumer, retryThrottleMillis);
         } else {
             logger.info(String.format("%s started in error processing mode", APPLICATION_NAME));

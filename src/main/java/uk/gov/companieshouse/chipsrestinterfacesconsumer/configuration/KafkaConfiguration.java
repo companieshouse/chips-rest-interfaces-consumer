@@ -16,8 +16,8 @@ import java.util.Collections;
 @Configuration
 class KafkaConfiguration {
 
-    @Value("${kafka.incoming.consumer.group.name}")
-    private String incomingConsumerGroupName;
+    @Value("${kafka.main.consumer.group.name}")
+    private String mainConsumerGroupName;
 
     @Value("${kafka.retry.consumer.group.name}")
     private String retryConsumerGroupName;
@@ -26,7 +26,7 @@ class KafkaConfiguration {
     private String brokerAddress;
 
     @Value("${kafka.consumer.topic}")
-    private String incomingTopicName;
+    private String mainTopicName;
 
     @Value("${kafka.retry.topic}")
     private String retryTopicName;
@@ -42,18 +42,18 @@ class KafkaConfiguration {
         return new DeserializerFactory();
     }
 
-    @Bean("incoming-consumer-group")
+    @Bean("main-consumer-group")
     @Lazy
-    CHKafkaConsumerGroup getIncomingConsumer() {
-        return new CHKafkaConsumerGroup(getIncomingConsumerConfig());
+    CHKafkaConsumerGroup getMainConsumer() {
+        return new CHKafkaConsumerGroup(getMainConsumerConfig());
     }
 
-    ConsumerConfig getIncomingConsumerConfig() {
+    ConsumerConfig getMainConsumerConfig() {
         ConsumerConfig config = new ConsumerConfig();
         config.setBrokerAddresses(new String[]{brokerAddress});
-        config.setTopics(Collections.singletonList(incomingTopicName));
+        config.setTopics(Collections.singletonList(mainTopicName));
         config.setPollTimeout(pollTimeout);
-        config.setGroupName(incomingConsumerGroupName);
+        config.setGroupName(mainConsumerGroupName);
         return config;
     }
 
