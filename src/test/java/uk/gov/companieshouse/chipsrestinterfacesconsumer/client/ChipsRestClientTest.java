@@ -52,6 +52,8 @@ class ChipsRestClientTest {
         ChipsRestInterfacesSend chipsRestInterfacesSend = new ChipsRestInterfacesSend();
         chipsRestInterfacesSend.setData(DATA);
         chipsRestInterfacesSend.setChipsRestEndpoint(CHIPS_REST_ENDPOINT);
+        String messageId = "12345";
+        chipsRestInterfacesSend.setMessageId(messageId);
         ReflectionTestUtils.setField(chipsRestClient, "chipsRestHost", CHIPS_REST_HOST);
         ResponseEntity<String> responseEntity = new ResponseEntity<>(HttpStatus.ACCEPTED);
         when(restTemplate.exchange(any(URI.class), eq(HttpMethod.POST), any(), eq(String.class))).thenReturn(responseEntity);
@@ -68,5 +70,10 @@ class ChipsRestClientTest {
 
         assertEquals(DATA, messageData.getBody());
         assertEquals(MediaType.APPLICATION_JSON, messageData.getHeaders().getContentType());
+
+        verify(logger, times(1))
+                .info(String.format("Posting message id %s to %s", messageId, FULL_EXPANDED_CHIPS_REST_URL));
+        verify(logger, times(1))
+                .info(String.format("Message id %s successfully sent, Chips Rest Response Status: %s", messageId, HttpStatus.ACCEPTED));
     }
 }
