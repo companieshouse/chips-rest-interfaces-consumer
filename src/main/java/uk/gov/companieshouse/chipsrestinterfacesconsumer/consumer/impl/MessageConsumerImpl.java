@@ -14,7 +14,7 @@ import javax.annotation.PreDestroy;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MessageConsumerImpl implements MessageConsumer, Runnable {
+public class MessageConsumerImpl implements MessageConsumer {
 
     private final ApplicationLogger logger;
 
