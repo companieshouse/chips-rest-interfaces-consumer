@@ -36,7 +36,7 @@ class MessageProducerImplUnitTest {
     private static final String DATA = "{subject: testing}";
     private static final String CHIPS_REST_ENDPOINT = "http://nowhere:1234";
     private static final String CREATED_AT = "1610543925";
-    public static final String TEST_TOPIC = "test-topic";
+    private static final String TEST_TOPIC = "test-topic";
 
     @Mock
     private ApplicationLogger logger;

@@ -24,8 +24,8 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class MessageProcessorServiceImplTest {
 
-    public static final String RETRY_TOPIC = "chips-rest-interfaces-send-retry";
-    public static final String ERROR_TOPIC = "chips-rest-interfaces-send-error";
+    private static final String RETRY_TOPIC = "chips-rest-interfaces-send-retry";
+    private static final String ERROR_TOPIC = "chips-rest-interfaces-send-error";
     @Mock
     private ChipsRestClient chipsRestClient;
 
