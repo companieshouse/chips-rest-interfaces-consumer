@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer;
+package uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

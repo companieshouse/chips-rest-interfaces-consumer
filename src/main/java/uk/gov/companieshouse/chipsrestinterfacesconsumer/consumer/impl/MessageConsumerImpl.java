@@ -1,7 +1,8 @@
-package uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer;
+package uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.impl;
 
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
+import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MessageConsumer;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
 import uk.gov.companieshouse.kafka.consumer.CHKafkaConsumerGroup;
 import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
@@ -39,12 +40,18 @@ public class MessageConsumerImpl implements MessageConsumer {
 
     @PostConstruct
     void init() {
+        logger.info(id + " initialised");
         consumer.connect();
     }
 
     @PreDestroy
     void close() {
         consumer.close();
+    }
+
+    @Override
+    public void run() {
+        this.readAndProcess();
     }
 
     @Override
@@ -58,6 +65,8 @@ public class MessageConsumerImpl implements MessageConsumer {
                 Map<String, Object> logMap = new HashMap<>();
                 logMap.put("Message Offset", msg.getOffset());
                 logMap.put("Deserialised message id", deserializedMsg.getMessageId());
+                logMap.put("Thread Name", Thread.currentThread().getName());
+                logMap.put("Message Consumer ID", id);
                 logger.info(String.format("%s - Message deserialised successfully", id), logMap);
 
                 messageProcessorService.processMessage(deserializedMsg);

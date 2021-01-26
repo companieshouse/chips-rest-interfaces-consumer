@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MessageConsumer;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MessageConsumerImpl;
+import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.impl.MessageConsumerImpl;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
 import uk.gov.companieshouse.kafka.consumer.CHKafkaConsumerGroup;
 import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
