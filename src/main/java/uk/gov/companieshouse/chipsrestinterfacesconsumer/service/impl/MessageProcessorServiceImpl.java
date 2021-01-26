@@ -22,6 +22,12 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
     @Value("${MAX_RETRY_ATTEMPTS}")
     private int maxRetryAttempts;
 
+    @Value("${kafka.retry.topic}")
+    private String retryTopicName;
+
+    @Value("${kafka.error.topic}")
+    private String errorTopicName;
+
     @Autowired
     private ChipsRestClient chipsRestClient;
 
@@ -29,13 +35,12 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
     private ApplicationLogger logger;
 
     @Autowired
-    private MessageProducer retryMessageProducer;
+    private MessageProducer messageProducer;
 
     @Override
     public void processMessage(ChipsRestInterfacesSend message) throws ServiceException {
         Map<String, Object> logMap = new HashMap<>();
         logMap.put("Message", message.getData());
-        logger.info("About to send message to Chips", logMap);
         try {
             chipsRestClient.sendToChips(message);
         } catch (HttpClientErrorException hcee) {
@@ -49,15 +54,17 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
     private void handleFailedMessage(ChipsRestInterfacesSend message, Exception e, Map<String, Object> logMap) throws ServiceException {
         logger.error(SEND_FAILURE_MESSAGE, e, logMap);
 
+        var messageId = message.getMessageId();
         var attempts = message.getAttempt();
+
+        logger.info(String.format("Attempt %s failed for message id %s", attempts, messageId), logMap);
+
         if (attempts < maxRetryAttempts) {
-            attempts++;
-            logger.info(String.format("Placing message on RETRY topic for attempt %s", attempts), logMap);
-            message.setAttempt(attempts);
-            retryMessageProducer.writeToTopic(message);
+            message.setAttempt(attempts + 1);
+            messageProducer.writeToTopic(message, retryTopicName);
         } else {
-            logger.error(String.format("Maximum retry attempts %s reached, moving message to ERROR topic", maxRetryAttempts), e, logMap);
-            // TODO move to Error topic
+            logger.error(String.format("Maximum retry attempts %s reached for message id %s", maxRetryAttempts, messageId), e, logMap);
+            messageProducer.writeToTopic(message, errorTopicName);
         }
     }
 }

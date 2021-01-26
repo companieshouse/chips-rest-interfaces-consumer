@@ -2,7 +2,6 @@ package uk.gov.companieshouse.chipsrestinterfacesconsumer.retry;
 
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
@@ -23,9 +22,6 @@ public class MessageProducerImpl implements MessageProducer {
 
     private final CHKafkaProducer producer;
 
-    @Value("${kafka.retry.topic}")
-    private String retryTopicName;
-
     @Autowired
     public MessageProducerImpl(ApplicationLogger logger,
                                AvroSerializer avroSerializer,
@@ -36,13 +32,13 @@ public class MessageProducerImpl implements MessageProducer {
     }
 
     @Override
-    public void writeToTopic(ChipsRestInterfacesSend chipsMessage) throws ServiceException {
+    public void writeToTopic(ChipsRestInterfacesSend chipsMessage, String topicName) throws ServiceException {
         try {
-            logger.info(String.format("Message %s: Writing message to topic: %s", chipsMessage.getMessageId(), retryTopicName));
+            logger.info(String.format("Writing message id %s to topic: %s", chipsMessage.getMessageId(), topicName));
             byte[] serializedData = avroSerializer.serialize(chipsMessage);
             Message kafkaMessage = new Message();
             kafkaMessage.setValue(serializedData);
-            kafkaMessage.setTopic(retryTopicName);
+            kafkaMessage.setTopic(topicName);
             kafkaMessage.setTimestamp(Long.valueOf(chipsMessage.getCreatedAt()));
             Future<RecordMetadata> future = producer.sendAndReturnFuture(kafkaMessage);
             future.get();
