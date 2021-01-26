@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.chipsrestinterfacesconsumer.retry;
+package uk.gov.companieshouse.chipsrestinterfacesconsumer.producer;
 
 import org.apache.avro.Schema;
 import org.apache.avro.io.DatumReader;

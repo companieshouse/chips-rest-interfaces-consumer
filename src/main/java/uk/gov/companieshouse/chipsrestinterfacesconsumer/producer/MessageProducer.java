@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.chipsrestinterfacesconsumer.retry;
+package uk.gov.companieshouse.chipsrestinterfacesconsumer.producer;
 
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.service.ServiceException;
