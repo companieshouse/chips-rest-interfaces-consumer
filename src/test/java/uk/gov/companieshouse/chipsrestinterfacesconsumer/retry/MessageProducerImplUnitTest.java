@@ -73,7 +73,7 @@ class MessageProducerImplUnitTest {
             throws IOException {
         doThrow(IOException.class).when(avroSerializer).serialize(any());
         assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), TEST_TOPIC));
-        verify(producer, times(0)).sendAndReturnFuture(kafkaMessageCaptor.capture());
+        verify(producer, times(0)).sendAndReturnFuture(any());
     }
 
     @Test
