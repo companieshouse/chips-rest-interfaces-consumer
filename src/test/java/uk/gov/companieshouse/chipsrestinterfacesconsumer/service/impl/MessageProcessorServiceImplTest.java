@@ -24,6 +24,8 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class MessageProcessorServiceImplTest {
 
+    public static final String RETRY_TOPIC = "chips-rest-interfaces-send-retry";
+    public static final String ERROR_TOPIC = "chips-rest-interfaces-send-error";
     @Mock
     private ChipsRestClient chipsRestClient;
 
@@ -37,10 +39,10 @@ class MessageProcessorServiceImplTest {
     private MessageProcessorServiceImpl messageProcessorService;
 
     @BeforeEach
-    void Setup(){
+    void setup(){
         ReflectionTestUtils.setField(messageProcessorService, "maxRetryAttempts", 10);
-        ReflectionTestUtils.setField(messageProcessorService, "retryTopicName", "chips-rest-interfaces-send-retry");
-        ReflectionTestUtils.setField(messageProcessorService, "errorTopicName", "chips-rest-interfaces-send-error");
+        ReflectionTestUtils.setField(messageProcessorService, "retryTopicName", RETRY_TOPIC);
+        ReflectionTestUtils.setField(messageProcessorService, "errorTopicName", ERROR_TOPIC);
     }
 
     @Test
@@ -50,8 +52,8 @@ class MessageProcessorServiceImplTest {
         messageProcessorService.processMessage(chipsRestInterfacesSend);
 
         verify(chipsRestClient, times(1)).sendToChips(eq(chipsRestInterfacesSend));
-        verify(messageProducer, times(0)).writeToTopic(eq(chipsRestInterfacesSend), eq("chips-rest-interfaces-send-retry"));
-        verify(messageProducer, times(0)).writeToTopic(eq(chipsRestInterfacesSend), eq("chips-rest-interfaces-send-error"));
+        verify(messageProducer, times(0)).writeToTopic(eq(chipsRestInterfacesSend), eq(RETRY_TOPIC));
+        verify(messageProducer, times(0)).writeToTopic(eq(chipsRestInterfacesSend), eq(ERROR_TOPIC));
     }
 
     @Test
@@ -66,8 +68,8 @@ class MessageProcessorServiceImplTest {
         verify(chipsRestClient, times(1)).sendToChips(eq(chipsRestInterfacesSend));
         verify(logger, times(1)).error(eq("Error sending message to chips, will place on retry queue"), eq(restClientException), anyMap());
         assertEquals(1, chipsRestInterfacesSend.getAttempt());
-        verify(messageProducer, times(1)).writeToTopic(eq(chipsRestInterfacesSend), eq("chips-rest-interfaces-send-retry"));
-        verify(messageProducer, times(0)).writeToTopic(eq(chipsRestInterfacesSend), eq("chips-rest-interfaces-send-error"));
+        verify(messageProducer, times(1)).writeToTopic(eq(chipsRestInterfacesSend), eq(RETRY_TOPIC));
+        verify(messageProducer, times(0)).writeToTopic(eq(chipsRestInterfacesSend), eq(ERROR_TOPIC));
     }
 
     @Test
@@ -80,8 +82,8 @@ class MessageProcessorServiceImplTest {
         messageProcessorService.processMessage(chipsRestInterfacesSend);
 
         verify(chipsRestClient, times(1)).sendToChips(eq(chipsRestInterfacesSend));
-        verify(messageProducer, times(0)).writeToTopic(eq(chipsRestInterfacesSend), eq("chips-rest-interfaces-send-retry"));
-        verify(messageProducer, times(1)).writeToTopic(eq(chipsRestInterfacesSend), eq("chips-rest-interfaces-send-error"));
+        verify(messageProducer, times(0)).writeToTopic(eq(chipsRestInterfacesSend), eq(RETRY_TOPIC));
+        verify(messageProducer, times(1)).writeToTopic(eq(chipsRestInterfacesSend), eq(ERROR_TOPIC));
         verify(logger, times(1)).error(eq("Error max attempts reached"), eq(restClientException), anyMap());
     }
 }

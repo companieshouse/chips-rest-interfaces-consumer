@@ -3,11 +3,14 @@ package uk.gov.companieshouse.chipsrestinterfacesconsumer.retry;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
+import uk.gov.companieshouse.kafka.message.Message;
 import uk.gov.companieshouse.kafka.producer.CHKafkaProducer;
 import uk.gov.companieshouse.service.ServiceException;
 
@@ -15,6 +18,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,6 +37,7 @@ class MessageProducerImplUnitTest {
     private static final String DATA = "{subject: testing}";
     private static final String CHIPS_REST_ENDPOINT = "http://nowhere:1234";
     private static final String CREATED_AT = "1610543925";
+    public static final String TEST_TOPIC = "test-topic";
 
     @Mock
     private ApplicationLogger logger;
@@ -49,22 +54,27 @@ class MessageProducerImplUnitTest {
     @InjectMocks
     private MessageProducerImpl messageProducerImpl;
 
+    @Captor
+    private ArgumentCaptor<Message> kafkaMessageCaptor;
+
     @Test
     void testSuccessfulWriteToTopic()
             throws ServiceException, ExecutionException, InterruptedException {
         when(producer.sendAndReturnFuture(any())).thenReturn(mockedFuture);
 
-        messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), anyString());
-
+        messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), TEST_TOPIC);
         verify(mockedFuture, times(1)).get();
+        verify(producer, times(1)).sendAndReturnFuture(kafkaMessageCaptor.capture());
+        Message kafkaMessage = kafkaMessageCaptor.getValue();
+        assertEquals(kafkaMessage.getTopic(), TEST_TOPIC);
     }
 
     @Test
     void testServiceExceptionIsThrownWhenSerializerThrowsIOException()
             throws IOException {
         doThrow(IOException.class).when(avroSerializer).serialize(any());
-
-        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(),""));
+        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), TEST_TOPIC));
+        verify(producer, times(0)).sendAndReturnFuture(kafkaMessageCaptor.capture());
     }
 
     @Test
@@ -73,8 +83,11 @@ class MessageProducerImplUnitTest {
         when(producer.sendAndReturnFuture(any())).thenReturn(mockedFuture);
         doThrow(InterruptedException.class).when(mockedFuture).get();
 
-        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), ""));
+        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), TEST_TOPIC));
         assertTrue(Thread.currentThread().isInterrupted());
+        verify(producer, times(1)).sendAndReturnFuture(kafkaMessageCaptor.capture());
+        Message kafkaMessage = kafkaMessageCaptor.getValue();
+        assertEquals(kafkaMessage.getTopic(), TEST_TOPIC);
     }
 
     @Test
@@ -83,7 +96,10 @@ class MessageProducerImplUnitTest {
         when(producer.sendAndReturnFuture(any())).thenReturn(mockedFuture);
         doThrow(ExecutionException.class).when(mockedFuture).get();
 
-        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), ""));
+        assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), TEST_TOPIC));
+        verify(producer, times(1)).sendAndReturnFuture(kafkaMessageCaptor.capture());
+        Message kafkaMessage = kafkaMessageCaptor.getValue();
+        assertEquals(kafkaMessage.getTopic(), TEST_TOPIC);
     }
 
     private ChipsRestInterfacesSend getDummyChipsRestInterfacesSend() {
