@@ -10,6 +10,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MessageConsumer;
 
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -37,8 +39,8 @@ class ApplicationTest {
         ReflectionTestUtils.setField(application, "runAppInErrorMode", true);
         application.run();
 
-        verify(taskScheduler, times(0)).scheduleWithFixedDelay(incomingMessageConsumer, 1L);
-        verify(taskScheduler, times(0)).scheduleWithFixedDelay(retryMessageConsumer, 3000L);
+        verify(taskScheduler, times(0)).scheduleWithFixedDelay(eq(incomingMessageConsumer), anyLong());
+        verify(taskScheduler, times(0)).scheduleWithFixedDelay(eq(retryMessageConsumer), anyLong());
 
         //ToDo Ensure error consumer is called
     }
