@@ -21,18 +21,18 @@ class ApplicationConfig {
         return builder.build();
     }
 
-    @Bean("incoming-message-consumer")
+    @Bean("main-message-consumer")
     @Lazy
-    MessageConsumer incomingMessageConsumer(ApplicationLogger logger,
+    MessageConsumer mainMessageConsumer(ApplicationLogger logger,
                                             MessageProcessorService messageProcessorService,
                                             DeserializerFactory deserializerFactory,
-                                            @Qualifier("incoming-consumer-group") CHKafkaConsumerGroup consumer) {
+                                            @Qualifier("main-consumer-group") CHKafkaConsumerGroup consumer) {
         return new MessageConsumerImpl(
                 logger,
                 messageProcessorService,
                 deserializerFactory,
                 consumer,
-                "incoming-message-consumer");
+                "main-message-consumer");
     }
 
     @Bean("retry-message-consumer")

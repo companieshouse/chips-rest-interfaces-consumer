@@ -26,7 +26,7 @@ class ApplicationTest {
     private ThreadPoolTaskScheduler taskScheduler;
 
     @Mock
-    private MessageConsumer incomingMessageConsumer;
+    private MessageConsumer mainMessageConsumer;
 
     @Mock
     private MessageConsumer retryMessageConsumer;
@@ -39,7 +39,7 @@ class ApplicationTest {
         ReflectionTestUtils.setField(application, "runAppInErrorMode", true);
         application.run();
 
-        verify(taskScheduler, times(0)).scheduleWithFixedDelay(eq(incomingMessageConsumer), anyLong());
+        verify(taskScheduler, times(0)).scheduleWithFixedDelay(eq(mainMessageConsumer), anyLong());
         verify(taskScheduler, times(0)).scheduleWithFixedDelay(eq(retryMessageConsumer), anyLong());
 
         //ToDo Ensure error consumer is called
@@ -51,7 +51,7 @@ class ApplicationTest {
         ReflectionTestUtils.setField(application, "retryThrottleSeconds", RETRY_THROTTLE_SECONDS);
         application.run();
 
-        verify(taskScheduler, times(1)).scheduleWithFixedDelay(incomingMessageConsumer,1L);
+        verify(taskScheduler, times(1)).scheduleWithFixedDelay(mainMessageConsumer,1L);
         verify(taskScheduler, times(1)).scheduleWithFixedDelay(retryMessageConsumer, RETRY_THROTTLE_SECONDS * 1000L);
 
         //ToDo Ensure error consumer is not called

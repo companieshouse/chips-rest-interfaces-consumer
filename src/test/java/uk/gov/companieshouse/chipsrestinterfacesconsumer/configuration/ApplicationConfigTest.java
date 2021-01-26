@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ApplicationConfigTest {
 
-    private static final String INCOMING_CONSUMER_ID = "incoming-message-consumer";
+    private static final String MAIN_CONSUMER_ID = "main-message-consumer";
     private static final String RETRY_CONSUMER_ID = "retry-message-consumer";
 
     @Mock
@@ -61,14 +61,14 @@ class ApplicationConfigTest {
     }
 
     @Test
-    void testIncomingMessageConsumer() {
-        MessageConsumer messageConsumer = applicationConfig.incomingMessageConsumer(
+    void testMainMessageConsumer() {
+        MessageConsumer messageConsumer = applicationConfig.mainMessageConsumer(
                 logger,
                 messageProcessorService,
                 deserializerFactory,
                 consumer);
 
-        assertEquals(INCOMING_CONSUMER_ID, ((MessageConsumerImpl) messageConsumer).getId());
+        assertEquals(MAIN_CONSUMER_ID, ((MessageConsumerImpl) messageConsumer).getId());
     }
 
     @Test
