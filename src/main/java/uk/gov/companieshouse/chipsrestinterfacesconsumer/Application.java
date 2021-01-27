@@ -43,12 +43,12 @@ public class Application implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (!runAppInErrorMode) {
-            logger.info("*****Application started in normal processing mode*****");
+            logger.info("***** Application started in normal processing mode *****");
             var retryThrottleMillis = retryThrottleSeconds * 1000L;
             taskScheduler.scheduleWithFixedDelay(mainMessageConsumer, 1L);
             taskScheduler.scheduleWithFixedDelay(retryMessageConsumer, retryThrottleMillis);
         } else {
-            logger.info("*****Application started in error processing mode*****");
+            logger.info("***** Application started in error processing mode *****");
 
             //ToDo Start error consumer
         }
