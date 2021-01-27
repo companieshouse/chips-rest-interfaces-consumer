@@ -9,6 +9,7 @@ import uk.gov.companieshouse.kafka.consumer.ConsumerConfig;
 import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
 import uk.gov.companieshouse.kafka.producer.Acks;
 import uk.gov.companieshouse.kafka.producer.ProducerConfig;
+import uk.gov.companieshouse.kafka.serialization.SerializerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -66,8 +67,8 @@ class KafkaConfigurationTest {
     }
 
     @Test
-    void getRetryMessageProducerConfigTest() {
-        ProducerConfig producerConfig = kafkaConfiguration.getRetryMessageProducerConfig();
+    void getMessageProducerConfigTest() {
+        ProducerConfig producerConfig = kafkaConfiguration.getMessageProducerConfig();
 
         assertNotNull(producerConfig.getBrokerAddresses());
         assertEquals(1, producerConfig.getBrokerAddresses().length);
@@ -81,5 +82,11 @@ class KafkaConfigurationTest {
     void getDeserializerFactory() {
         DeserializerFactory deserializerFactory = kafkaConfiguration.getDeserializerFactory();
         assertNotNull(deserializerFactory);
+    }
+
+    @Test
+    void getSerializerFactory() {
+        SerializerFactory serializerFactory = kafkaConfiguration.getSerializerFactory();
+        assertNotNull(serializerFactory);
     }
 }

@@ -10,6 +10,7 @@ import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
 import uk.gov.companieshouse.kafka.producer.Acks;
 import uk.gov.companieshouse.kafka.producer.CHKafkaProducer;
 import uk.gov.companieshouse.kafka.producer.ProducerConfig;
+import uk.gov.companieshouse.kafka.serialization.SerializerFactory;
 
 import java.util.Collections;
 
@@ -40,6 +41,11 @@ class KafkaConfiguration {
     @Bean
     DeserializerFactory getDeserializerFactory() {
         return new DeserializerFactory();
+    }
+
+    @Bean
+    SerializerFactory getSerializerFactory() {
+        return new SerializerFactory();
     }
 
     @Bean("main-consumer-group")
@@ -73,11 +79,11 @@ class KafkaConfiguration {
     }
 
     @Bean
-    CHKafkaProducer getRetryMessageProducer() {
-        return new CHKafkaProducer(getRetryMessageProducerConfig());
+    CHKafkaProducer getMessageProducer() {
+        return new CHKafkaProducer(getMessageProducerConfig());
     }
 
-    ProducerConfig getRetryMessageProducerConfig() {
+    ProducerConfig getMessageProducerConfig() {
         ProducerConfig config = new ProducerConfig();
         config.setBrokerAddresses(new String[]{brokerAddress});
         config.setRoundRobinPartitioner(true);
