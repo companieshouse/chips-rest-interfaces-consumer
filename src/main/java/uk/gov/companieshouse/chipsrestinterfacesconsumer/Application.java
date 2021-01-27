@@ -30,6 +30,11 @@ public class Application implements CommandLineRunner {
     @Qualifier("retry-message-consumer")
     private MessageConsumer retryMessageConsumer;
 
+    @Autowired
+    @Lazy
+    @Qualifier("error-message-consumer")
+    private MessageConsumer errorMessageConsumer;
+
     @Value("${RUN_APP_IN_ERROR_MODE:false}")
     private boolean runAppInErrorMode;
 
@@ -49,8 +54,7 @@ public class Application implements CommandLineRunner {
             taskScheduler.scheduleWithFixedDelay(retryMessageConsumer, retryThrottleMillis);
         } else {
             logger.info("***** Application started in error processing mode *****");
-
-            //ToDo Start error consumer
+            taskScheduler.scheduleWithFixedDelay(errorMessageConsumer, 1L);
         }
     }
 }

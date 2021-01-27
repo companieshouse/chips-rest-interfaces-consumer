@@ -31,6 +31,9 @@ class ApplicationTest {
     @Mock
     private MessageConsumer retryMessageConsumer;
 
+    @Mock
+    private MessageConsumer errorMessageConsumer;
+
     @InjectMocks
     private Application application;
 
@@ -41,8 +44,7 @@ class ApplicationTest {
 
         verify(taskScheduler, times(0)).scheduleWithFixedDelay(eq(mainMessageConsumer), anyLong());
         verify(taskScheduler, times(0)).scheduleWithFixedDelay(eq(retryMessageConsumer), anyLong());
-
-        //ToDo Ensure error consumer is called
+        verify(taskScheduler, times(1)).scheduleWithFixedDelay(errorMessageConsumer, 1L);
     }
 
     @Test
@@ -53,7 +55,6 @@ class ApplicationTest {
 
         verify(taskScheduler, times(1)).scheduleWithFixedDelay(mainMessageConsumer,1L);
         verify(taskScheduler, times(1)).scheduleWithFixedDelay(retryMessageConsumer, RETRY_THROTTLE_SECONDS * 1000L);
-
-        //ToDo Ensure error consumer is not called
+        verify(taskScheduler, times(0)).scheduleWithFixedDelay(eq(errorMessageConsumer), anyLong());
     }
 }
