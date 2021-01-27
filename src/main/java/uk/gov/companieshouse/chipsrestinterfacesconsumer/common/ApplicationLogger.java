@@ -1,10 +1,11 @@
 package uk.gov.companieshouse.chipsrestinterfacesconsumer.common;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.Application;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
+import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,50 +16,63 @@ import java.util.Map;
  */
 @Component
 public class ApplicationLogger {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Application.APPLICATION_NAME);
+
+    private Logger logger;
+
+    @Value("${RUN_APP_IN_ERROR_MODE:false}")
+    private boolean runAppInErrorMode;
+
+    @PostConstruct
+    void init() {
+        if (runAppInErrorMode) {
+            logger = LoggerFactory.getLogger("chips-rest-interfaces-error-consumer");
+        } else {
+            logger = LoggerFactory.getLogger("chips-rest-interfaces-consumer");
+        }
+    }
 
     public void debugContext(String context, String message) {
-        LOGGER.debugContext(context, message, null);
+        logger.debugContext(context, message, null);
     }
 
     public void debugContext(String context, String message, Map<String, Object> dataMap) {
-        LOGGER.debugContext(context, message, cloneMapData(dataMap));
+        logger.debugContext(context, message, cloneMapData(dataMap));
     }
 
     public void info(String message) {
-        LOGGER.info(message, null);
+        logger.info(message, null);
     }
 
     public void info(String message, Map<String, Object> map) {
-        LOGGER.info(message, cloneMapData(map));
+        logger.info(message, cloneMapData(map));
     }
 
     public void infoContext(String context, String message) {
-        LOGGER.infoContext(context, message, null);
+        logger.infoContext(context, message, null);
     }
 
     public void infoContext(String context, String message, Map<String, Object> dataMap) {
-        LOGGER.infoContext(context, message, cloneMapData(dataMap));
+        logger.infoContext(context, message, cloneMapData(dataMap));
     }
 
     public void errorContext(String context, Exception e) {
-        LOGGER.errorContext(context, e, null);
+        logger.errorContext(context, e, null);
     }
 
     public void errorContext(String context, String message, Exception e) {
-        LOGGER.errorContext(context, message, e, null);
+        logger.errorContext(context, message, e, null);
     }
 
     public void errorContext(String context, String message, Exception e, Map<String, Object> dataMap) {
-        LOGGER.errorContext(context, message, e, cloneMapData(dataMap));
+        logger.errorContext(context, message, e, cloneMapData(dataMap));
     }
 
     public void error(String message, Exception e) {
-        LOGGER.error(message, e);
+        logger.error(message, e);
     }
 
     public void error(String message, Exception e, Map<String, Object> dataMap) {
-        LOGGER.error(message, e, cloneMapData(dataMap));
+        logger.error(message, e, cloneMapData(dataMap));
     }
 
     /**

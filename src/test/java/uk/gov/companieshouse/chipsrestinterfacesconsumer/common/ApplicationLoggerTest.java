@@ -23,6 +23,7 @@ class ApplicationLoggerTest {
     @BeforeEach
     void setup() {
         applicationLogger = new ApplicationLogger();
+        applicationLogger.init();
         logMap = new HashMap<>();
         logMap.put(LOG_MAP_KEY, LOG_MAP_VALUE);
     }
