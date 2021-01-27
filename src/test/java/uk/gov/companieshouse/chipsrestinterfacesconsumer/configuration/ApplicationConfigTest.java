@@ -24,6 +24,7 @@ class ApplicationConfigTest {
 
     private static final String MAIN_CONSUMER_ID = "main-message-consumer";
     private static final String RETRY_CONSUMER_ID = "retry-message-consumer";
+    private static final String ERROR_CONSUMER_ID = "error-message-consumer";
 
     @Mock
     private ApplicationLogger logger;
@@ -80,5 +81,16 @@ class ApplicationConfigTest {
                 consumer);
 
         assertEquals(RETRY_CONSUMER_ID, ((MessageConsumerImpl) messageConsumer).getId());
+    }
+
+    @Test
+    void testErrorMessageConsumer() {
+        MessageConsumer messageConsumer = applicationConfig.errorMessageConsumer(
+                logger,
+                messageProcessorService,
+                deserializerFactory,
+                consumer);
+
+        assertEquals(ERROR_CONSUMER_ID, ((MessageConsumerImpl) messageConsumer).getId());
     }
 }

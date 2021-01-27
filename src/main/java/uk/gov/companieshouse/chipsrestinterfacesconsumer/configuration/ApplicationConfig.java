@@ -51,15 +51,15 @@ class ApplicationConfig {
 
     @Bean("error-message-consumer")
     @Lazy
-    MessageConsumer errorConsumer(ApplicationLogger logger,
+    MessageConsumer errorMessageConsumer(ApplicationLogger logger,
                                         MessageProcessorService messageProcessorService,
                                         DeserializerFactory deserializerFactory,
-                                        @Qualifier("error-consumer") CHKafkaConsumerGroup consumer) {
+                                        @Qualifier("error-message-consumer") CHKafkaConsumerGroup consumer) {
         return new MessageConsumerImpl(
                 logger,
                 messageProcessorService,
                 deserializerFactory,
                 consumer,
-                "error-consumer");
+                "error-message-consumer");
     }
 }
