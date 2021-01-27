@@ -72,9 +72,11 @@ class MessageProducerImplUnitTest {
             throws ServiceException, ExecutionException, InterruptedException {
         when(producer.sendAndReturnFuture(any())).thenReturn(mockedFuture);
         messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), TEST_TOPIC);
+
         verify(mockedFuture, times(1)).get();
         verify(producer, times(1)).sendAndReturnFuture(kafkaMessageCaptor.capture());
         Message kafkaMessage = kafkaMessageCaptor.getValue();
+
         assertEquals(TEST_TOPIC, kafkaMessage.getTopic());
     }
 
@@ -84,6 +86,7 @@ class MessageProducerImplUnitTest {
         SerializationException serializationException = new SerializationException("error", new Exception());
         ChipsRestInterfacesSend chipsRestInterfacesSend = getDummyChipsRestInterfacesSend();
         when(avroSerializer.toBinary(chipsRestInterfacesSend)).thenThrow(serializationException);
+
         assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(chipsRestInterfacesSend, TEST_TOPIC));
         verify(producer, times(0)).sendAndReturnFuture(any());
     }
@@ -93,6 +96,7 @@ class MessageProducerImplUnitTest {
             throws ExecutionException, InterruptedException {
         when(producer.sendAndReturnFuture(any())).thenReturn(mockedFuture);
         doThrow(InterruptedException.class).when(mockedFuture).get();
+
         assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), TEST_TOPIC));
         assertTrue(Thread.currentThread().isInterrupted());
         verify(producer, times(1)).sendAndReturnFuture(kafkaMessageCaptor.capture());
@@ -105,6 +109,7 @@ class MessageProducerImplUnitTest {
             throws ExecutionException, InterruptedException {
         when(producer.sendAndReturnFuture(any())).thenReturn(mockedFuture);
         doThrow(ExecutionException.class).when(mockedFuture).get();
+
         assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), TEST_TOPIC));
         verify(producer, times(1)).sendAndReturnFuture(kafkaMessageCaptor.capture());
         Message kafkaMessage = kafkaMessageCaptor.getValue();
