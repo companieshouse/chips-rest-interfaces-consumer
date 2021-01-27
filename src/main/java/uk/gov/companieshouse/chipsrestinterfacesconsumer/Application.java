@@ -14,8 +14,6 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MessageConsume
 @SpringBootApplication
 public class Application implements CommandLineRunner {
 
-    public static final String APPLICATION_NAME = "chips-rest-interfaces-consumer";
-
     @Autowired
     private ApplicationLogger logger;
 
@@ -45,12 +43,12 @@ public class Application implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (!runAppInErrorMode) {
-            logger.info(String.format("%s started in normal processing mode", APPLICATION_NAME));
+            logger.info("Application started in normal processing mode");
             var retryThrottleMillis = retryThrottleSeconds * 1000L;
             taskScheduler.scheduleWithFixedDelay(mainMessageConsumer, 1L);
             taskScheduler.scheduleWithFixedDelay(retryMessageConsumer, retryThrottleMillis);
         } else {
-            logger.info(String.format("%s started in error processing mode", APPLICATION_NAME));
+            logger.info("Application started in error processing mode");
 
             //ToDo Start error consumer
         }
