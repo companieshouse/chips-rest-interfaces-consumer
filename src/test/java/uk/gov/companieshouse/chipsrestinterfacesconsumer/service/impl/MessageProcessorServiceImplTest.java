@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.client.ChipsRestClient;
@@ -106,6 +107,29 @@ class MessageProcessorServiceImplTest {
 
         verify(chipsRestClient, times(1)).sendToChips(eq(chipsRestInterfacesSend));
         verify(logger, times(1)).error(eq(String.format(CHIPS_ERROR_MESSAGE, MESSAGE_ID)), eq(httpClientErrorException), mapArgumentCaptor.capture());
+        Map<String, Object> logMap = mapArgumentCaptor.getValue();
+        verifyLogData(logMap);
+        verifyLogHttpCode(logMap);
+
+        verify(logger, times(1)).info(eq("Attempt 0 failed for message id " + MESSAGE_ID), mapArgumentCaptor.capture());
+        logMap = mapArgumentCaptor.getValue();
+        verifyLogData(logMap);
+        verifyLogHttpCode(logMap);
+
+        assertEquals(1, chipsRestInterfacesSend.getAttempt());
+        verify(messageProducer, times(1)).writeToTopic(chipsRestInterfacesSend, RETRY_TOPIC);
+        verify(messageProducer, times(0)).writeToTopic(any(), eq(ERROR_TOPIC));
+    }
+
+    @Test
+    void testRetryIsCalledForHttpServerErrorException() throws ServiceException {
+        HttpServerErrorException httpServerErrorException = new HttpServerErrorException(HttpStatus.BAD_GATEWAY);
+        doThrow(httpServerErrorException).when(chipsRestClient).sendToChips(chipsRestInterfacesSend);
+
+        messageProcessorService.processMessage(chipsRestInterfacesSend);
+
+        verify(chipsRestClient, times(1)).sendToChips(eq(chipsRestInterfacesSend));
+        verify(logger, times(1)).error(eq(String.format(CHIPS_ERROR_MESSAGE, MESSAGE_ID)), eq(httpServerErrorException), mapArgumentCaptor.capture());
         Map<String, Object> logMap = mapArgumentCaptor.getValue();
         verifyLogData(logMap);
         verifyLogHttpCode(logMap);

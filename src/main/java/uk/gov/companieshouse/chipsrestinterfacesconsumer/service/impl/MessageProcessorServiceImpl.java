@@ -3,7 +3,7 @@ package uk.gov.companieshouse.chipsrestinterfacesconsumer.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.client.ChipsRestClient;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
@@ -43,9 +43,9 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
         logMap.put("Message", message.getData());
         try {
             chipsRestClient.sendToChips(message);
-        } catch (HttpClientErrorException hcee) {
-            logMap.put("HTTP Status Code", hcee.getStatusCode());
-            handleFailedMessage(message, hcee, logMap);
+        } catch (HttpStatusCodeException hsce) {
+            logMap.put("HTTP Status Code", hsce.getStatusCode());
+            handleFailedMessage(message, hsce, logMap);
         } catch (Exception e) {
             handleFailedMessage(message, e, logMap);
         }
