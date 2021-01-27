@@ -3,7 +3,7 @@ package uk.gov.companieshouse.chipsrestinterfacesconsumer.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.client.ChipsRestClient;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
@@ -39,30 +39,30 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
 
     @Override
     public void processMessage(ChipsRestInterfacesSend message) throws ServiceException {
-        Map<String, Object> logMap = new HashMap<>();
-        logMap.put("Message", message.getData());
+        var messageId = message.getMessageId();
         try {
             chipsRestClient.sendToChips(message);
-        } catch (HttpClientErrorException hcee) {
-            logMap.put("HTTP Status Code", hcee.getStatusCode());
-            handleFailedMessage(message, hcee, logMap);
+        } catch (HttpStatusCodeException hsce) {
+            Map<String, Object> logMap = new HashMap<>();
+            logMap.put("HTTP Status Code", hsce.getStatusCode());
+            logger.error(String.format(SEND_FAILURE_MESSAGE, messageId), hsce, logMap);
+            handleFailedMessage(message, hsce);
         } catch (Exception e) {
-            handleFailedMessage(message, e, logMap);
+            logger.error(String.format(SEND_FAILURE_MESSAGE, messageId), e);
+            handleFailedMessage(message, e);
         }
     }
 
-    private void handleFailedMessage(ChipsRestInterfacesSend message, Exception e, Map<String, Object> logMap) throws ServiceException {
+    private void handleFailedMessage(ChipsRestInterfacesSend message, Exception e) throws ServiceException {
         var messageId = message.getMessageId();
-        logger.error(String.format(SEND_FAILURE_MESSAGE, messageId), e, logMap);
-
         var attempts = message.getAttempt();
-        logger.info(String.format("Attempt %s failed for message id %s", attempts, messageId), logMap);
+        logger.info(String.format("Attempt %s failed for message id %s", attempts, messageId));
 
         if (attempts < maxRetryAttempts) {
             message.setAttempt(attempts + 1);
             messageProducer.writeToTopic(message, retryTopicName);
         } else {
-            logger.error(String.format("Maximum retry attempts %s reached for message id %s", maxRetryAttempts, messageId), e, logMap);
+            logger.error(String.format("Maximum retry attempts %s reached for message id %s", maxRetryAttempts, messageId), e);
             messageProducer.writeToTopic(message, errorTopicName);
         }
     }
