@@ -48,4 +48,18 @@ class ApplicationConfig {
                 consumer,
                 "retry-message-consumer");
     }
+
+    @Bean("error-message-consumer")
+    @Lazy
+    MessageConsumer errorConsumer(ApplicationLogger logger,
+                                        MessageProcessorService messageProcessorService,
+                                        DeserializerFactory deserializerFactory,
+                                        @Qualifier("error-consumer") CHKafkaConsumerGroup consumer) {
+        return new MessageConsumerImpl(
+                logger,
+                messageProcessorService,
+                deserializerFactory,
+                consumer,
+                "error-consumer");
+    }
 }
