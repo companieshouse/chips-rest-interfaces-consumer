@@ -43,13 +43,11 @@ public class MessageProducerImpl implements MessageProducer {
             kafkaMessage.setTimestamp(Long.valueOf(chipsMessage.getCreatedAt()));
             Future<RecordMetadata> future = producer.sendAndReturnFuture(kafkaMessage);
             future.get();
-        } catch (ExecutionException e) {
+        } catch (SerializationException | ExecutionException e) {
             throw new ServiceException(e.getMessage(), e);
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
             throw new ServiceException("Thread Interrupted when future was sent and returned", ie);
-        } catch (SerializationException e) {
-            throw new ServiceException(e.getMessage(), e);
         }
     }
 
