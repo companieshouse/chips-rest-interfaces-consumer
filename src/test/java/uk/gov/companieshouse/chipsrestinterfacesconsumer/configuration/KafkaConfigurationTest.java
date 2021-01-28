@@ -25,6 +25,7 @@ class KafkaConfigurationTest {
     private static final String RETRY_TOPIC_NAME_VALUE = "retry-topic";
     private static final int POLL_TIMEOUT_VALUE = 100;
     private static final int RETRIES = 10;
+    private static final int THROTTLE_DELAY = 10;
 
     private KafkaConfiguration kafkaConfiguration;
 
@@ -38,6 +39,7 @@ class KafkaConfigurationTest {
         ReflectionTestUtils.setField(kafkaConfiguration, "retryTopicName", RETRY_TOPIC_NAME_VALUE);
         ReflectionTestUtils.setField(kafkaConfiguration, "pollTimeout", POLL_TIMEOUT_VALUE);
         ReflectionTestUtils.setField(kafkaConfiguration, "retries", RETRIES);
+        ReflectionTestUtils.setField(kafkaConfiguration, "retryThrottleSeconds", THROTTLE_DELAY);
     }
 
     @Test
@@ -63,7 +65,7 @@ class KafkaConfigurationTest {
         assertEquals(BROKER_ADDRESS_VALUE, consumerConfig.getBrokerAddresses()[0]);
         assertEquals(1, consumerConfig.getTopics().size());
         assertEquals(RETRY_TOPIC_NAME_VALUE, consumerConfig.getTopics().get(0));
-        assertEquals(100, consumerConfig.getPollTimeout());
+        assertEquals(20000, consumerConfig.getPollTimeout());
     }
 
     @Test

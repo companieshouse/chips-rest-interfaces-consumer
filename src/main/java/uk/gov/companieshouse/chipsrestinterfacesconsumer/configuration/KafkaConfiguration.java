@@ -38,6 +38,9 @@ class KafkaConfiguration {
     @Value("${kafka.producer.retries}")
     private int retries;
 
+    @Value("${RETRY_THROTTLE_RATE_SECONDS}")
+    private long retryThrottleSeconds;
+
     @Bean
     DeserializerFactory getDeserializerFactory() {
         return new DeserializerFactory();
@@ -73,7 +76,7 @@ class KafkaConfiguration {
         ConsumerConfig config = new ConsumerConfig();
         config.setBrokerAddresses(new String[]{brokerAddress});
         config.setTopics(Collections.singletonList(retryTopicName));
-        config.setPollTimeout(pollTimeout);
+        config.setPollTimeout(retryThrottleSeconds * 2 * 1000);
         config.setGroupName(retryConsumerGroupName);
         return config;
     }
