@@ -45,8 +45,7 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
         try {
             chipsRestClient.sendToChips(message);
         } catch (HttpStatusCodeException hsce) {
-            HttpStatus status = hsce.getStatusCode();
-            logMap.put("HTTP Status Code", status != null ? status.toString() : "null");
+            logMap.put("HTTP Status Code", hsce.getStatusCode().toString());
             handleFailedMessage(message, hsce, logMap);
         } catch (Exception e) {
             handleFailedMessage(message, e, logMap);
