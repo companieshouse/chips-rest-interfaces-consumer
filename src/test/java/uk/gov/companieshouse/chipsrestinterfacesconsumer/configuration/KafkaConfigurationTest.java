@@ -65,7 +65,7 @@ class KafkaConfigurationTest {
         assertEquals(BROKER_ADDRESS_VALUE, consumerConfig.getBrokerAddresses()[0]);
         assertEquals(1, consumerConfig.getTopics().size());
         assertEquals(RETRY_TOPIC_NAME_VALUE, consumerConfig.getTopics().get(0));
-        assertEquals(20000, consumerConfig.getPollTimeout());
+        assertEquals((THROTTLE_DELAY * 1000) + POLL_TIMEOUT_VALUE, consumerConfig.getPollTimeout());
     }
 
     @Test

@@ -76,7 +76,7 @@ class KafkaConfiguration {
         ConsumerConfig config = new ConsumerConfig();
         config.setBrokerAddresses(new String[]{brokerAddress});
         config.setTopics(Collections.singletonList(retryTopicName));
-        config.setPollTimeout(retryThrottleSeconds * 2 * 1000);
+        config.setPollTimeout((retryThrottleSeconds * 1000) + pollTimeout);
         config.setGroupName(retryConsumerGroupName);
         return config;
     }
