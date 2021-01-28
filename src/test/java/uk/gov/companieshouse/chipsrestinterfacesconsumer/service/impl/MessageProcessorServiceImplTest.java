@@ -173,6 +173,6 @@ class MessageProcessorServiceImplTest {
     }
 
     private void verifyLogHttpCode(Map<String, Object> logMap) {
-        assertEquals(HttpStatus.BAD_GATEWAY, logMap.get(LOG_KEY_HTTP_CODE));
+        assertEquals(HttpStatus.BAD_GATEWAY.toString(), logMap.get(LOG_KEY_HTTP_CODE));
     }
 }
