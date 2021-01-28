@@ -69,7 +69,9 @@ class MessageProducerImplUnitTest {
 
     @Test
     void testSuccessfulWriteToTopic()
-            throws ServiceException, ExecutionException, InterruptedException {
+            throws ServiceException, ExecutionException, InterruptedException, SerializationException {
+        byte[] serializedBytes = new byte[2];
+        when(avroSerializer.toBinary(any())).thenReturn(serializedBytes);
         when(producer.sendAndReturnFuture(any())).thenReturn(mockedFuture);
         messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), TEST_TOPIC);
 
@@ -78,6 +80,7 @@ class MessageProducerImplUnitTest {
         Message kafkaMessage = kafkaMessageCaptor.getValue();
 
         assertEquals(TEST_TOPIC, kafkaMessage.getTopic());
+        assertEquals(serializedBytes, kafkaMessage.getValue());
     }
 
     @Test
