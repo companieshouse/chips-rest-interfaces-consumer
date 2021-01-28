@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.client.ChipsRestClient;
@@ -40,6 +41,9 @@ class MessageProcessorServiceImplTest {
     private static final String ERROR_TOPIC = "chips-rest-interfaces-send-error";
 
     private ChipsRestInterfacesSend chipsRestInterfacesSend;
+
+    @Mock
+    private HttpStatusCodeException httpStatusCodeException;
 
     @Mock
     private ChipsRestClient chipsRestClient;
@@ -168,11 +172,24 @@ class MessageProcessorServiceImplTest {
         verify(messageProducer, times(1)).writeToTopic(chipsRestInterfacesSend, ERROR_TOPIC);
     }
 
+    @Test
+    void testNullHttpStatusCode() throws ServiceException {
+        doThrow(httpStatusCodeException).when(chipsRestClient).sendToChips(chipsRestInterfacesSend);
+
+        messageProcessorService.processMessage(chipsRestInterfacesSend);
+
+        verify(chipsRestClient, times(1)).sendToChips(eq(chipsRestInterfacesSend));
+        verify(logger, times(1)).error(eq(String.format(CHIPS_ERROR_MESSAGE, MESSAGE_ID)), eq(httpStatusCodeException), mapArgumentCaptor.capture());
+        Map<String, Object> logMap = mapArgumentCaptor.getValue();
+        verifyLogData(logMap);
+        assertEquals("null", logMap.get(LOG_KEY_HTTP_CODE));
+    }
+
     private void verifyLogData(Map<String, Object> logMap) {
         assertEquals(DUMMY_DATA, logMap.get(LOG_KEY_MESSAGE));
     }
 
     private void verifyLogHttpCode(Map<String, Object> logMap) {
-        assertEquals(HttpStatus.BAD_GATEWAY, logMap.get(LOG_KEY_HTTP_CODE));
+        assertEquals(HttpStatus.BAD_GATEWAY.toString(), logMap.get(LOG_KEY_HTTP_CODE));
     }
 }
