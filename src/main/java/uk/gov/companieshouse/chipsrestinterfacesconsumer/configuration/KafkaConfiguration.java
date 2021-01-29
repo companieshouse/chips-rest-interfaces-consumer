@@ -23,6 +23,9 @@ class KafkaConfiguration {
     @Value("${kafka.retry.consumer.group.name}")
     private String retryConsumerGroupName;
 
+    @Value("${kafka.error.consumer.group.name}")
+    private String errorConsumerGroupName;
+
     @Value("${kafka.broker.address}")
     private String brokerAddress;
 
@@ -31,6 +34,9 @@ class KafkaConfiguration {
 
     @Value("${kafka.retry.topic}")
     private String retryTopicName;
+
+    @Value("${kafka.error.topic}")
+    private String errorTopicName;
 
     @Value("${kafka.consumer.pollTimeout:100}")
     private long pollTimeout;
@@ -75,6 +81,21 @@ class KafkaConfiguration {
         config.setTopics(Collections.singletonList(retryTopicName));
         config.setPollTimeout(pollTimeout);
         config.setGroupName(retryConsumerGroupName);
+        return config;
+    }
+
+    @Bean("error-consumer-group")
+    @Lazy
+    CHKafkaConsumerGroup getErrorConsumer() {
+        return new CHKafkaConsumerGroup(getErrorConsumerConfig());
+    }
+
+    ConsumerConfig getErrorConsumerConfig() {
+        ConsumerConfig config = new ConsumerConfig();
+        config.setBrokerAddresses(new String[]{brokerAddress});
+        config.setTopics(Collections.singletonList(errorTopicName));
+        config.setPollTimeout(pollTimeout);
+        config.setGroupName(errorConsumerGroupName);
         return config;
     }
 

@@ -54,7 +54,7 @@ class ApplicationConfig {
     MessageConsumer errorMessageConsumer(ApplicationLogger logger,
                                         MessageProcessorService messageProcessorService,
                                         DeserializerFactory deserializerFactory,
-                                        @Qualifier("error-message-consumer") CHKafkaConsumerGroup consumer) {
+                                        @Qualifier("error-consumer-group") CHKafkaConsumerGroup consumer) {
         return new MessageConsumerImpl(
                 logger,
                 messageProcessorService,
