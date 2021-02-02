@@ -29,6 +29,9 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
     @Value("${kafka.error.topic}")
     private String errorTopicName;
 
+    @Value("${RUN_APP_IN_ERROR_MODE:false}")
+    private boolean runAppInErrorMode;
+
     @Autowired
     private ChipsRestClient chipsRestClient;
 
@@ -42,24 +45,24 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
     private ConsumerConfig consumerConfig;
 
     @Override
-    public void processMessage(ChipsRestInterfacesSend message, boolean isErrorAttempt) throws ServiceException {
+    public void processMessage(ChipsRestInterfacesSend message) throws ServiceException {
         Map<String, Object> logMap = new HashMap<>();
         logMap.put("Message", message.getData());
         try {
             chipsRestClient.sendToChips(message);
         } catch (HttpStatusCodeException hsce) {
             logMap.put("HTTP Status Code", hsce.getStatusCode().toString());
-            handleFailedMessage(message, hsce, logMap, isErrorAttempt);
+            handleFailedMessage(message, hsce, logMap);
         } catch (Exception e) {
-            handleFailedMessage(message, e, logMap, isErrorAttempt);
+            handleFailedMessage(message, e, logMap);
         }
     }
 
-    private void handleFailedMessage(ChipsRestInterfacesSend message, Exception e, Map<String, Object> logMap, boolean isErrorAttempt) throws ServiceException {
+    private void handleFailedMessage(ChipsRestInterfacesSend message, Exception e, Map<String, Object> logMap) throws ServiceException {
         var messageId = message.getMessageId();
         logger.error(String.format(SEND_FAILURE_MESSAGE, messageId), e, logMap);
 
-        if (isErrorAttempt) {
+        if (runAppInErrorMode) {
             message.setAttempt(1);
             messageProducer.writeToTopic(message, consumerConfig.retryTopic());
             return;

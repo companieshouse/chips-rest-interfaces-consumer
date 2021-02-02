@@ -39,7 +39,6 @@ class MessageConsumerImplTest {
     private final static String LOG_MESSAGE_ID_KEY = "Deserialised message id";
     private final static String MESSAGE_CONSUMER_ID = "consumer id";
     private final static String ERROR_MESSAGE = MESSAGE_CONSUMER_ID + " - Failed to read message from queue";
-    private final static boolean IS_ERROR_CONSUMER = false;
 
     @Mock
     private ApplicationLogger logger;
@@ -68,8 +67,7 @@ class MessageConsumerImplTest {
                 messageProcessorService,
                 deserializerFactory,
                 consumer,
-                MESSAGE_CONSUMER_ID,
-                IS_ERROR_CONSUMER
+                MESSAGE_CONSUMER_ID
         );
     }
 
@@ -92,7 +90,7 @@ class MessageConsumerImplTest {
 
         messageConsumer.readAndProcess();
 
-        verify(messageProcessorService, times(0)).processMessage(any(), anyBoolean());
+        verify(messageProcessorService, times(0)).processMessage(any());
     }
 
     @Test
@@ -113,7 +111,7 @@ class MessageConsumerImplTest {
 
         messageConsumer.readAndProcess();
 
-        verify(messageProcessorService, times(messages.size())).processMessage(deserializedMessage, false);
+        verify(messageProcessorService, times(messages.size())).processMessage(deserializedMessage);
         verify(consumer, times(messages.size())).commit(message);
 
         verify(logger, times(1)).info(

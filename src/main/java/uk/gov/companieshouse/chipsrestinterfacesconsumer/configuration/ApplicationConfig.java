@@ -32,8 +32,7 @@ class ApplicationConfig {
                 messageProcessorService,
                 deserializerFactory,
                 consumer,
-                "main-message-consumer",
-                false);
+                "main-message-consumer");
     }
 
     @Bean("retry-message-consumer")
@@ -47,8 +46,7 @@ class ApplicationConfig {
                 messageProcessorService,
                 deserializerFactory,
                 consumer,
-                "retry-message-consumer",
-                false);
+                "retry-message-consumer");
     }
 
     @Bean("error-message-consumer")
@@ -62,7 +60,6 @@ class ApplicationConfig {
                 messageProcessorService,
                 deserializerFactory,
                 consumer,
-                "error-message-consumer",
-                true);
+                "error-message-consumer");
     }
 }

@@ -66,6 +66,7 @@ class MessageProcessorServiceImplTest {
         ReflectionTestUtils.setField(messageProcessorService, "maxRetryAttempts", MAX_RETRIES);
         ReflectionTestUtils.setField(messageProcessorService, "retryTopicName", RETRY_TOPIC);
         ReflectionTestUtils.setField(messageProcessorService, "errorTopicName", ERROR_TOPIC);
+        ReflectionTestUtils.setField(messageProcessorService, "runAppInErrorMode", false);
 
         chipsRestInterfacesSend = new ChipsRestInterfacesSend();
         chipsRestInterfacesSend.setData(DUMMY_DATA);
@@ -77,7 +78,7 @@ class MessageProcessorServiceImplTest {
     void processMessageTest() throws ServiceException {
         ChipsRestInterfacesSend chipsRestInterfacesSend = new ChipsRestInterfacesSend();
 
-        messageProcessorService.processMessage(chipsRestInterfacesSend, false);
+        messageProcessorService.processMessage(chipsRestInterfacesSend);
 
         verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend);
         verify(messageProducer, times(0)).writeToTopic(any(), eq(RETRY_TOPIC));
@@ -86,12 +87,13 @@ class MessageProcessorServiceImplTest {
 
     @Test
     void processErrorMessageTest() throws ServiceException {
+        ReflectionTestUtils.setField(messageProcessorService, "runAppInErrorMode", true);
         ChipsRestInterfacesSend chipsRestInterfacesSend = new ChipsRestInterfacesSend();
         RuntimeException runtimeException = new RuntimeException("runtimeException");
         doThrow(runtimeException).when(chipsRestClient).sendToChips(chipsRestInterfacesSend);
         when(consumerConfig.retryTopic()).thenReturn(RETRY_TOPIC);
 
-        messageProcessorService.processMessage(chipsRestInterfacesSend, true);
+        messageProcessorService.processMessage(chipsRestInterfacesSend);
 
         verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend);
         verify(messageProducer, times(1)).writeToTopic(any(), eq(RETRY_TOPIC));
@@ -104,7 +106,7 @@ class MessageProcessorServiceImplTest {
         doThrow(runtimeException).when(chipsRestClient).sendToChips(chipsRestInterfacesSend);
         when(consumerConfig.retryTopic()).thenReturn(RETRY_TOPIC);
 
-        messageProcessorService.processMessage(chipsRestInterfacesSend, false);
+        messageProcessorService.processMessage(chipsRestInterfacesSend);
 
         verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend);
         verify(logger, times(1)).error(eq(String.format(CHIPS_ERROR_MESSAGE, MESSAGE_ID)), eq(runtimeException), mapArgumentCaptor.capture());
@@ -124,7 +126,7 @@ class MessageProcessorServiceImplTest {
         doThrow(httpClientErrorException).when(chipsRestClient).sendToChips(chipsRestInterfacesSend);
         when(consumerConfig.retryTopic()).thenReturn(RETRY_TOPIC);
 
-        messageProcessorService.processMessage(chipsRestInterfacesSend, false);
+        messageProcessorService.processMessage(chipsRestInterfacesSend);
 
         verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend);
         verify(logger, times(1)).error(eq(String.format(CHIPS_ERROR_MESSAGE, MESSAGE_ID)), eq(httpClientErrorException), mapArgumentCaptor.capture());
@@ -148,7 +150,7 @@ class MessageProcessorServiceImplTest {
         doThrow(httpServerErrorException).when(chipsRestClient).sendToChips(chipsRestInterfacesSend);
         when(consumerConfig.retryTopic()).thenReturn(RETRY_TOPIC);
 
-        messageProcessorService.processMessage(chipsRestInterfacesSend, false);
+        messageProcessorService.processMessage(chipsRestInterfacesSend);
 
         verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend);
         verify(logger, times(1)).error(eq(String.format(CHIPS_ERROR_MESSAGE, MESSAGE_ID)), eq(httpServerErrorException), mapArgumentCaptor.capture());
@@ -173,7 +175,7 @@ class MessageProcessorServiceImplTest {
         doThrow(restClientException).when(chipsRestClient).sendToChips(chipsRestInterfacesSend);
         when(consumerConfig.errorTopic()).thenReturn(ERROR_TOPIC);
 
-        messageProcessorService.processMessage(chipsRestInterfacesSend, false);
+        messageProcessorService.processMessage(chipsRestInterfacesSend);
 
         verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend);
         verify(messageProducer, times(0)).writeToTopic(chipsRestInterfacesSend, RETRY_TOPIC);

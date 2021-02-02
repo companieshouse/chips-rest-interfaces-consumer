@@ -26,20 +26,16 @@ public class MessageConsumerImpl implements MessageConsumer {
 
     private final String id;
 
-    private final boolean isErrorConsumer;
-
     public MessageConsumerImpl(ApplicationLogger logger,
                                MessageProcessorService messageProcessorService,
                                DeserializerFactory deserializerFactory,
                                CHKafkaResilientConsumerGroup consumer,
-                               String id,
-                               boolean isErrorConsumer) {
+                               String id) {
         this.logger = logger;
         this.messageProcessorService = messageProcessorService;
         this.deserializerFactory = deserializerFactory;
         this.consumer = consumer;
         this.id = id;
-        this.isErrorConsumer = isErrorConsumer;
     }
 
     @PostConstruct
@@ -73,7 +69,7 @@ public class MessageConsumerImpl implements MessageConsumer {
                 logMap.put("Message Consumer ID", id);
                 logger.info(String.format("%s - Message deserialised successfully", id), logMap);
 
-                messageProcessorService.processMessage(deserializedMsg, isErrorConsumer);
+                messageProcessorService.processMessage(deserializedMsg);
 
                 logger.info(String.format("%s - Message offset %s processed, committing offset", id, msg.getOffset()));
 
