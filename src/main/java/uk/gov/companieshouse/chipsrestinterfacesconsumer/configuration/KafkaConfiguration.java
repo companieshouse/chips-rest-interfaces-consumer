@@ -18,7 +18,7 @@ import java.util.Collections;
 @Configuration
 class KafkaConfiguration {
 
-    public static final String APPLICATION_NAME = "CRIC";
+    public static final String APPLICATION_NAME = "cric";
 
     @Value("${kafka.main.consumer.group.name}")
     private String mainConsumerGroupName;
