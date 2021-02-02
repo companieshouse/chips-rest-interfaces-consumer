@@ -10,7 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
-import uk.gov.companieshouse.kafka.consumer.CHKafkaConsumerGroup;
+import uk.gov.companieshouse.kafka.consumer.resilience.CHKafkaResilientConsumerGroup;
 import uk.gov.companieshouse.kafka.deserialization.AvroDeserializer;
 import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
 import uk.gov.companieshouse.kafka.exceptions.DeserializationException;
@@ -24,6 +24,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -38,6 +39,7 @@ class MessageConsumerImplTest {
     private final static String LOG_MESSAGE_ID_KEY = "Deserialised message id";
     private final static String MESSAGE_CONSUMER_ID = "consumer id";
     private final static String ERROR_MESSAGE = MESSAGE_CONSUMER_ID + " - Failed to read message from queue";
+    private final static boolean IS_ERROR_CONSUMER = false;
 
     @Mock
     private ApplicationLogger logger;
@@ -49,7 +51,7 @@ class MessageConsumerImplTest {
     private AvroDeserializer<ChipsRestInterfacesSend> avroDeserializer;
 
     @Mock
-    private CHKafkaConsumerGroup consumer;
+    private CHKafkaResilientConsumerGroup consumer;
 
     @Mock
     private MessageProcessorService messageProcessorService;
@@ -66,7 +68,8 @@ class MessageConsumerImplTest {
                 messageProcessorService,
                 deserializerFactory,
                 consumer,
-                MESSAGE_CONSUMER_ID
+                MESSAGE_CONSUMER_ID,
+                IS_ERROR_CONSUMER
         );
     }
 
@@ -89,7 +92,7 @@ class MessageConsumerImplTest {
 
         messageConsumer.readAndProcess();
 
-        verify(messageProcessorService, times(0)).processMessage(any());
+        verify(messageProcessorService, times(0)).processMessage(any(), anyBoolean());
     }
 
     @Test
@@ -110,7 +113,7 @@ class MessageConsumerImplTest {
 
         messageConsumer.readAndProcess();
 
-        verify(messageProcessorService, times(messages.size())).processMessage(deserializedMessage);
+        verify(messageProcessorService, times(messages.size())).processMessage(deserializedMessage, false);
         verify(consumer, times(messages.size())).commit(message);
 
         verify(logger, times(1)).info(

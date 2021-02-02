@@ -4,8 +4,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import uk.gov.companieshouse.kafka.consumer.CHKafkaConsumerGroup;
 import uk.gov.companieshouse.kafka.consumer.ConsumerConfig;
+import uk.gov.companieshouse.kafka.consumer.resilience.CHConsumerType;
+import uk.gov.companieshouse.kafka.consumer.resilience.CHKafkaResilientConsumerGroup;
 import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
 import uk.gov.companieshouse.kafka.producer.Acks;
 import uk.gov.companieshouse.kafka.producer.CHKafkaProducer;
@@ -16,6 +17,8 @@ import java.util.Collections;
 
 @Configuration
 class KafkaConfiguration {
+
+    public static final String APPLICATION_NAME = "CRIC";
 
     @Value("${kafka.main.consumer.group.name}")
     private String mainConsumerGroupName;
@@ -56,12 +59,13 @@ class KafkaConfiguration {
 
     @Bean("main-consumer-group")
     @Lazy
-    CHKafkaConsumerGroup getMainConsumer() {
-        return new CHKafkaConsumerGroup(getMainConsumerConfig());
+    CHKafkaResilientConsumerGroup getMainConsumer() {
+        return new CHKafkaResilientConsumerGroup(getMainConsumerConfig(), CHConsumerType.MAIN_CONSUMER);
     }
 
+    @Bean
     ConsumerConfig getMainConsumerConfig() {
-        ConsumerConfig config = new ConsumerConfig();
+        ConsumerConfig config = new ConsumerConfig(APPLICATION_NAME);
         config.setBrokerAddresses(new String[]{brokerAddress});
         config.setTopics(Collections.singletonList(mainTopicName));
         config.setPollTimeout(pollTimeout);
@@ -71,14 +75,14 @@ class KafkaConfiguration {
 
     @Bean("retry-consumer-group")
     @Lazy
-    CHKafkaConsumerGroup getRetryConsumer() {
-        return new CHKafkaConsumerGroup(getRetryConsumerConfig());
+    CHKafkaResilientConsumerGroup getRetryConsumer() {
+        return new CHKafkaResilientConsumerGroup(getRetryConsumerConfig(), CHConsumerType.RETRY_CONSUMER);
     }
 
     ConsumerConfig getRetryConsumerConfig() {
-        ConsumerConfig config = new ConsumerConfig();
+        ConsumerConfig config = new ConsumerConfig(APPLICATION_NAME);
         config.setBrokerAddresses(new String[]{brokerAddress});
-        config.setTopics(Collections.singletonList(retryTopicName));
+        config.setTopics(Collections.singletonList(mainTopicName));
         config.setPollTimeout(pollTimeout);
         config.setGroupName(retryConsumerGroupName);
         return config;
@@ -86,17 +90,8 @@ class KafkaConfiguration {
 
     @Bean("error-consumer-group")
     @Lazy
-    CHKafkaConsumerGroup getErrorConsumer() {
-        return new CHKafkaConsumerGroup(getErrorConsumerConfig());
-    }
-
-    ConsumerConfig getErrorConsumerConfig() {
-        ConsumerConfig config = new ConsumerConfig();
-        config.setBrokerAddresses(new String[]{brokerAddress});
-        config.setTopics(Collections.singletonList(errorTopicName));
-        config.setPollTimeout(pollTimeout);
-        config.setGroupName(errorConsumerGroupName);
-        return config;
+    CHKafkaResilientConsumerGroup getErrorConsumer() {
+        return new CHKafkaResilientConsumerGroup(getMainConsumerConfig(), CHConsumerType.ERROR_CONSUMER);
     }
 
     @Bean

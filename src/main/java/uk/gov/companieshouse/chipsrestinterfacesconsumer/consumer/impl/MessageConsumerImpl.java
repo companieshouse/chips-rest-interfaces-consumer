@@ -4,7 +4,7 @@ import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MessageConsumer;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
-import uk.gov.companieshouse.kafka.consumer.CHKafkaConsumerGroup;
+import uk.gov.companieshouse.kafka.consumer.resilience.CHKafkaResilientConsumerGroup;
 import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
 import uk.gov.companieshouse.kafka.exceptions.DeserializationException;
 import uk.gov.companieshouse.kafka.message.Message;
@@ -22,20 +22,24 @@ public class MessageConsumerImpl implements MessageConsumer {
 
     private final DeserializerFactory deserializerFactory;
 
-    private final CHKafkaConsumerGroup consumer;
+    private final CHKafkaResilientConsumerGroup consumer;
 
     private final String id;
+
+    private final boolean isErrorConsumer;
 
     public MessageConsumerImpl(ApplicationLogger logger,
                                MessageProcessorService messageProcessorService,
                                DeserializerFactory deserializerFactory,
-                               CHKafkaConsumerGroup consumer,
-                               String id) {
+                               CHKafkaResilientConsumerGroup consumer,
+                               String id,
+                               boolean isErrorConsumer) {
         this.logger = logger;
         this.messageProcessorService = messageProcessorService;
         this.deserializerFactory = deserializerFactory;
         this.consumer = consumer;
         this.id = id;
+        this.isErrorConsumer = isErrorConsumer;
     }
 
     @PostConstruct
@@ -69,7 +73,7 @@ public class MessageConsumerImpl implements MessageConsumer {
                 logMap.put("Message Consumer ID", id);
                 logger.info(String.format("%s - Message deserialised successfully", id), logMap);
 
-                messageProcessorService.processMessage(deserializedMsg);
+                messageProcessorService.processMessage(deserializedMsg, isErrorConsumer);
 
                 logger.info(String.format("%s - Message offset %s processed, committing offset", id, msg.getOffset()));
 

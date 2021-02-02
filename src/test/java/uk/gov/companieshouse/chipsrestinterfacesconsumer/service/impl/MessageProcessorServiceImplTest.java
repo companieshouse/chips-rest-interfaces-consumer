@@ -17,6 +17,7 @@ import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.client.ChipsRestClient;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.producer.MessageProducer;
+import uk.gov.companieshouse.kafka.consumer.ConsumerConfig;
 import uk.gov.companieshouse.service.ServiceException;
 
 import java.util.Map;
@@ -27,6 +28,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MessageProcessorServiceImplTest {
@@ -50,6 +52,9 @@ class MessageProcessorServiceImplTest {
     @Mock
     private ApplicationLogger logger;
 
+    @Mock
+    private ConsumerConfig consumerConfig;
+
     @InjectMocks
     private MessageProcessorServiceImpl messageProcessorService;
 
@@ -72,7 +77,7 @@ class MessageProcessorServiceImplTest {
     void processMessageTest() throws ServiceException {
         ChipsRestInterfacesSend chipsRestInterfacesSend = new ChipsRestInterfacesSend();
 
-        messageProcessorService.processMessage(chipsRestInterfacesSend);
+        messageProcessorService.processMessage(chipsRestInterfacesSend, false);
 
         verify(chipsRestClient, times(1)).sendToChips(eq(chipsRestInterfacesSend));
         verify(messageProducer, times(0)).writeToTopic(any(), eq(RETRY_TOPIC));
@@ -83,8 +88,9 @@ class MessageProcessorServiceImplTest {
     void testRetryIsCalled() throws ServiceException {
         RuntimeException runtimeException = new RuntimeException("runtimeException");
         doThrow(runtimeException).when(chipsRestClient).sendToChips(chipsRestInterfacesSend);
+        when(consumerConfig.retryTopic()).thenReturn(RETRY_TOPIC);
 
-        messageProcessorService.processMessage(chipsRestInterfacesSend);
+        messageProcessorService.processMessage(chipsRestInterfacesSend, false);
 
         verify(chipsRestClient, times(1)).sendToChips(eq(chipsRestInterfacesSend));
         verify(logger, times(1)).error(eq(String.format(CHIPS_ERROR_MESSAGE, MESSAGE_ID)), eq(runtimeException), mapArgumentCaptor.capture());
@@ -102,8 +108,9 @@ class MessageProcessorServiceImplTest {
     void testRetryIsCalledForHttpClientErrorException() throws ServiceException {
         HttpClientErrorException httpClientErrorException = new HttpClientErrorException(HttpStatus.BAD_GATEWAY);
         doThrow(httpClientErrorException).when(chipsRestClient).sendToChips(chipsRestInterfacesSend);
+        when(consumerConfig.retryTopic()).thenReturn(RETRY_TOPIC);
 
-        messageProcessorService.processMessage(chipsRestInterfacesSend);
+        messageProcessorService.processMessage(chipsRestInterfacesSend, false);
 
         verify(chipsRestClient, times(1)).sendToChips(eq(chipsRestInterfacesSend));
         verify(logger, times(1)).error(eq(String.format(CHIPS_ERROR_MESSAGE, MESSAGE_ID)), eq(httpClientErrorException), mapArgumentCaptor.capture());
@@ -125,8 +132,9 @@ class MessageProcessorServiceImplTest {
     void testRetryIsCalledForHttpServerErrorException() throws ServiceException {
         HttpServerErrorException httpServerErrorException = new HttpServerErrorException(HttpStatus.BAD_GATEWAY);
         doThrow(httpServerErrorException).when(chipsRestClient).sendToChips(chipsRestInterfacesSend);
+        when(consumerConfig.retryTopic()).thenReturn(RETRY_TOPIC);
 
-        messageProcessorService.processMessage(chipsRestInterfacesSend);
+        messageProcessorService.processMessage(chipsRestInterfacesSend, false);
 
         verify(chipsRestClient, times(1)).sendToChips(eq(chipsRestInterfacesSend));
         verify(logger, times(1)).error(eq(String.format(CHIPS_ERROR_MESSAGE, MESSAGE_ID)), eq(httpServerErrorException), mapArgumentCaptor.capture());
@@ -149,8 +157,9 @@ class MessageProcessorServiceImplTest {
         chipsRestInterfacesSend.setAttempt(10);
         RestClientException restClientException = new RestClientException("restClientException");
         doThrow(restClientException).when(chipsRestClient).sendToChips(chipsRestInterfacesSend);
+        when(consumerConfig.errorTopic()).thenReturn(ERROR_TOPIC);
 
-        messageProcessorService.processMessage(chipsRestInterfacesSend);
+        messageProcessorService.processMessage(chipsRestInterfacesSend, false);
 
         verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend);
         verify(messageProducer, times(0)).writeToTopic(chipsRestInterfacesSend, RETRY_TOPIC);

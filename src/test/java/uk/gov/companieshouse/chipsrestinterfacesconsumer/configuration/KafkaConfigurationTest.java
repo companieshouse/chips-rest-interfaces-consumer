@@ -71,19 +71,6 @@ class KafkaConfigurationTest {
     }
 
     @Test
-    void getErrorConsumerConfigTest() {
-        ConsumerConfig consumerConfig = kafkaConfiguration.getErrorConsumerConfig();
-
-        assertEquals(ERROR_GROUP_NAME_VALUE, consumerConfig.getGroupName());
-        assertNotNull(consumerConfig.getBrokerAddresses());
-        assertEquals(1, consumerConfig.getBrokerAddresses().length);
-        assertEquals(BROKER_ADDRESS_VALUE, consumerConfig.getBrokerAddresses()[0]);
-        assertEquals(1, consumerConfig.getTopics().size());
-        assertEquals(ERROR_TOPIC_NAME_VALUE, consumerConfig.getTopics().get(0));
-        assertEquals(100, consumerConfig.getPollTimeout());
-    }
-
-    @Test
     void getMessageProducerConfigTest() {
         ProducerConfig producerConfig = kafkaConfiguration.getMessageProducerConfig();
 
