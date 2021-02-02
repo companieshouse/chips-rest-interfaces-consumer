@@ -85,6 +85,20 @@ class MessageProcessorServiceImplTest {
     }
 
     @Test
+    void processErrorMessageTest() throws ServiceException {
+        ChipsRestInterfacesSend chipsRestInterfacesSend = new ChipsRestInterfacesSend();
+        RuntimeException runtimeException = new RuntimeException("runtimeException");
+        doThrow(runtimeException).when(chipsRestClient).sendToChips(chipsRestInterfacesSend);
+        when(consumerConfig.retryTopic()).thenReturn(RETRY_TOPIC);
+
+        messageProcessorService.processMessage(chipsRestInterfacesSend, true);
+
+        verify(chipsRestClient, times(1)).sendToChips(eq(chipsRestInterfacesSend));
+        verify(messageProducer, times(1)).writeToTopic(any(), eq(RETRY_TOPIC));
+        verify(messageProducer, times(0)).writeToTopic(any(), eq(ERROR_TOPIC));
+    }
+
+    @Test
     void testRetryIsCalled() throws ServiceException {
         RuntimeException runtimeException = new RuntimeException("runtimeException");
         doThrow(runtimeException).when(chipsRestClient).sendToChips(chipsRestInterfacesSend);
