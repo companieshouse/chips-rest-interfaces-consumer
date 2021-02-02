@@ -91,7 +91,16 @@ class KafkaConfiguration {
     @Bean("error-consumer-group")
     @Lazy
     CHKafkaResilientConsumerGroup getErrorConsumer() {
-        return new CHKafkaResilientConsumerGroup(getMainConsumerConfig(), CHConsumerType.ERROR_CONSUMER);
+        return new CHKafkaResilientConsumerGroup(getErrorConsumerConfig(), CHConsumerType.ERROR_CONSUMER);
+    }
+
+    ConsumerConfig getErrorConsumerConfig() {
+        ConsumerConfig config = new ConsumerConfig(APPLICATION_NAME);
+        config.setBrokerAddresses(new String[]{brokerAddress});
+        config.setTopics(Collections.singletonList(mainTopicName));
+        config.setPollTimeout(pollTimeout);
+        config.setGroupName(errorConsumerGroupName);
+        return config;
     }
 
     @Bean
