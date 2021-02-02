@@ -10,7 +10,7 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogge
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MessageConsumer;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.impl.MessageConsumerImpl;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
-import uk.gov.companieshouse.kafka.consumer.CHKafkaConsumerGroup;
+import uk.gov.companieshouse.kafka.consumer.resilience.CHKafkaResilientConsumerGroup;
 import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
 
 @Configuration
@@ -26,7 +26,7 @@ class ApplicationConfig {
     MessageConsumer mainMessageConsumer(ApplicationLogger logger,
                                             MessageProcessorService messageProcessorService,
                                             DeserializerFactory deserializerFactory,
-                                            @Qualifier("main-consumer-group") CHKafkaConsumerGroup consumer) {
+                                            @Qualifier("main-consumer-group") CHKafkaResilientConsumerGroup consumer) {
         return new MessageConsumerImpl(
                 logger,
                 messageProcessorService,
@@ -40,7 +40,7 @@ class ApplicationConfig {
     MessageConsumer retryMessageConsumer(ApplicationLogger logger,
                                          MessageProcessorService messageProcessorService,
                                          DeserializerFactory deserializerFactory,
-                                         @Qualifier("retry-consumer-group") CHKafkaConsumerGroup consumer) {
+                                         @Qualifier("retry-consumer-group") CHKafkaResilientConsumerGroup consumer) {
         return new MessageConsumerImpl(
                 logger,
                 messageProcessorService,
@@ -54,7 +54,7 @@ class ApplicationConfig {
     MessageConsumer errorMessageConsumer(ApplicationLogger logger,
                                         MessageProcessorService messageProcessorService,
                                         DeserializerFactory deserializerFactory,
-                                        @Qualifier("error-consumer-group") CHKafkaConsumerGroup consumer) {
+                                        @Qualifier("error-consumer-group") CHKafkaResilientConsumerGroup consumer) {
         return new MessageConsumerImpl(
                 logger,
                 messageProcessorService,

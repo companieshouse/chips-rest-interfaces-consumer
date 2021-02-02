@@ -9,6 +9,7 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.client.ChipsRestClient;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.producer.MessageProducer;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
+import uk.gov.companieshouse.kafka.consumer.ConsumerConfig;
 import uk.gov.companieshouse.service.ServiceException;
 
 import java.util.HashMap;
@@ -28,6 +29,9 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
     @Value("${kafka.error.topic}")
     private String errorTopicName;
 
+    @Value("${RUN_APP_IN_ERROR_MODE:false}")
+    private boolean runAppInErrorMode;
+
     @Autowired
     private ChipsRestClient chipsRestClient;
 
@@ -36,6 +40,9 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
 
     @Autowired
     private MessageProducer messageProducer;
+
+    @Autowired
+    private ConsumerConfig consumerConfig;
 
     @Override
     public void processMessage(ChipsRestInterfacesSend message) throws ServiceException {
@@ -55,15 +62,21 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
         var messageId = message.getMessageId();
         logger.error(String.format(SEND_FAILURE_MESSAGE, messageId), e, logMap);
 
+        if (runAppInErrorMode) {
+            message.setAttempt(1);
+            messageProducer.writeToTopic(message, consumerConfig.retryTopic());
+            return;
+        }
+
         var attempts = message.getAttempt();
         logger.info(String.format("Attempt %s failed for message id %s", attempts, messageId), logMap);
 
         if (attempts < maxRetryAttempts) {
             message.setAttempt(attempts + 1);
-            messageProducer.writeToTopic(message, retryTopicName);
+            messageProducer.writeToTopic(message, consumerConfig.retryTopic());
         } else {
             logger.error(String.format("Maximum retry attempts %s reached for message id %s", maxRetryAttempts, messageId), e, logMap);
-            messageProducer.writeToTopic(message, errorTopicName);
+            messageProducer.writeToTopic(message, consumerConfig.errorTopic());
         }
     }
 }
