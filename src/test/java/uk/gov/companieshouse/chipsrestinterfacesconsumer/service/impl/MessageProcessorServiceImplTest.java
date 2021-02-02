@@ -79,7 +79,7 @@ class MessageProcessorServiceImplTest {
 
         messageProcessorService.processMessage(chipsRestInterfacesSend, false);
 
-        verify(chipsRestClient, times(1)).sendToChips(eq(chipsRestInterfacesSend));
+        verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend);
         verify(messageProducer, times(0)).writeToTopic(any(), eq(RETRY_TOPIC));
         verify(messageProducer, times(0)).writeToTopic(any(), eq(ERROR_TOPIC));
     }
@@ -93,7 +93,7 @@ class MessageProcessorServiceImplTest {
 
         messageProcessorService.processMessage(chipsRestInterfacesSend, true);
 
-        verify(chipsRestClient, times(1)).sendToChips(eq(chipsRestInterfacesSend));
+        verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend);
         verify(messageProducer, times(1)).writeToTopic(any(), eq(RETRY_TOPIC));
         verify(messageProducer, times(0)).writeToTopic(any(), eq(ERROR_TOPIC));
     }
@@ -106,7 +106,7 @@ class MessageProcessorServiceImplTest {
 
         messageProcessorService.processMessage(chipsRestInterfacesSend, false);
 
-        verify(chipsRestClient, times(1)).sendToChips(eq(chipsRestInterfacesSend));
+        verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend);
         verify(logger, times(1)).error(eq(String.format(CHIPS_ERROR_MESSAGE, MESSAGE_ID)), eq(runtimeException), mapArgumentCaptor.capture());
         verifyLogData(mapArgumentCaptor.getValue());
 
@@ -126,7 +126,7 @@ class MessageProcessorServiceImplTest {
 
         messageProcessorService.processMessage(chipsRestInterfacesSend, false);
 
-        verify(chipsRestClient, times(1)).sendToChips(eq(chipsRestInterfacesSend));
+        verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend);
         verify(logger, times(1)).error(eq(String.format(CHIPS_ERROR_MESSAGE, MESSAGE_ID)), eq(httpClientErrorException), mapArgumentCaptor.capture());
         Map<String, Object> logMap = mapArgumentCaptor.getValue();
         verifyLogData(logMap);
@@ -150,7 +150,7 @@ class MessageProcessorServiceImplTest {
 
         messageProcessorService.processMessage(chipsRestInterfacesSend, false);
 
-        verify(chipsRestClient, times(1)).sendToChips(eq(chipsRestInterfacesSend));
+        verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend);
         verify(logger, times(1)).error(eq(String.format(CHIPS_ERROR_MESSAGE, MESSAGE_ID)), eq(httpServerErrorException), mapArgumentCaptor.capture());
         Map<String, Object> logMap = mapArgumentCaptor.getValue();
         verifyLogData(logMap);
