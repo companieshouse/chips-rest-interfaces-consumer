@@ -25,8 +25,10 @@ class KafkaConfigurationTest {
     private static final String MAIN_TOPIC_NAME_VALUE = "main-topic";
     private static final String RETRY_TOPIC_NAME_VALUE = MAIN_TOPIC_NAME_VALUE + "-cric-retry";
     private static final String ERROR_TOPIC_NAME_VALUE = MAIN_TOPIC_NAME_VALUE + "-cric-error";
-    private static final int POLL_TIMEOUT_VALUE = 100;
+    private static final int POLL_TIMEOUT_VALUE = 99;
     private static final int RETRIES = 10;
+    private static final int MAX_POLL_INTERVAL_MS_VALUE = 100000;
+    private static final long RETRY_THROTTLE_SECONDS_VALUE = 30;
 
     private KafkaConfiguration kafkaConfiguration;
 
@@ -42,6 +44,8 @@ class KafkaConfigurationTest {
         ReflectionTestUtils.setField(kafkaConfiguration, "errorTopicName", ERROR_TOPIC_NAME_VALUE);
         ReflectionTestUtils.setField(kafkaConfiguration, "pollTimeout", POLL_TIMEOUT_VALUE);
         ReflectionTestUtils.setField(kafkaConfiguration, "retries", RETRIES);
+        ReflectionTestUtils.setField(kafkaConfiguration, "maxPollIntervalMs", MAX_POLL_INTERVAL_MS_VALUE);
+        ReflectionTestUtils.setField(kafkaConfiguration, "retryThrottleSeconds", RETRY_THROTTLE_SECONDS_VALUE);
     }
 
     @Test
@@ -54,7 +58,8 @@ class KafkaConfigurationTest {
         assertEquals(BROKER_ADDRESS_VALUE, consumerConfig.getBrokerAddresses()[0]);
         assertEquals(1, consumerConfig.getTopics().size());
         assertEquals(MAIN_TOPIC_NAME_VALUE, consumerConfig.getTopics().get(0));
-        assertEquals(100, consumerConfig.getPollTimeout());
+        assertEquals(POLL_TIMEOUT_VALUE, consumerConfig.getPollTimeout());
+        assertEquals(MAX_POLL_INTERVAL_MS_VALUE, consumerConfig.getMaxPollIntervalMilliSeconds());
     }
 
     @Test
@@ -68,7 +73,8 @@ class KafkaConfigurationTest {
         assertEquals(1, consumerConfig.getTopics().size());
         // Retry topic calculates name based off of main topic
         assertEquals(RETRY_TOPIC_NAME_VALUE, consumerConfig.retryTopic());
-        assertEquals(100, consumerConfig.getPollTimeout());
+        assertEquals(POLL_TIMEOUT_VALUE, consumerConfig.getPollTimeout());
+        assertEquals((RETRY_THROTTLE_SECONDS_VALUE * 1000) + MAX_POLL_INTERVAL_MS_VALUE, consumerConfig.getMaxPollIntervalMilliSeconds());
     }
 
     @Test
@@ -82,7 +88,8 @@ class KafkaConfigurationTest {
         assertEquals(1, consumerConfig.getTopics().size());
         // Retry topic calculates name based off of main topic
         assertEquals(ERROR_TOPIC_NAME_VALUE, consumerConfig.errorTopic());
-        assertEquals(100, consumerConfig.getPollTimeout());
+        assertEquals(POLL_TIMEOUT_VALUE, consumerConfig.getPollTimeout());
+        assertEquals(MAX_POLL_INTERVAL_MS_VALUE, consumerConfig.getMaxPollIntervalMilliSeconds());
     }
 
     @Test

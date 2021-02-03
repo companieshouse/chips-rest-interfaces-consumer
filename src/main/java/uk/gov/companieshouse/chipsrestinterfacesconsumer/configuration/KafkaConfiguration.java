@@ -18,7 +18,7 @@ import java.util.Collections;
 @Configuration
 class KafkaConfiguration {
 
-    public static final String APPLICATION_NAME = "cric";
+    private static final String APPLICATION_NAME = "cric";
 
     @Value("${kafka.main.consumer.group.name}")
     private String mainConsumerGroupName;
@@ -41,11 +41,17 @@ class KafkaConfiguration {
     @Value("${kafka.error.topic}")
     private String errorTopicName;
 
-    @Value("${kafka.consumer.pollTimeout:100}")
+    @Value("${kafka.consumer.poll.timeout.ms:100}")
     private long pollTimeout;
+
+    @Value("${kafka.consumer.max.poll.interval.ms:300000}")
+    private int maxPollIntervalMs;
 
     @Value("${kafka.producer.retries}")
     private int retries;
+
+    @Value("${RETRY_THROTTLE_RATE_SECONDS}")
+    private long retryThrottleSeconds;
 
     @Bean
     DeserializerFactory getDeserializerFactory() {
@@ -69,6 +75,7 @@ class KafkaConfiguration {
         config.setBrokerAddresses(new String[]{brokerAddress});
         config.setTopics(Collections.singletonList(mainTopicName));
         config.setPollTimeout(pollTimeout);
+        config.setMaxPollIntervalMilliSeconds(maxPollIntervalMs);
         config.setGroupName(mainConsumerGroupName);
         return config;
     }
@@ -84,6 +91,7 @@ class KafkaConfiguration {
         config.setBrokerAddresses(new String[]{brokerAddress});
         config.setTopics(Collections.singletonList(mainTopicName));
         config.setPollTimeout(pollTimeout);
+        config.setMaxPollIntervalMilliSeconds((Math.toIntExact(retryThrottleSeconds) * 1000) + maxPollIntervalMs);
         config.setGroupName(retryConsumerGroupName);
         return config;
     }
@@ -99,6 +107,7 @@ class KafkaConfiguration {
         config.setBrokerAddresses(new String[]{brokerAddress});
         config.setTopics(Collections.singletonList(mainTopicName));
         config.setPollTimeout(pollTimeout);
+        config.setMaxPollIntervalMilliSeconds(maxPollIntervalMs);
         config.setGroupName(errorConsumerGroupName);
         return config;
     }
