@@ -37,10 +37,13 @@ class MessageProcessorServiceImplTest {
     private static final String DUMMY_DATA = "{test:data}";
     private static final String LOG_KEY_MESSAGE = "Message";
     private static final String LOG_KEY_HTTP_CODE = "HTTP Status Code";
+    private static final String LOG_THREAD_NAME = "main";
+    private static final String LOG_KEY_THREAD_NAME = "Thread Name";
     private static final String CHIPS_ERROR_MESSAGE = "Error sending this message to chips";
     private static final String RETRY_TOPIC = "chips-rest-interfaces-send-retry";
     private static final String ERROR_TOPIC = "chips-rest-interfaces-send-error";
     private static final String CONSUMER_ID = "test-message-consumer";
+    private static final String LOG_KEY_CONSUMER_NAME = "Message Consumer ID";
 
     private ChipsRestInterfacesSend chipsRestInterfacesSend;
 
@@ -112,9 +115,12 @@ class MessageProcessorServiceImplTest {
         verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend);
         verify(logger, times(1)).errorContext(eq(MESSAGE_ID), eq(CHIPS_ERROR_MESSAGE), eq(runtimeException), mapArgumentCaptor.capture());
         verifyLogData(mapArgumentCaptor.getValue());
+        verifyLogConsumerName(mapArgumentCaptor.getValue());
 
         verify(logger, times(1)).infoContext(eq(MESSAGE_ID), eq("Attempt 0 failed for this message"), mapArgumentCaptor.capture());
         verifyLogData(mapArgumentCaptor.getValue());
+        verifyLogThreadName(mapArgumentCaptor.getValue());
+        verifyLogConsumerName(mapArgumentCaptor.getValue());
 
         assertEquals(1, chipsRestInterfacesSend.getAttempt());
         verify(messageProducer, times(1)).writeToTopic(chipsRestInterfacesSend, RETRY_TOPIC);
@@ -134,11 +140,15 @@ class MessageProcessorServiceImplTest {
         Map<String, Object> logMap = mapArgumentCaptor.getValue();
         verifyLogData(logMap);
         verifyLogHttpCode(logMap);
+        verifyLogThreadName(mapArgumentCaptor.getValue());
+        verifyLogConsumerName(mapArgumentCaptor.getValue());
 
         verify(logger, times(1)).infoContext(eq(MESSAGE_ID), eq("Attempt 0 failed for this message"), mapArgumentCaptor.capture());
         logMap = mapArgumentCaptor.getValue();
         verifyLogData(logMap);
         verifyLogHttpCode(logMap);
+        verifyLogThreadName(mapArgumentCaptor.getValue());
+        verifyLogConsumerName(mapArgumentCaptor.getValue());
 
         assertEquals(1, chipsRestInterfacesSend.getAttempt());
         verify(messageProducer, times(1)).writeToTopic(chipsRestInterfacesSend, RETRY_TOPIC);
@@ -159,11 +169,15 @@ class MessageProcessorServiceImplTest {
         Map<String, Object> logMap = mapArgumentCaptor.getValue();
         verifyLogData(logMap);
         verifyLogHttpCode(logMap);
+        verifyLogThreadName(mapArgumentCaptor.getValue());
+        verifyLogConsumerName(mapArgumentCaptor.getValue());
 
         verify(logger, times(1)).infoContext(eq(MESSAGE_ID), eq("Attempt 0 failed for this message"), mapArgumentCaptor.capture());
         logMap = mapArgumentCaptor.getValue();
         verifyLogData(logMap);
         verifyLogHttpCode(logMap);
+        verifyLogThreadName(mapArgumentCaptor.getValue());
+        verifyLogConsumerName(mapArgumentCaptor.getValue());
 
         assertEquals(1, chipsRestInterfacesSend.getAttempt());
         verify(messageProducer, times(1)).writeToTopic(chipsRestInterfacesSend, RETRY_TOPIC);
@@ -183,13 +197,18 @@ class MessageProcessorServiceImplTest {
         verify(messageProducer, times(0)).writeToTopic(chipsRestInterfacesSend, RETRY_TOPIC);
         verify(logger, times(1)).errorContext(eq(MESSAGE_ID), eq(CHIPS_ERROR_MESSAGE), eq(restClientException), mapArgumentCaptor.capture());
         verifyLogData(mapArgumentCaptor.getValue());
+        verifyLogConsumerName(mapArgumentCaptor.getValue());
 
         verify(logger, times(1)).infoContext(eq(MESSAGE_ID), eq("Attempt 10 failed for this message"), mapArgumentCaptor.capture());
         verifyLogData(mapArgumentCaptor.getValue());
+        verifyLogThreadName(mapArgumentCaptor.getValue());
+        verifyLogConsumerName(mapArgumentCaptor.getValue());
 
         verify(logger, times(1))
                 .errorContext(eq(MESSAGE_ID), eq("Maximum retry attempts " + MAX_RETRIES + " reached for this message"), eq(restClientException), mapArgumentCaptor.capture());
         verifyLogData(mapArgumentCaptor.getValue());
+        verifyLogThreadName(mapArgumentCaptor.getValue());
+        verifyLogConsumerName(mapArgumentCaptor.getValue());
 
         verify(messageProducer, times(0)).writeToTopic(any(), eq(RETRY_TOPIC));
         verify(messageProducer, times(1)).writeToTopic(chipsRestInterfacesSend, ERROR_TOPIC);
@@ -201,5 +220,13 @@ class MessageProcessorServiceImplTest {
 
     private void verifyLogHttpCode(Map<String, Object> logMap) {
         assertEquals(HttpStatus.BAD_GATEWAY.toString(), logMap.get(LOG_KEY_HTTP_CODE));
+    }
+
+    private void verifyLogThreadName(Map<String, Object> logMap) {
+        assertEquals(LOG_THREAD_NAME, logMap.get(LOG_KEY_THREAD_NAME));
+    }
+
+    private void verifyLogConsumerName(Map<String, Object> logMap) {
+        assertEquals(CONSUMER_ID.toString(), logMap.get(LOG_KEY_CONSUMER_NAME));
     }
 }
