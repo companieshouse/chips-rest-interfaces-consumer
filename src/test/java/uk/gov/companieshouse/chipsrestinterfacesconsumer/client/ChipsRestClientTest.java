@@ -72,8 +72,8 @@ class ChipsRestClientTest {
         assertEquals(MediaType.APPLICATION_JSON, messageData.getHeaders().getContentType());
 
         verify(logger, times(1))
-                .info(String.format("Posting message id %s to %s", messageId, FULL_EXPANDED_CHIPS_REST_URL));
+                .infoContext(messageId, String.format("Posting this message to %s", FULL_EXPANDED_CHIPS_REST_URL));
         verify(logger, times(1))
-                .info(String.format("Message id %s successfully sent, Chips Rest Response Status: %s", messageId, HttpStatus.ACCEPTED));
+                .infoContext(messageId, String.format("Message successfully sent, Chips Rest Response Status: %s", HttpStatus.ACCEPTED));
     }
 }

@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -77,6 +78,7 @@ class MessageProducerImplUnitTest {
 
         verify(mockedFuture, times(1)).get();
         verify(producer, times(1)).sendAndReturnFuture(kafkaMessageCaptor.capture());
+        verify(logger, times(1)).infoContext(eq(MESSAGE_ID), eq(String.format( "Writing this message to topic: %s", TEST_TOPIC)));
         Message kafkaMessage = kafkaMessageCaptor.getValue();
 
         assertEquals(TEST_TOPIC, kafkaMessage.getTopic());
@@ -92,6 +94,7 @@ class MessageProducerImplUnitTest {
 
         assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(chipsRestInterfacesSend, TEST_TOPIC));
         verify(producer, times(0)).sendAndReturnFuture(any());
+        verify(logger, times(1)).infoContext(eq(MESSAGE_ID), eq(String.format( "Writing this message to topic: %s", TEST_TOPIC)));
     }
 
     @Test
@@ -103,6 +106,7 @@ class MessageProducerImplUnitTest {
         assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), TEST_TOPIC));
         assertTrue(Thread.currentThread().isInterrupted());
         verify(producer, times(1)).sendAndReturnFuture(kafkaMessageCaptor.capture());
+        verify(logger, times(1)).infoContext(eq(MESSAGE_ID), eq(String.format( "Writing this message to topic: %s", TEST_TOPIC)));
         Message kafkaMessage = kafkaMessageCaptor.getValue();
         assertEquals(TEST_TOPIC, kafkaMessage.getTopic());
     }
@@ -115,6 +119,7 @@ class MessageProducerImplUnitTest {
 
         assertThrows(ServiceException.class, () -> messageProducerImpl.writeToTopic(getDummyChipsRestInterfacesSend(), TEST_TOPIC));
         verify(producer, times(1)).sendAndReturnFuture(kafkaMessageCaptor.capture());
+        verify(logger, times(1)).infoContext(eq(MESSAGE_ID), eq(String.format( "Writing this message to topic: %s", TEST_TOPIC)));
         Message kafkaMessage = kafkaMessageCaptor.getValue();
         assertEquals(TEST_TOPIC, kafkaMessage.getTopic());
     }

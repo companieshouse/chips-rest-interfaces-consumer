@@ -67,11 +67,12 @@ public class MessageConsumerImpl implements MessageConsumer {
                 logMap.put("Deserialised message id", deserializedMsg.getMessageId());
                 logMap.put("Thread Name", Thread.currentThread().getName());
                 logMap.put("Message Consumer ID", id);
-                logger.info(String.format("%s - Message deserialised successfully", id), logMap);
+                var messageId = deserializedMsg.getMessageId();
+                logger.infoContext(messageId, String.format("%s - Message deserialised successfully", id), logMap);
 
-                messageProcessorService.processMessage(deserializedMsg);
+                messageProcessorService.processMessage(id, deserializedMsg);
 
-                logger.info(String.format("%s - Message offset %s processed, committing offset", id, msg.getOffset()));
+                logger.infoContext(messageId, String.format("%s - Message offset %s processed, committing offset", id, msg.getOffset()));
 
                 consumer.commit(msg);
             } catch (Exception e) {
