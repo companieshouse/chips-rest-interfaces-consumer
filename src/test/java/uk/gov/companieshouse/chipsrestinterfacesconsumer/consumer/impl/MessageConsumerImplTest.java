@@ -90,7 +90,7 @@ class MessageConsumerImplTest {
 
         messageConsumer.readAndProcess();
 
-        verify(messageProcessorService, times(0)).processMessage(any());
+        verify(messageProcessorService, times(0)).processMessage(any(), any());
     }
 
     @Test
@@ -99,6 +99,8 @@ class MessageConsumerImplTest {
         Message message = new Message();
         Long offset = 123L;
         message.setOffset(offset);
+        Integer partition = 100;
+        message.setPartition(partition);
         messages.add(message);
 
         ChipsRestInterfacesSend deserializedMessage = new ChipsRestInterfacesSend();
@@ -111,19 +113,21 @@ class MessageConsumerImplTest {
 
         messageConsumer.readAndProcess();
 
-        verify(messageProcessorService, times(messages.size())).processMessage(deserializedMessage);
+        verify(messageProcessorService, times(messages.size())).processMessage(MESSAGE_CONSUMER_ID, deserializedMessage);
         verify(consumer, times(messages.size())).commit(message);
 
         verify(logger, times(1)).info(
-                String.format("%s - Message offset %s retrieved, processing", MESSAGE_CONSUMER_ID, offset));
-        verify(logger, times(1)).info(
+                String.format("%s - Message offset %s, partition %s retrieved, processing", MESSAGE_CONSUMER_ID, offset, partition));
+        verify(logger, times(1)).infoContext(
+                eq(messageId),
                 eq(String.format("%s - Message deserialised successfully", MESSAGE_CONSUMER_ID)),
                 loggingDataMapCaptor.capture());
         Map<String, Object> loggingDataMap = loggingDataMapCaptor.getValue();
         assertEquals(offset, loggingDataMap.get(LOG_OFFSET_KEY));
         assertEquals(messageId, loggingDataMap.get(LOG_MESSAGE_ID_KEY));
-        verify(logger, times(1)).info(
-                String.format("%s - Message offset %s processed, committing offset", MESSAGE_CONSUMER_ID, offset));
+        verify(logger, times(1)).infoContext(
+                messageId,
+                String.format("%s - Message offset %s, partition %s processed, committing offset", MESSAGE_CONSUMER_ID, offset, partition));
     }
 
     @Test
