@@ -90,7 +90,7 @@ class MessageConsumerImplTest {
 
         messageConsumer.readAndProcess();
 
-        verify(messageProcessorService, times(0)).processMessage(eq(MESSAGE_CONSUMER_ID), any());
+        verify(messageProcessorService, times(0)).processMessage(any(), any());
     }
 
     @Test
@@ -99,6 +99,8 @@ class MessageConsumerImplTest {
         Message message = new Message();
         Long offset = 123L;
         message.setOffset(offset);
+        Integer partition = 100;
+        message.setPartition(partition);
         messages.add(message);
 
         ChipsRestInterfacesSend deserializedMessage = new ChipsRestInterfacesSend();
@@ -115,7 +117,7 @@ class MessageConsumerImplTest {
         verify(consumer, times(messages.size())).commit(message);
 
         verify(logger, times(1)).info(
-                String.format("%s - Message offset %s retrieved, processing", MESSAGE_CONSUMER_ID, offset));
+                String.format("%s - Message offset %s, partition %s retrieved, processing", MESSAGE_CONSUMER_ID, offset, partition));
         verify(logger, times(1)).infoContext(
                 eq(messageId),
                 eq(String.format("%s - Message deserialised successfully", MESSAGE_CONSUMER_ID)),
@@ -125,7 +127,7 @@ class MessageConsumerImplTest {
         assertEquals(messageId, loggingDataMap.get(LOG_MESSAGE_ID_KEY));
         verify(logger, times(1)).infoContext(
                 messageId,
-                String.format("%s - Message offset %s processed, committing offset", MESSAGE_CONSUMER_ID, offset));
+                String.format("%s - Message offset %s, partition %s processed, committing offset", MESSAGE_CONSUMER_ID, offset, partition));
     }
 
     @Test

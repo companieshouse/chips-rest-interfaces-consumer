@@ -58,7 +58,7 @@ public class MessageConsumerImpl implements MessageConsumer {
     public void readAndProcess() {
         for (Message msg : consumer.consume()) {
             try {
-                logger.info(String.format("%s - Message offset %s retrieved, processing", id, msg.getOffset()));
+                logger.info(String.format("%s - Message offset %s, partition %s retrieved, processing", id, msg.getOffset(), msg.getPartition()));
 
                 ChipsRestInterfacesSend deserializedMsg = deserialize(msg);
 
@@ -72,7 +72,7 @@ public class MessageConsumerImpl implements MessageConsumer {
 
                 messageProcessorService.processMessage(id, deserializedMsg);
 
-                logger.infoContext(messageId, String.format("%s - Message offset %s processed, committing offset", id, msg.getOffset()));
+                logger.infoContext(messageId, String.format("%s - Message offset %s, partition %s processed, committing offset", id, msg.getOffset(), msg.getPartition()));
 
                 consumer.commit(msg);
             } catch (Exception e) {
