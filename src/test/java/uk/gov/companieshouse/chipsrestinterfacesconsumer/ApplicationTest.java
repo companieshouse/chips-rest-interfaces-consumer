@@ -44,7 +44,7 @@ class ApplicationTest {
 
         verify(taskScheduler, times(0)).scheduleWithFixedDelay(eq(mainMessageConsumer), anyLong());
         verify(taskScheduler, times(0)).scheduleWithFixedDelay(eq(retryMessageConsumer), anyLong());
-        verify(taskScheduler, times(1)).scheduleWithFixedDelay(errorMessageConsumer, 1L);
+        verify(errorMessageConsumer, times(1)).readAndProcess();
     }
 
     @Test

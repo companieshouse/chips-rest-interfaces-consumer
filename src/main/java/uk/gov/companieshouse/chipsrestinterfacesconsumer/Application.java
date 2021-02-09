@@ -50,11 +50,20 @@ public class Application implements CommandLineRunner {
         if (!runAppInErrorMode) {
             logger.info("***** Application started in normal processing mode *****");
             var retryThrottleMillis = retryThrottleSeconds * 1000L;
+
+            mainMessageConsumer.readAndProcess();
+            retryMessageConsumer.readAndProcess();
+
             taskScheduler.scheduleWithFixedDelay(mainMessageConsumer, 1L);
             taskScheduler.scheduleWithFixedDelay(retryMessageConsumer, retryThrottleMillis);
         } else {
             logger.info("***** Application started in error processing mode *****");
-            taskScheduler.scheduleWithFixedDelay(errorMessageConsumer, 1L);
+
+            try {
+                errorMessageConsumer.readAndProcess();
+            } catch (Exception e) {
+                logger.error(String.format("Error consuming error topic: %s", e.getMessage()), e);
+            }
         }
     }
 }
