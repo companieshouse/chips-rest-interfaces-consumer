@@ -13,6 +13,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MessageConsumerImpl implements MessageConsumer {
 
@@ -26,7 +27,9 @@ public class MessageConsumerImpl implements MessageConsumer {
 
     private final String id;
 
-    private Object lock = new Object();
+    private final Object lock = new Object();
+
+    private AtomicBoolean processing = new AtomicBoolean(false);
 
     public MessageConsumerImpl(ApplicationLogger logger,
                                MessageProcessorService messageProcessorService,
@@ -50,12 +53,16 @@ public class MessageConsumerImpl implements MessageConsumer {
     void close() {
         synchronized(lock) {
             try {
-                lock.wait();
+                while(processing.get()) {
+                    lock.wait();
+                }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
             consumer.close();
-            lock.notify();
+            if(!processing.get()) {
+                lock.notify();
+            }
         }
     }
 
@@ -66,6 +73,7 @@ public class MessageConsumerImpl implements MessageConsumer {
 
     @Override
     public void readAndProcess() {
+        processing.set(true);
         for (Message msg : consumer.consume()) {
             try {
                 logger.info(String.format("%s - Message offset %s, partition %s retrieved, processing", id, msg.getOffset(), msg.getPartition()));
@@ -89,6 +97,8 @@ public class MessageConsumerImpl implements MessageConsumer {
                 Map<String, Object> data = new HashMap<>();
                 data.put("message", msg.getValue() == null ? "" : new String(msg.getValue()));
                 logger.error(String.format("%s - Failed to read message from queue", id), e, data);
+            } finally {
+                processing.set(false);
             }
         }
     }
