@@ -61,7 +61,7 @@ public class MessageConsumerImpl implements MessageConsumer {
             }
             consumer.close();
             if(!processing.get()) {
-                lock.notify();
+                lock.notifyAll();
             }
         }
     }
