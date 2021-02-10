@@ -26,6 +26,8 @@ public class MessageConsumerImpl implements MessageConsumer {
 
     private final String id;
 
+    private Object lock = new Object();
+
     public MessageConsumerImpl(ApplicationLogger logger,
                                MessageProcessorService messageProcessorService,
                                DeserializerFactory deserializerFactory,
@@ -46,7 +48,15 @@ public class MessageConsumerImpl implements MessageConsumer {
 
     @PreDestroy
     void close() {
-        consumer.close();
+        synchronized(lock) {
+            try {
+                lock.wait();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            consumer.close();
+            lock.notify();
+        }
     }
 
     @Override

@@ -78,12 +78,6 @@ class MessageConsumerImplTest {
     }
 
     @Test
-    void destroyTest() {
-        messageConsumer.close();
-        verify(consumer).close();
-    }
-
-    @Test
     void testReadNoMessage() throws ServiceException {
         List<Message> messages = Collections.emptyList();
         when(consumer.consume()).thenReturn(messages);
