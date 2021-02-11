@@ -97,10 +97,10 @@ public class MessageConsumerImpl implements MessageConsumer {
                 Map<String, Object> data = new HashMap<>();
                 data.put("message", msg.getValue() == null ? "" : new String(msg.getValue()));
                 logger.error(String.format("%s - Failed to read message from queue", id), e, data);
-            } finally {
                 processing.set(false);
             }
         }
+        processing.set(false);
     }
 
     private ChipsRestInterfacesSend deserialize(Message msg) throws DeserializationException {
