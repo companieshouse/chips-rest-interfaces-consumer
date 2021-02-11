@@ -9,7 +9,6 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.client.ChipsRestClient;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.producer.MessageProducer;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
-import uk.gov.companieshouse.kafka.consumer.ConsumerConfig;
 import uk.gov.companieshouse.service.ServiceException;
 
 import java.util.HashMap;
@@ -18,7 +17,7 @@ import java.util.Map;
 @Service
 public class MessageProcessorServiceImpl implements MessageProcessorService {
 
-    private static final String SEND_FAILURE_MESSAGE = "Error sending message id %s to chips";
+    private static final String SEND_FAILURE_MESSAGE = "Error sending this message to chips";
 
     @Value("${MAX_RETRY_ATTEMPTS}")
     private int maxRetryAttempts;
@@ -41,13 +40,12 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
     @Autowired
     private MessageProducer messageProducer;
 
-    @Autowired
-    private ConsumerConfig consumerConfig;
-
     @Override
-    public void processMessage(ChipsRestInterfacesSend message) throws ServiceException {
+    public void processMessage(String consumerId, ChipsRestInterfacesSend message) throws ServiceException{
         Map<String, Object> logMap = new HashMap<>();
         logMap.put("Message", message.getData());
+        logMap.put("Thread Name", Thread.currentThread().getName());
+        logMap.put("Message Consumer ID", consumerId);
         try {
             chipsRestClient.sendToChips(message);
         } catch (HttpStatusCodeException hsce) {
@@ -60,23 +58,23 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
 
     private void handleFailedMessage(ChipsRestInterfacesSend message, Exception e, Map<String, Object> logMap) throws ServiceException {
         var messageId = message.getMessageId();
-        logger.error(String.format(SEND_FAILURE_MESSAGE, messageId), e, logMap);
+        logger.errorContext(messageId, SEND_FAILURE_MESSAGE, e, logMap);
 
         if (runAppInErrorMode) {
             message.setAttempt(1);
-            messageProducer.writeToTopic(message, consumerConfig.retryTopic());
+            messageProducer.writeToTopic(message, retryTopicName);
             return;
         }
 
         var attempts = message.getAttempt();
-        logger.info(String.format("Attempt %s failed for message id %s", attempts, messageId), logMap);
+        logger.infoContext(messageId, String.format("Attempt %s failed for this message", attempts), logMap);
 
         if (attempts < maxRetryAttempts) {
             message.setAttempt(attempts + 1);
-            messageProducer.writeToTopic(message, consumerConfig.retryTopic());
+            messageProducer.writeToTopic(message, retryTopicName);
         } else {
-            logger.error(String.format("Maximum retry attempts %s reached for message id %s", maxRetryAttempts, messageId), e, logMap);
-            messageProducer.writeToTopic(message, consumerConfig.errorTopic());
+            logger.errorContext(messageId, String.format("Maximum retry attempts %s reached for this message", maxRetryAttempts), e, logMap);
+            messageProducer.writeToTopic(message, errorTopicName);
         }
     }
 }

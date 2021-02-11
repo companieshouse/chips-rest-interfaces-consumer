@@ -1,10 +1,11 @@
-package uk.gov.companieshouse.chipsrestinterfacesconsumer.producer;
+package uk.gov.companieshouse.chipsrestinterfacesconsumer.producer.impl;
 
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
+import uk.gov.companieshouse.chipsrestinterfacesconsumer.producer.MessageProducer;
 import uk.gov.companieshouse.kafka.exceptions.SerializationException;
 import uk.gov.companieshouse.kafka.message.Message;
 import uk.gov.companieshouse.kafka.producer.CHKafkaProducer;
@@ -14,7 +15,7 @@ import uk.gov.companieshouse.kafka.serialization.SerializerFactory;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-@Component
+@Service
 public class MessageProducerImpl implements MessageProducer {
 
     private final ApplicationLogger logger;
@@ -35,7 +36,8 @@ public class MessageProducerImpl implements MessageProducer {
     @Override
     public void writeToTopic(ChipsRestInterfacesSend chipsMessage, String topicName) throws ServiceException {
         try {
-            logger.info(String.format("Writing message id %s to topic: %s", chipsMessage.getMessageId(), topicName));
+            logger.infoContext(chipsMessage.getMessageId(),
+                    String.format("Writing this message to topic: %s", topicName));
             byte[] serializedData = serialize(chipsMessage);
             Message kafkaMessage = new Message();
             kafkaMessage.setValue(serializedData);
