@@ -9,26 +9,26 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MainConsumer;
+import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.ErrorConsumer;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
 import uk.gov.companieshouse.service.ServiceException;
 
 @Service
-@Profile("!error-mode")
-public class MainConsumerImpl implements MainConsumer {
+@Profile("error-mode")
+public class ErrorConsumerImpl implements ErrorConsumer {
 
     private final ApplicationLogger logger;
     private final MessageProcessorService messageProcessorService;
 
     @Autowired
-    public MainConsumerImpl(ApplicationLogger logger, MessageProcessorService messageProcessorService) {
+    public ErrorConsumerImpl(ApplicationLogger logger, MessageProcessorService messageProcessorService) {
         this.logger = logger;
         this.messageProcessorService = messageProcessorService;
     }
 
     @Override
-    @KafkaListener(topics = "${kafka.main.topic}", containerFactory = "kafkaListenerContainerFactory", groupId = "main-group")
-    public void readAndProcessMainTopic(@Payload ChipsRestInterfacesSend data,
+    @KafkaListener(topics = "${kafka.error.topic}", containerFactory = "kafkaListenerContainerFactory", groupId = "error-group")
+    public void readAndProcessErrorTopic(@Payload ChipsRestInterfacesSend data,
                                         @Headers MessageHeaders headers){
 
         logger.info(String.format("received data='%s'", data));
@@ -38,25 +38,7 @@ public class MainConsumerImpl implements MainConsumer {
         });
 
         try {
-            messageProcessorService.processMessage("Main Consumer", data);
-        } catch (ServiceException se) {
-            logger.error("Failed to process message", se);
-        }
-    }
-
-    @Override
-    @KafkaListener(topics = "${kafka.retry.topic}", containerFactory = "kafkaRetryListenerContainerFactory", groupId = "retry-group")
-    public void readAndProcessRetryTopic(@Payload ChipsRestInterfacesSend data,
-                                        @Headers MessageHeaders headers){
-
-        logger.info(String.format("received data='%s'", data));
-
-        headers.keySet().forEach(key -> {
-            logger.info(String.format("%s: %s", key, headers.get(key)));
-        });
-
-        try {
-            messageProcessorService.processMessage("Retry Consumer", data);
+            messageProcessorService.processMessage("Error Consumer", data);
         } catch (ServiceException se) {
             logger.error("Failed to process message", se);
         }

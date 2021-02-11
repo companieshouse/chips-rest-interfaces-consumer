@@ -1,6 +1,6 @@
 local_resource(
   name = 'dev:chips-rest-interfaces-consumer',
-  cmd = 'mvn compile',
+  cmd = 'mvn clean compile',
   deps = ['src']
 )
 
