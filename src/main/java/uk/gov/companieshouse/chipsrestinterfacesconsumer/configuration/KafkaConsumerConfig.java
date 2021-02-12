@@ -2,7 +2,6 @@ package uk.gov.companieshouse.chipsrestinterfacesconsumer.configuration;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +11,6 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.avro.AvroDeserializer;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +18,8 @@ import java.util.Map;
 @EnableKafka
 @Configuration
 public class KafkaConsumerConfig {
+
+    private static final int MINIMUM_POLL_INTERVAL = 300000;
 
     @Value("${kafka.broker.address}")
     private String brokerAddress;
@@ -30,11 +30,7 @@ public class KafkaConsumerConfig {
     @Value("${MAX_RETRY_ATTEMPTS}")
     private int maxRetryAttempts;
 
-    @Autowired
-    private ApplicationLogger logger;
-
-    @Bean
-    public ConsumerFactory<String, ChipsRestInterfacesSend> consumerFactory() {
+    private Map<String, Object> getDefaultConfig() {
         Map<String, Object> props = new HashMap<>();
         props.put(
                 ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
@@ -51,27 +47,45 @@ public class KafkaConsumerConfig {
         props.put(
                 ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
                 "earliest");
+        return props;
+    }
+
+    private ConsumerFactory<String, ChipsRestInterfacesSend> newMainConsumerFactory() {
+        var props = getDefaultConfig();
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new AvroDeserializer<>(ChipsRestInterfacesSend.class));
+    }
+
+    private ConsumerFactory<String, ChipsRestInterfacesSend> newRetryConsumerFactory() {
+        var maxPollInterval = Math.max(MINIMUM_POLL_INTERVAL, (int) retryThrottleSeconds * 1000);
+
+        var props = getDefaultConfig();
+        props.put(
+                ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG,
+                maxPollInterval
+        );
+
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new AvroDeserializer<>(ChipsRestInterfacesSend.class));
     }
 
     private ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> getNewDefaultContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
+        factory.setConsumerFactory(newMainConsumerFactory());
+        return factory;
+    }
+
+    private ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> getNewRetryContainerFactory(long idleMillis) {
+        ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(newRetryConsumerFactory());
+        factory.getContainerProperties().setIdleBetweenPolls(idleMillis);
         return factory;
     }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend>
     kafkaListenerContainerFactory() {
-
         return getNewDefaultContainerFactory();
-    }
-
-    ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> getNewRetryContainerFactory(long idleMillis) {
-        var factory = getNewDefaultContainerFactory();
-        factory.getContainerProperties().setIdleBetweenPolls(idleMillis);
-        return factory;
     }
 
     @Bean
