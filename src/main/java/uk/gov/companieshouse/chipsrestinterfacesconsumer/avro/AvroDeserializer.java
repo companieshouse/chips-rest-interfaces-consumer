@@ -38,7 +38,7 @@ public class AvroDeserializer<T extends SpecificRecordBase> implements Deseriali
 
             if (data != null) {
                 DatumReader<GenericRecord> datumReader =
-                        new SpecificDatumReader<>(targetType.newInstance().getSchema());
+                        new SpecificDatumReader<>(targetType.getDeclaredConstructor().newInstance().getSchema());
                 Decoder decoder = DecoderFactory.get().binaryDecoder(data, null);
 
                 result = (T) datumReader.read(null, decoder);
