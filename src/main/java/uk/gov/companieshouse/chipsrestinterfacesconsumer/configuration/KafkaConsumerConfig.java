@@ -54,10 +54,7 @@ public class KafkaConsumerConfig {
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new AvroDeserializer<>(ChipsRestInterfacesSend.class));
     }
 
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend>
-    kafkaListenerContainerFactory() {
-
+    private ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> getMainFactory() {
         ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
@@ -66,12 +63,15 @@ public class KafkaConsumerConfig {
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend>
+    kafkaListenerContainerFactory() {
+
+        return getMainFactory();
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend>
     kafkaRetryListenerContainerFactory() {
 
-        ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
-
-        return factory;
+        return getMainFactory();
     }
 }
