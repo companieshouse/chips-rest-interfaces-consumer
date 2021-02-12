@@ -43,9 +43,7 @@ public class MainConsumerImpl implements MainConsumer {
     private void processMessage(String consumerId, ChipsRestInterfacesSend data, MessageHeaders headers) {
         logger.info(String.format("received data='%s'", data));
 
-        headers.keySet().forEach(key -> {
-            logger.info(String.format("%s: %s", key, headers.get(key)));
-        });
+        headers.keySet().forEach(key -> logger.info(String.format("%s: %s", key, headers.get(key))));
 
         try {
             messageProcessorService.processMessage(consumerId, data);

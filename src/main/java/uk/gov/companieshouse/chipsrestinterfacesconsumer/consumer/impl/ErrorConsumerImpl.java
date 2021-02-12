@@ -33,9 +33,7 @@ public class ErrorConsumerImpl implements ErrorConsumer {
 
         logger.info(String.format("received data='%s'", data));
 
-        headers.keySet().forEach(key -> {
-            logger.info(String.format("%s: %s", key, headers.get(key)));
-        });
+        headers.keySet().forEach(key -> logger.info(String.format("%s: %s", key, headers.get(key))));
 
         try {
             messageProcessorService.processMessage("Error Consumer", data);
