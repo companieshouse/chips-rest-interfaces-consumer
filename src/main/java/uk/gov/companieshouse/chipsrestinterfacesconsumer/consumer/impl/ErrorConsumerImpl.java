@@ -36,7 +36,7 @@ public class ErrorConsumerImpl implements ErrorConsumer {
         headers.keySet().forEach(key -> logger.info(String.format("%s: %s", key, headers.get(key))));
 
         try {
-            messageProcessorService.processMessage("Error Consumer", data);
+            messageProcessorService.processMessage("error-consumer", data);
         } catch (ServiceException se) {
             logger.error("Failed to process message", se);
         }

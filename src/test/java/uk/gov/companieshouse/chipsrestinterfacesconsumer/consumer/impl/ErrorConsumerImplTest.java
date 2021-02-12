@@ -2,8 +2,10 @@ package uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.MessageHeaders;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
@@ -15,6 +17,7 @@ import java.util.Collections;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 class ErrorConsumerImplTest {
 
     private static final String DATA = "DATA";
