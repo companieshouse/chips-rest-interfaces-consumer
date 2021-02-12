@@ -11,19 +11,8 @@ import org.apache.kafka.common.serialization.Serializer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Map;
 
 public class AvroSerializer<T extends SpecificRecordBase> implements Serializer<T> {
-
-    @Override
-    public void close() {
-        // No-op
-    }
-
-    @Override
-    public void configure(Map<String, ?> arg0, boolean arg1) {
-        // No-op
-    }
 
     @Override
     public byte[] serialize(String topic, T data) {

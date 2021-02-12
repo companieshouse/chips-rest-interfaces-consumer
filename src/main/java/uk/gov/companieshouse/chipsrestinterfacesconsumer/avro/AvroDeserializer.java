@@ -10,7 +10,6 @@ import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Deserializer;
 
 import java.util.Arrays;
-import java.util.Map;
 
 public class AvroDeserializer<T extends SpecificRecordBase> implements Deserializer<T> {
 
@@ -18,16 +17,6 @@ public class AvroDeserializer<T extends SpecificRecordBase> implements Deseriali
 
     public AvroDeserializer(Class<T> targetType) {
         this.targetType = targetType;
-    }
-
-    @Override
-    public void close() {
-        // No-op
-    }
-
-    @Override
-    public void configure(Map<String, ?> arg0, boolean arg1) {
-        // No-op
     }
 
     @SuppressWarnings("unchecked")
