@@ -54,7 +54,7 @@ public class KafkaConsumerConfig {
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new AvroDeserializer<>(ChipsRestInterfacesSend.class));
     }
 
-    private ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> getMainFactory() {
+    private ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> getNewDefaultContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
@@ -65,13 +65,21 @@ public class KafkaConsumerConfig {
     public ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend>
     kafkaListenerContainerFactory() {
 
-        return getMainFactory();
+        return getNewDefaultContainerFactory();
+    }
+
+    ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> getNewRetryContainerFactory(long idleMillis) {
+        var factory = getNewDefaultContainerFactory();
+        factory.getContainerProperties().setIdleBetweenPolls(idleMillis);
+        return factory;
     }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend>
     kafkaRetryListenerContainerFactory() {
 
-        return getMainFactory();
+        var idleMillis = retryThrottleSeconds * 1000L;
+
+        return getNewRetryContainerFactory(idleMillis);
     }
 }
