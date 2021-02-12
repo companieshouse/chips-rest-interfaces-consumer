@@ -2,7 +2,6 @@ package uk.gov.companieshouse.chipsrestinterfacesconsumer.configuration;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +11,6 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.avro.AvroDeserializer;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,9 +29,6 @@ public class KafkaConsumerConfig {
 
     @Value("${MAX_RETRY_ATTEMPTS}")
     private int maxRetryAttempts;
-
-    @Autowired
-    private ApplicationLogger logger;
 
     private Map<String, Object> getDefaultConfig() {
         Map<String, Object> props = new HashMap<>();
@@ -54,6 +49,7 @@ public class KafkaConsumerConfig {
                 "earliest");
         return props;
     }
+
     private ConsumerFactory<String, ChipsRestInterfacesSend> newMainConsumerFactory() {
         var props = getDefaultConfig();
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new AvroDeserializer<>(ChipsRestInterfacesSend.class));
