@@ -21,7 +21,7 @@ import java.util.Map;
 @Configuration
 public class KafkaConsumerConfig {
 
-    private static final int MINIMUM_POLL_INTERVAL = 5000;
+    private static final int MINIMUM_POLL_INTERVAL = 300000;
 
     @Value("${kafka.broker.address}")
     private String brokerAddress;
@@ -78,19 +78,18 @@ public class KafkaConsumerConfig {
         return factory;
     }
 
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend>
-    kafkaListenerContainerFactory() {
+    private ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> getNewRetryContainerFactory(long idleMillis) {
         ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(newRetryConsumerFactory());
+        factory.getContainerProperties().setIdleBetweenPolls(idleMillis);
         return factory;
     }
 
-    private ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> getNewRetryContainerFactory(long idleMillis) {
-        var factory = getNewDefaultContainerFactory();
-        factory.getContainerProperties().setIdleBetweenPolls(idleMillis);
-        return factory;
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend>
+    kafkaListenerContainerFactory() {
+        return getNewDefaultContainerFactory();
     }
 
     @Bean
