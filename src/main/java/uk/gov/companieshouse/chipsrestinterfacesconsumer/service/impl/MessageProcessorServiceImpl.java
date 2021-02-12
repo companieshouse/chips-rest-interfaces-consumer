@@ -9,7 +9,6 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.client.ChipsRestClient;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.producer.MessageProducer;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
-import uk.gov.companieshouse.kafka.consumer.ConsumerConfig;
 import uk.gov.companieshouse.service.ServiceException;
 
 import java.util.HashMap;
@@ -41,11 +40,8 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
     @Autowired
     private MessageProducer messageProducer;
 
-    @Autowired
-    private ConsumerConfig consumerConfig;
-
     @Override
-    public void processMessage(String consumerId, ChipsRestInterfacesSend message) throws ServiceException {
+    public void processMessage(String consumerId, ChipsRestInterfacesSend message) throws ServiceException{
         Map<String, Object> logMap = new HashMap<>();
         logMap.put("Message", message.getData());
         logMap.put("Thread Name", Thread.currentThread().getName());
@@ -66,7 +62,7 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
 
         if (runAppInErrorMode) {
             message.setAttempt(1);
-            messageProducer.writeToTopic(message, consumerConfig.retryTopic());
+            messageProducer.writeToTopic(message, retryTopicName);
             return;
         }
 
@@ -75,10 +71,10 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
 
         if (attempts < maxRetryAttempts) {
             message.setAttempt(attempts + 1);
-            messageProducer.writeToTopic(message, consumerConfig.retryTopic());
+            messageProducer.writeToTopic(message, retryTopicName);
         } else {
             logger.errorContext(messageId, String.format("Maximum retry attempts %s reached for this message", maxRetryAttempts), e, logMap);
-            messageProducer.writeToTopic(message, consumerConfig.errorTopic());
+            messageProducer.writeToTopic(message, errorTopicName);
         }
     }
 }
