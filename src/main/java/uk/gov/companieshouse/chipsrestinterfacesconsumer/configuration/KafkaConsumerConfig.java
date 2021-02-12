@@ -21,6 +21,8 @@ import java.util.Map;
 @Configuration
 public class KafkaConsumerConfig {
 
+    private static final int MINIMUM_POLL_INTERVAL = 5000;
+
     @Value("${kafka.broker.address}")
     private String brokerAddress;
 
@@ -33,8 +35,7 @@ public class KafkaConsumerConfig {
     @Autowired
     private ApplicationLogger logger;
 
-    @Bean
-    public ConsumerFactory<String, ChipsRestInterfacesSend> consumerFactory() {
+    private Map<String, Object> getDefaultConfig() {
         Map<String, Object> props = new HashMap<>();
         props.put(
                 ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
@@ -51,24 +52,42 @@ public class KafkaConsumerConfig {
         props.put(
                 ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
                 "earliest");
+        return props;
+    }
+    private ConsumerFactory<String, ChipsRestInterfacesSend> newMainConsumerFactory() {
+        var props = getDefaultConfig();
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new AvroDeserializer<>(ChipsRestInterfacesSend.class));
+    }
+
+    private ConsumerFactory<String, ChipsRestInterfacesSend> newRetryConsumerFactory() {
+        var maxPollInterval = Math.max(MINIMUM_POLL_INTERVAL, (int) retryThrottleSeconds * 1000);
+
+        var props = getDefaultConfig();
+        props.put(
+                ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG,
+                maxPollInterval
+        );
+
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new AvroDeserializer<>(ChipsRestInterfacesSend.class));
     }
 
     private ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> getNewDefaultContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
+        factory.setConsumerFactory(newMainConsumerFactory());
         return factory;
     }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend>
     kafkaListenerContainerFactory() {
-
-        return getNewDefaultContainerFactory();
+        ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(newRetryConsumerFactory());
+        return factory;
     }
 
-    ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> getNewRetryContainerFactory(long idleMillis) {
+    private ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> getNewRetryContainerFactory(long idleMillis) {
         var factory = getNewDefaultContainerFactory();
         factory.getContainerProperties().setIdleBetweenPolls(idleMillis);
         return factory;
