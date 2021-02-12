@@ -30,25 +30,17 @@ public class MainConsumerImpl implements MainConsumer {
     @KafkaListener(topics = "${kafka.main.topic}", containerFactory = "kafkaListenerContainerFactory", groupId = "main-group")
     public void readAndProcessMainTopic(@Payload ChipsRestInterfacesSend data,
                                         @Headers MessageHeaders headers){
-
-        logger.info(String.format("received data='%s'", data));
-
-        headers.keySet().forEach(key -> {
-            logger.info(String.format("%s: %s", key, headers.get(key)));
-        });
-
-        try {
-            messageProcessorService.processMessage("Main Consumer", data);
-        } catch (ServiceException se) {
-            logger.error("Failed to process message", se);
-        }
+        processMessage("main-consumer", data, headers);
     }
 
     @Override
     @KafkaListener(topics = "${kafka.retry.topic}", containerFactory = "kafkaRetryListenerContainerFactory", groupId = "retry-group")
     public void readAndProcessRetryTopic(@Payload ChipsRestInterfacesSend data,
                                         @Headers MessageHeaders headers){
+        processMessage("retry-consumer", data, headers);
+    }
 
+    private void processMessage(String consumerId, ChipsRestInterfacesSend data, MessageHeaders headers) {
         logger.info(String.format("received data='%s'", data));
 
         headers.keySet().forEach(key -> {
@@ -56,7 +48,7 @@ public class MainConsumerImpl implements MainConsumer {
         });
 
         try {
-            messageProcessorService.processMessage("Retry Consumer", data);
+            messageProcessorService.processMessage(consumerId, data);
         } catch (ServiceException se) {
             logger.error("Failed to process message", se);
         }
