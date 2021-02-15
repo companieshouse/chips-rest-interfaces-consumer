@@ -1,7 +1,7 @@
 package uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.Headers;
@@ -13,8 +13,10 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MainConsumer;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
 import uk.gov.companieshouse.service.ServiceException;
 
+import javax.annotation.PostConstruct;
+
 @Service
-@Profile("!error-mode")
+@ConditionalOnProperty(prefix = "feature", name = "errorMode", havingValue = "false")
 public class MainConsumerImpl implements MainConsumer {
 
     private final ApplicationLogger logger;
@@ -24,6 +26,11 @@ public class MainConsumerImpl implements MainConsumer {
     public MainConsumerImpl(ApplicationLogger logger, MessageProcessorService messageProcessorService) {
         this.logger = logger;
         this.messageProcessorService = messageProcessorService;
+    }
+
+    @PostConstruct
+    void init() {
+        logger.info("***** Application started in normal processing mode *****");
     }
 
     @Override
