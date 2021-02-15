@@ -7,7 +7,6 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.producer.MessageProducer;
-import uk.gov.companieshouse.service.ServiceException;
 
 @Service
 public class MessageProducerImpl implements MessageProducer {
@@ -22,7 +21,7 @@ public class MessageProducerImpl implements MessageProducer {
     }
 
     @Override
-    public void writeToTopic(ChipsRestInterfacesSend chipsMessage, String topicName) throws ServiceException {
+    public void writeToTopic(ChipsRestInterfacesSend chipsMessage, String topicName) {
         var future = kafkaTemplate.send(topicName, chipsMessage);
 
         future.addCallback(new ListenableFutureCallback<>() {

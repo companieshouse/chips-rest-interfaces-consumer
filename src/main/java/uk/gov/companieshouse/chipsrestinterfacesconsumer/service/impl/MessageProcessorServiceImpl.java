@@ -56,7 +56,7 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
         }
     }
 
-    private void handleFailedMessage(ChipsRestInterfacesSend message, Exception e, Map<String, Object> logMap) throws ServiceException {
+    private void handleFailedMessage(ChipsRestInterfacesSend message, Exception e, Map<String, Object> logMap) {
         var messageId = message.getMessageId();
         logger.errorContext(messageId, SEND_FAILURE_MESSAGE, e, logMap);
 
