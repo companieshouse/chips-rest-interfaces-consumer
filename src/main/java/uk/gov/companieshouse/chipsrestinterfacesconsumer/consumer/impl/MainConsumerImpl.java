@@ -62,19 +62,20 @@ public class MainConsumerImpl implements MainConsumer {
     }
 
     private void processMessage(String consumerId, ChipsRestInterfacesSend data, Long offset, Integer partition) {
+        var messageId = data.getMessageId();
         Map<String, Object> logMap = new HashMap<>();
         logMap.put("Group Id", consumerId);
         logMap.put("Partition", partition);
         logMap.put("Offset", offset);
 
         try {
-            logger.info(String.format("%s: Consumed Partition: %s, Offset: %s", consumerId, partition, offset), logMap);
-            logger.info(String.format("received data='%s'", data), logMap);
+            logger.infoContext(messageId, String.format("%s: Consumed Message from Partition: %s, Offset: %s", consumerId, partition, offset), logMap);
+            logger.infoContext(messageId, String.format("received data='%s'", data), logMap);
             messageProcessorService.processMessage(consumerId, data);
         } catch (ServiceException se) {
-            logger.error("Failed to process message", se);
+            logger.errorContext(messageId, "Failed to process message", se);
         } finally {
-            logger.info(String.format("%s: Finished Processing Partition: %s, Offset: %s", consumerId, partition, offset), logMap);
+            logger.infoContext(messageId, String.format("%s: Finished Processing Message from Partition: %s, Offset: %s", consumerId, partition, offset), logMap);
         }
     }
 }
