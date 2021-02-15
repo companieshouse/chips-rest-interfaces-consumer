@@ -16,7 +16,7 @@ import uk.gov.companieshouse.service.ServiceException;
 import javax.annotation.PostConstruct;
 
 @Service
-@ConditionalOnProperty(prefix = "feature", name = "error", havingValue = "true")
+@ConditionalOnProperty(prefix = "feature", name = "errorMode", havingValue = "true")
 public class ErrorConsumerImpl implements ErrorConsumer {
 
     private final ApplicationLogger logger;
