@@ -30,6 +30,10 @@ public class KafkaConsumerConfig {
     @Value("${MAX_RETRY_ATTEMPTS}")
     private int maxRetryAttempts;
 
+    /**
+     *
+     * @return A Map of default Configs for ConsumerFactories to use as a starting point.
+     */
     private Map<String, Object> getDefaultConfig() {
         Map<String, Object> props = new HashMap<>();
         props.put(
@@ -50,11 +54,19 @@ public class KafkaConsumerConfig {
         return props;
     }
 
+    /**
+     *
+     * @return A consumer factory with no delay between polls
+     */
     private ConsumerFactory<String, ChipsRestInterfacesSend> newMainConsumerFactory() {
         var props = getDefaultConfig();
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new AvroDeserializer<>(ChipsRestInterfacesSend.class));
     }
 
+    /**
+     *
+     * @return A consumer factory with delay between polls
+     */
     private ConsumerFactory<String, ChipsRestInterfacesSend> newRetryConsumerFactory() {
         var maxPollInterval = Math.max(MINIMUM_POLL_INTERVAL, (int) retryThrottleSeconds * 1000);
 
@@ -67,6 +79,12 @@ public class KafkaConsumerConfig {
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new AvroDeserializer<>(ChipsRestInterfacesSend.class));
     }
 
+    /**
+     * Creates a concurrent kafka listener container factory.
+     * For each message a kafka listener receives this factory will create a container to process the message.
+     *
+     * @return A ConcurrentKafkaListenerContainerFactory
+     */
     private ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> getNewDefaultContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
@@ -74,6 +92,15 @@ public class KafkaConsumerConfig {
         return factory;
     }
 
+    /**
+     * Creates a concurrent kafka listener container factory.
+     * For each message a kafka listener receives this factory will create a container to process the message.
+     * Batch is set to true so that it consumes all the messages after the delay period. Without this it will
+     * consume one message per poll
+     *
+     * @param idleMillis the amount of time in millis you want the consumer to wait between polls
+     * @return A ConcurrentKafkaListenerContainerFactory with batch set tot true
+     */
     private ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> getNewRetryContainerFactory(long idleMillis) {
         ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
@@ -83,12 +110,20 @@ public class KafkaConsumerConfig {
         return factory;
     }
 
+    /**
+     *
+     * @return ConcurrentKafkaListenerContainerFactory with default configuration
+     */
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend>
     kafkaListenerContainerFactory() {
         return getNewDefaultContainerFactory();
     }
 
+    /**
+     *
+     * @return ConcurrentKafkaListenerContainerFactory with retry configuration
+     */
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend>
     kafkaRetryListenerContainerFactory() {
