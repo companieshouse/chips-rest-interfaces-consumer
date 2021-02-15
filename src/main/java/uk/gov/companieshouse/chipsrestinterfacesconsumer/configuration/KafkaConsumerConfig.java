@@ -79,6 +79,7 @@ public class KafkaConsumerConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(newRetryConsumerFactory());
         factory.getContainerProperties().setIdleBetweenPolls(idleMillis);
+        factory.setBatchListener(true);
         return factory;
     }
 

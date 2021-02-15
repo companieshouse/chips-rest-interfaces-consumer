@@ -31,6 +31,10 @@ public class ApplicationLogger {
         }
     }
 
+    public void debug(String message) {
+        logger.debug(message);
+    }
+
     public void debugContext(String context, String message) {
         logger.debugContext(context, message, null);
     }

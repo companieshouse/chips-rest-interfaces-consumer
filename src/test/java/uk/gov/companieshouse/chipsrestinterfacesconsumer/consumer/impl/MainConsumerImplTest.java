@@ -12,7 +12,9 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogge
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
 import uk.gov.companieshouse.service.ServiceException;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -21,6 +23,7 @@ import static org.mockito.Mockito.verify;
 class MainConsumerImplTest {
 
     private static final String DATA = "DATA";
+    private static final String SECOND_DATA = "DATA-2";
     private static final String MAIN_CONSUMER_ID = "main-consumer";
     private static final String RETRY_CONSUMER_ID = "retry-consumer";
 
@@ -34,26 +37,32 @@ class MainConsumerImplTest {
     private MainConsumerImpl mainConsumer;
 
     private ChipsRestInterfacesSend data;
-    private MessageHeaders headers;
+    private ChipsRestInterfacesSend secondData;
+    private List<ChipsRestInterfacesSend> messageList;
 
     @BeforeEach
     void init() {
         data = new ChipsRestInterfacesSend();
         data.setData(DATA);
-        headers = new MessageHeaders(Collections.singletonMap("Key", "Value"));
+        secondData = new ChipsRestInterfacesSend();
+        secondData.setData(SECOND_DATA);
     }
 
     @Test
     void readAndProcessMainTopic() throws ServiceException {
-        mainConsumer.readAndProcessMainTopic(data, headers);
+        mainConsumer.readAndProcessMainTopic(data, 0L, 0, MAIN_CONSUMER_ID);
 
         verify(messageProcessorService, times(1)).processMessage(MAIN_CONSUMER_ID, data);
     }
 
     @Test
     void readAndProcessRetryTopic() throws ServiceException {
-        mainConsumer.readAndProcessRetryTopic(data, headers);
+        messageList = Arrays.asList(data, secondData);
+        List<Long> offsets = Arrays.asList(0L, 1L);
+        List<Integer> partitions = Arrays.asList(0, 0);
+        mainConsumer.readAndProcessRetryTopic(messageList, offsets, partitions, RETRY_CONSUMER_ID);
 
         verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, data);
+        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData);
     }
 }
