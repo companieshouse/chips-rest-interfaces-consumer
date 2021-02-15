@@ -36,6 +36,14 @@ public class MainConsumerImpl implements MainConsumer {
         logger.info("***** Application started in normal processing mode *****");
     }
 
+    /**
+     * Creates a container using the containerFactory argument to handle any messages retrieved from kafka
+     *
+     * @param data The deserialized message from Kafka
+     * @param offset The offset of {@code data}
+     * @param partition The partition of {@code data}
+     * @param groupId The group id of the consumer
+     */
     @Override
     @KafkaListener(topics = "${kafka.main.topic}", containerFactory = "kafkaListenerContainerFactory", groupId = "main-group")
     public void readAndProcessMainTopic(@Payload ChipsRestInterfacesSend data,
@@ -46,6 +54,14 @@ public class MainConsumerImpl implements MainConsumer {
         processMessage(groupId, data, offset, partition);
     }
 
+    /**
+     * Creates a container using the containerFactory argument to handle any messages retrieved from kafka
+     *
+     * @param messages A list of deserialized messages from Kafka
+     * @param offsets A list of the offsets for the messages in {@code data}
+     * @param partitions A list of the partitiona for the messages in {@code data}
+     * @param groupId The group id of the consumer
+     */
     @Override
     @KafkaListener(topics = "${kafka.retry.topic}", containerFactory = "kafkaRetryListenerContainerFactory", groupId = "retry-group")
     public void readAndProcessRetryTopic(@Payload List<ChipsRestInterfacesSend> messages,
@@ -61,6 +77,15 @@ public class MainConsumerImpl implements MainConsumer {
 
     }
 
+    /**
+     * Delegates the processing of the message to the {@code messageProcessorService}
+     * and handles any unexpected errors
+     *
+     * @param consumerId the id of the consumer calling this method
+     * @param data a deserialized message from kafka
+     * @param offset The offset of {@code data}
+     * @param partition The partition of {@code data}
+     */
     private void processMessage(String consumerId, ChipsRestInterfacesSend data, Long offset, Integer partition) {
         var messageId = data.getMessageId();
         Map<String, Object> logMap = new HashMap<>();

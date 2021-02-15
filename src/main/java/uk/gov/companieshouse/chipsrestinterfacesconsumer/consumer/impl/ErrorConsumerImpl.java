@@ -33,6 +33,11 @@ public class ErrorConsumerImpl implements ErrorConsumer {
         logger.info("***** Application started in error processing mode *****");
     }
 
+    /**
+     * Creates a container using the containerFactory argument to handle any messages retrieved from kafka
+     * @param data deserialized message from kafka
+     * @param headers the headers associated with {@code data}
+     */
     @Override
     @KafkaListener(topics = "${kafka.error.topic}", containerFactory = "kafkaListenerContainerFactory", groupId = "error-group")
     public void readAndProcessErrorTopic(@Payload ChipsRestInterfacesSend data,
