@@ -51,6 +51,7 @@ public class MainConsumerImpl implements MainConsumer {
                                         @Header(KafkaHeaders.RECEIVED_PARTITION_ID) Integer partition,
                                         @Header(KafkaHeaders.GROUP_ID) String groupId
     ){
+        data.setAttempt(0);
         processMessage(groupId, data, offset, partition);
     }
 
