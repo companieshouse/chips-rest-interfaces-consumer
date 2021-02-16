@@ -54,7 +54,7 @@ class MainConsumerImplTest {
         mainConsumer.readAndProcessMainTopic(data, 0L, 0, MAIN_CONSUMER_ID);
 
         verify(messageProcessorService, times(1)).processMessage(MAIN_CONSUMER_ID, data);
-        assertEquals(data.getAttempt(), 0);
+        assertEquals(0, data.getAttempt());
     }
 
     @Test
@@ -63,7 +63,7 @@ class MainConsumerImplTest {
         mainConsumer.readAndProcessMainTopic(data, 0L, 0, MAIN_CONSUMER_ID);
 
         verify(messageProcessorService, times(1)).processMessage(MAIN_CONSUMER_ID, data);
-        assertEquals(data.getAttempt(), 0);
+        assertEquals(0, data.getAttempt());
     }
 
     @Test
