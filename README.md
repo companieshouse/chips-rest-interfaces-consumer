@@ -39,4 +39,3 @@ KAFKA_PRODUCER_RETRIES | 5 |
 LOG_LEVEL | DEBUG |
 MAX_RETRY_ATTEMPTS | 10 | Number of retries before the message is added to the error topic.
 RETRY_THROTTLE_RATE_SECONDS | 30 | Delay between retry consumer processing the messages on the retry topic.
-
