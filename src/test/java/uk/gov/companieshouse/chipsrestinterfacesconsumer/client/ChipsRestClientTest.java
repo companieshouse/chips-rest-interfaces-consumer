@@ -22,6 +22,7 @@ import java.net.URI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -59,7 +60,7 @@ class ChipsRestClientTest {
         when(restTemplate.exchange(any(URI.class), eq(HttpMethod.POST), any(), eq(String.class))).thenReturn(responseEntity);
 
         chipsRestClient.init();
-        chipsRestClient.sendToChips(chipsRestInterfacesSend);
+        chipsRestClient.sendToChips(chipsRestInterfacesSend, "CONSUMER-ID");
 
         verify(restTemplate, times(1)).exchange(
                 eq(FULL_EXPANDED_CHIPS_REST_URL), eq(HttpMethod.POST), messageDataArgCaptor.capture(),
@@ -72,8 +73,8 @@ class ChipsRestClientTest {
         assertEquals(MediaType.APPLICATION_JSON, messageData.getHeaders().getContentType());
 
         verify(logger, times(1))
-                .infoContext(messageId, String.format("Posting this message to %s", FULL_EXPANDED_CHIPS_REST_URL));
+                .infoContext(eq(messageId), eq(String.format("Posting this message to %s", FULL_EXPANDED_CHIPS_REST_URL)), anyMap());
         verify(logger, times(1))
-                .infoContext(messageId, String.format("Message successfully sent, Chips Rest Response Status: %s", HttpStatus.ACCEPTED));
+                .infoContext(eq(messageId), eq(String.format("Message successfully sent, Chips Rest Response Status: %s", HttpStatus.ACCEPTED)), anyMap());
     }
 }

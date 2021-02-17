@@ -22,19 +22,20 @@ public class MessageProducerImpl implements MessageProducer {
 
     @Override
     public void writeToTopic(ChipsRestInterfacesSend chipsMessage, String topicName) {
+        var messageId = chipsMessage.getMessageId();
         var future = kafkaTemplate.send(topicName, chipsMessage);
 
         future.addCallback(new ListenableFutureCallback<>() {
 
             @Override
             public void onSuccess(SendResult<String, ChipsRestInterfacesSend> result) {
-                logger.info("Sent message=[" + chipsMessage +
+                logger.infoContext(messageId, "Sent message=[" + chipsMessage +
                         "] with offset=[" + result.getRecordMetadata().offset() + "]");
             }
 
             @Override
             public void onFailure(Throwable ex) {
-                logger.error("Unable to send message=["
+                logger.errorContext(messageId, "Unable to send message=["
                         + chipsMessage + "] due to : " + ex.getMessage(), new Exception(ex));
             }
         });

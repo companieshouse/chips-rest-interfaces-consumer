@@ -6,13 +6,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.messaging.MessageHeaders;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
 import uk.gov.companieshouse.service.ServiceException;
-
-import java.util.Collections;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -33,18 +30,16 @@ class ErrorConsumerImplTest {
     private ErrorConsumerImpl errorConsumer;
 
     private ChipsRestInterfacesSend data;
-    private MessageHeaders headers;
 
     @BeforeEach
     void init() {
         data = new ChipsRestInterfacesSend();
         data.setData(DATA);
-        headers = new MessageHeaders(Collections.singletonMap("Key", "Value"));
     }
 
     @Test
     void readAndProcessErrorTopic() throws ServiceException {
-        errorConsumer.readAndProcessErrorTopic(data, headers);
+        errorConsumer.readAndProcessErrorTopic(data, 0L, 0, ERROR_CONSUMER_ID);
 
         verify(messageProcessorService, times(1)).processMessage(ERROR_CONSUMER_ID, data);
     }
