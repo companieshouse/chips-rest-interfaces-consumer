@@ -3,17 +3,18 @@ package uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.handler.annotation.Headers;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.ErrorConsumer;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
-import uk.gov.companieshouse.service.ServiceException;
 
 import javax.annotation.PostConstruct;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @ConditionalOnProperty(prefix = "feature", name = "errorMode", havingValue = "true")
@@ -34,23 +35,31 @@ public class ErrorConsumerImpl implements ErrorConsumer {
     }
 
     /**
+     *
      * Creates a container using the containerFactory argument to handle any messages retrieved from kafka
-     * @param data deserialized message from kafka
-     * @param headers the headers associated with {@code data}
+     *
+     * @param data The deserialized message from Kafka
+     * @param offset The offset of {@code data}
+     * @param partition The partition of {@code data}
+     * @param groupId The group id of the consumer
      */
     @Override
     @KafkaListener(topics = "${kafka.error.topic}", containerFactory = "kafkaListenerContainerFactory", groupId = "error-group")
     public void readAndProcessErrorTopic(@Payload ChipsRestInterfacesSend data,
-                                        @Headers MessageHeaders headers){
+                                         @Header(KafkaHeaders.OFFSET) Long offset,
+                                         @Header(KafkaHeaders.RECEIVED_PARTITION_ID) Integer partition,
+                                         @Header(KafkaHeaders.GROUP_ID) String groupId){
 
-        logger.info(String.format("received data='%s'", data));
+        var messageId = data.getMessageId();
+        Map<String, Object> logMap = new HashMap<>();
+        logMap.put("Group Id", groupId);
+        logMap.put("Partition", partition);
+        logMap.put("Offset", offset);
 
-        headers.keySet().forEach(key -> logger.info(String.format("%s: %s", key, headers.get(key))));
+        logger.infoContext(messageId, String.format("%s: Consumed Message from Partition: %s, Offset: %s", groupId, partition, offset), logMap);
+        logger.infoContext(messageId, String.format("received data='%s'", data), logMap);
 
-        try {
-            messageProcessorService.processMessage("error-consumer", data);
-        } catch (ServiceException se) {
-            logger.error("Failed to process message", se);
-        }
+        messageProcessorService.processMessage("error-consumer", data);
+        logger.infoContext(messageId, String.format("%s: Finished Processing Message from Partition: %s, Offset: %s", groupId, partition, offset), logMap);
     }
 }

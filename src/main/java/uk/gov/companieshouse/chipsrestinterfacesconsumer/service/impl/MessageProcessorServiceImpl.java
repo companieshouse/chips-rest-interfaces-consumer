@@ -9,7 +9,6 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.client.ChipsRestClient;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.producer.MessageProducer;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
-import uk.gov.companieshouse.service.ServiceException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,13 +40,12 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
     private MessageProducer messageProducer;
 
     @Override
-    public void processMessage(String consumerId, ChipsRestInterfacesSend message) throws ServiceException{
+    public void processMessage(String consumerId, ChipsRestInterfacesSend message) {
         Map<String, Object> logMap = new HashMap<>();
         logMap.put("Message", message.getData());
-        logMap.put("Thread Name", Thread.currentThread().getName());
         logMap.put("Message Consumer ID", consumerId);
         try {
-            chipsRestClient.sendToChips(message);
+            chipsRestClient.sendToChips(message, consumerId);
         } catch (HttpStatusCodeException hsce) {
             logMap.put("HTTP Status Code", hsce.getStatusCode().toString());
             handleFailedMessage(message, hsce, logMap);

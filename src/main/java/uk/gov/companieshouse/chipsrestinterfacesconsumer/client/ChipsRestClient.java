@@ -14,6 +14,8 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogge
 
 import javax.annotation.PostConstruct;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class ChipsRestClient {
@@ -36,7 +38,10 @@ public class ChipsRestClient {
         chipsRestUrl = new UriTemplate(String.format("%s{%s}", chipsRestHost, CHIPS_REST_ENDPOINT_URI_VAR));
     }
 
-    public void sendToChips(ChipsRestInterfacesSend message) {
+    public void sendToChips(ChipsRestInterfacesSend message, String consumerId) {
+        Map<String, Object> logMap = new HashMap<>();
+        logMap.put("Group Id", consumerId);
+
         var messageData = message.getData();
         var restEndpoint = message.getChipsRestEndpoint();
 
@@ -48,7 +53,7 @@ public class ChipsRestClient {
 
         var expandedUrl = chipsRestUrl.expand(uriVariables);
         var messageId = message.getMessageId();
-        logger.infoContext(messageId , String.format("Posting this message to %s", expandedUrl));
+        logger.infoContext(messageId , String.format("Posting this message to %s", expandedUrl), logMap);
         HttpEntity<String> requestEntity = new HttpEntity<>(messageData, requestHeaders);
         var response = restTemplate.exchange(
                 expandedUrl,
@@ -58,6 +63,6 @@ public class ChipsRestClient {
         );
 
         logger.infoContext(messageId, String.format(
-                "Message successfully sent, Chips Rest Response Status: %s", response.getStatusCode()));
+                "Message successfully sent, Chips Rest Response Status: %s", response.getStatusCode()), logMap);
     }
 }
