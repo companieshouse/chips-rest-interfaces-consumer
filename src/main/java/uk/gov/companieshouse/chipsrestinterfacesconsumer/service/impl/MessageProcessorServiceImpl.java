@@ -9,6 +9,7 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.client.ChipsRestClient;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.producer.MessageProducer;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
+import uk.gov.companieshouse.chipsrestinterfacesconsumer.slack.SlackMessagingService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +36,9 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
 
     @Autowired
     private ApplicationLogger logger;
+
+    @Autowired
+    private SlackMessagingService slackMessagingService;
 
     @Autowired
     private MessageProducer messageProducer;
@@ -65,11 +69,13 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
         }
 
         var attempts = message.getAttempt();
-        logger.infoContext(messageId, String.format("Attempt %s failed for this message", attempts), logMap);
+        String errorMessage = String.format("Attempt %s failed for this message", attempts);
+        logger.infoContext(messageId, errorMessage, logMap);
 
         if (attempts < maxRetryAttempts) {
             message.setAttempt(attempts + 1);
             messageProducer.writeToTopic(message, retryTopicName);
+            slackMessagingService.sendMessage(message.getMessageId(), logMap, errorMessage);
         } else {
             logger.errorContext(messageId, String.format("Maximum retry attempts %s reached for this message", maxRetryAttempts), e, logMap);
             messageProducer.writeToTopic(message, errorTopicName);
