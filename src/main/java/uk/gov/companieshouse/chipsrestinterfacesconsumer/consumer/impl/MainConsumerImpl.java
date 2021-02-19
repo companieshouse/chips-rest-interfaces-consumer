@@ -11,7 +11,6 @@ import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MainConsumer;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
-import uk.gov.companieshouse.service.ServiceException;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
@@ -51,6 +50,7 @@ public class MainConsumerImpl implements MainConsumer {
                                         @Header(KafkaHeaders.RECEIVED_PARTITION_ID) Integer partition,
                                         @Header(KafkaHeaders.GROUP_ID) String groupId
     ){
+        data.setAttempt(0);
         processMessage(groupId, data, offset, partition);
     }
 
@@ -59,7 +59,7 @@ public class MainConsumerImpl implements MainConsumer {
      *
      * @param messages A list of deserialized messages from Kafka
      * @param offsets A list of the offsets for the messages in {@code data}
-     * @param partitions A list of the partitiona for the messages in {@code data}
+     * @param partitions A list of the partitions for the messages in {@code data}
      * @param groupId The group id of the consumer
      */
     @Override
@@ -93,14 +93,9 @@ public class MainConsumerImpl implements MainConsumer {
         logMap.put("Partition", partition);
         logMap.put("Offset", offset);
 
-        try {
-            logger.infoContext(messageId, String.format("%s: Consumed Message from Partition: %s, Offset: %s", consumerId, partition, offset), logMap);
-            logger.infoContext(messageId, String.format("received data='%s'", data), logMap);
-            messageProcessorService.processMessage(consumerId, data);
-        } catch (ServiceException se) {
-            logger.errorContext(messageId, "Failed to process message", se);
-        } finally {
-            logger.infoContext(messageId, String.format("%s: Finished Processing Message from Partition: %s, Offset: %s", consumerId, partition, offset), logMap);
-        }
+        logger.infoContext(messageId, String.format("%s: Consumed Message from Partition: %s, Offset: %s", consumerId, partition, offset), logMap);
+        logger.infoContext(messageId, String.format("received data='%s'", data), logMap);
+        logger.infoContext(messageId, String.format("%s: Finished Processing Message from Partition: %s, Offset: %s", consumerId, partition, offset), logMap);
+        messageProcessorService.processMessage(consumerId, data);
     }
 }
