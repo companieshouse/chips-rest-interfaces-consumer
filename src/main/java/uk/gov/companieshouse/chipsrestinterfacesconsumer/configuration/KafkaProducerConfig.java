@@ -36,6 +36,9 @@ public class KafkaProducerConfig {
         configProps.put(
                 ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
                 AvroSerializer.class);
+           configProps.put(
+                ProducerConfig.LINGER_MS_CONFIG,
+                2000);
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 
