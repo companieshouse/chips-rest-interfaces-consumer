@@ -24,6 +24,12 @@ public class KafkaProducerConfig {
     @Value("${kafka.producer.retries}")
     private int retries;
 
+    @Value("${kafka.producer.batch.size.bytes}")
+    private int batchSizeBytes;
+
+    @Value("${kafka.producer.linger.ms}")
+    private int lingerMs;
+
     @Bean
     public ProducerFactory<String, ChipsRestInterfacesSend> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
@@ -36,9 +42,12 @@ public class KafkaProducerConfig {
         configProps.put(
                 ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
                 AvroSerializer.class);
-           configProps.put(
+        configProps.put(
+                ProducerConfig.BATCH_SIZE_CONFIG,
+                batchSizeBytes);
+        configProps.put(
                 ProducerConfig.LINGER_MS_CONFIG,
-                2000);
+                lingerMs);
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 
