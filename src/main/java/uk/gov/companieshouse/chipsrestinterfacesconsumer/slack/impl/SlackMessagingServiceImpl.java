@@ -32,7 +32,6 @@ public class SlackMessagingServiceImpl implements SlackMessagingService {
 
     @Override
     public void sendMessage(String kafkaMessageId,
-                            Map<String, Object> logMap,
                             String errorMessage) {
 
         try {
@@ -44,7 +43,11 @@ public class SlackMessagingServiceImpl implements SlackMessagingService {
                     .build();
 
             ChatPostMessageResponse response = methods.chatPostMessage(request);
-            logger.infoContext(kafkaMessageId, String.format("Message sent to: %s, response: %s", slackChannel, response));
+            if(response.isOk()) {
+                logger.infoContext(kafkaMessageId, String.format("Message sent to: %s", slackChannel));
+            } else {
+                logger.infoContext(kafkaMessageId, String.format("Message sent with response %s", response.getError()));
+            }
         } catch(IOException | SlackApiException e) {
             logger.errorContext(kafkaMessageId, "Slack error message not sent", e);
         }

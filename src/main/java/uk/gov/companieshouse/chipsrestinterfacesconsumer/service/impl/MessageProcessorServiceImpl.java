@@ -75,7 +75,7 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
         if (attempts < maxRetryAttempts) {
             message.setAttempt(attempts + 1);
             messageProducer.writeToTopic(message, retryTopicName);
-            slackMessagingService.sendMessage(message.getMessageId(), logMap, errorMessage);
+            slackMessagingService.sendMessage(message.getMessageId(), errorMessage);
         } else {
             logger.errorContext(messageId, String.format("Maximum retry attempts %s reached for this message", maxRetryAttempts), e, logMap);
             messageProducer.writeToTopic(message, errorTopicName);
