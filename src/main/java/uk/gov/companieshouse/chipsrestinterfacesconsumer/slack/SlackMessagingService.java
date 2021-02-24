@@ -4,6 +4,5 @@ import java.util.Map;
 
 public interface SlackMessagingService {
 
-    void sendMessage(String kafkaMessageId,
-                     String errorMessage);
+    void sendMessage(String kafkaMessageId);
 }

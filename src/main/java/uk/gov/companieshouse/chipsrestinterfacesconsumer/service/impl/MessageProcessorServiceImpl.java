@@ -63,22 +63,23 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
         logger.errorContext(messageId, SEND_FAILURE_MESSAGE, e, logMap);
 
         if (runAppInErrorMode) {
+            slackMessagingService.sendMessage(message.getMessageId());
             message.setAttempt(1);
             messageProducer.writeToTopic(message, retryTopicName);
             return;
         }
 
         var attempts = message.getAttempt();
-        String errorMessage = String.format("Attempt %s failed for this message", attempts);
-        logger.infoContext(messageId, errorMessage, logMap);
+        logger.infoContext(messageId, String.format("Attempt %s failed for this message", attempts), logMap);
+
 
         if (attempts < maxRetryAttempts) {
             message.setAttempt(attempts + 1);
             messageProducer.writeToTopic(message, retryTopicName);
-            slackMessagingService.sendMessage(message.getMessageId(), errorMessage);
         } else {
             logger.errorContext(messageId, String.format("Maximum retry attempts %s reached for this message", maxRetryAttempts), e, logMap);
             messageProducer.writeToTopic(message, errorTopicName);
+            slackMessagingService.sendMessage(message.getMessageId());
         }
     }
 }

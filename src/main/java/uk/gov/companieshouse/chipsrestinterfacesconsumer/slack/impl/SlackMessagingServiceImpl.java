@@ -12,7 +12,6 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogge
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.slack.SlackMessagingService;
 
 import java.io.IOException;
-import java.util.Map;
 
 @Service
 public class SlackMessagingServiceImpl implements SlackMessagingService {
@@ -25,28 +24,34 @@ public class SlackMessagingServiceImpl implements SlackMessagingService {
     @Value("${SLACK_ACCESS_TOKEN}")
     private String slackAccessToken;
 
+    @Value("${SLACK_ERROR_MESSAGE}")
+    private String slackErrorMessage;
+
+    @Value("${RUN_APP_IN_ERROR_MODE}")
+    private boolean inErrorMode;
+
     @Autowired
     public SlackMessagingServiceImpl(ApplicationLogger logger) {
         this.logger = logger;
     }
 
     @Override
-    public void sendMessage(String kafkaMessageId,
-                            String errorMessage) {
+    public void sendMessage(String kafkaMessageId) {
 
         try {
+            String mode = (inErrorMode)? "error" : "normal";
             Slack slack = Slack.getInstance();
             MethodsClient methods = slack.methods(slackAccessToken);
             ChatPostMessageRequest request = ChatPostMessageRequest.builder()
                     .channel(slackChannel)
-                    .text(errorMessage)
+                    .text(String.format(slackErrorMessage, mode, kafkaMessageId))
                     .build();
 
             ChatPostMessageResponse response = methods.chatPostMessage(request);
             if(response.isOk()) {
                 logger.infoContext(kafkaMessageId, String.format("Message sent to: %s", slackChannel));
             } else {
-                logger.infoContext(kafkaMessageId, String.format("Message sent with response %s", response.getError()));
+                logger.infoContext(kafkaMessageId, String.format("Error message sent but received response: %s", response.getError()));
             }
         } catch(IOException | SlackApiException e) {
             logger.errorContext(kafkaMessageId, "Slack error message not sent", e);
