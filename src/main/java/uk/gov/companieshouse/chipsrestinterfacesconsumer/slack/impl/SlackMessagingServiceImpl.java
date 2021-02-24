@@ -12,10 +12,12 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogge
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.slack.SlackMessagingService;
 
 import java.io.IOException;
+import java.util.List;
 
 @Service
 public class SlackMessagingServiceImpl implements SlackMessagingService {
 
+    public static final int LIMIT = 20;
     private final ApplicationLogger logger;
 
     @Value("${SLACK_CHANNEL}")
@@ -24,11 +26,10 @@ public class SlackMessagingServiceImpl implements SlackMessagingService {
     @Value("${SLACK_ACCESS_TOKEN}")
     private String slackAccessToken;
 
-    @Value("${SLACK_ERROR_MESSAGE}")
-    private String slackErrorMessage;
-
     @Value("${RUN_APP_IN_ERROR_MODE}")
     private boolean inErrorMode;
+
+    private ChatPostMessageRequest request;
 
     @Autowired
     public SlackMessagingServiceImpl(ApplicationLogger logger) {
@@ -36,25 +37,41 @@ public class SlackMessagingServiceImpl implements SlackMessagingService {
     }
 
     @Override
-    public void sendMessage(String kafkaMessageId) {
+    public void sendMessage(List<String> failedMessageIds) {
 
         try {
-            String mode = (inErrorMode)? "error" : "normal";
+            String slackErrorMessage = buildMessage(failedMessageIds);
             Slack slack = Slack.getInstance();
             MethodsClient methods = slack.methods(slackAccessToken);
-            ChatPostMessageRequest request = ChatPostMessageRequest.builder()
+            request = ChatPostMessageRequest.builder()
                     .channel(slackChannel)
-                    .text(String.format(slackErrorMessage, mode, kafkaMessageId))
+                    .text(slackErrorMessage)
                     .build();
 
             ChatPostMessageResponse response = methods.chatPostMessage(request);
             if(response.isOk()) {
-                logger.infoContext(kafkaMessageId, String.format("Message sent to: %s", slackChannel));
+                logger.info(String.format("Message sent to: %s", slackChannel));
             } else {
-                logger.infoContext(kafkaMessageId, String.format("Error message sent but received response: %s", response.getError()));
+                logger.info(String.format("Error message sent but received response: %s", response.getError()));
             }
         } catch(IOException | SlackApiException e) {
-            logger.errorContext(kafkaMessageId, "Slack error message not sent", e);
+            logger.errorContext("Slack error message not sent", e);
+        } finally {
+            failedMessageIds.clear();
         }
+    }
+
+    private String buildMessage(List<String> failedMessageIds) {
+        String mode = (inErrorMode)? "error" : "normal";
+
+        StringBuilder failedSb = new StringBuilder();
+        failedSb.append(String.format("In %s mode - Unable to send message with ids: \n", mode));
+        for(int index = 0; index < LIMIT; index++){
+            failedSb.append(failedMessageIds.get(index) + "\n");
+        }
+        if (failedMessageIds.size() > LIMIT) {
+            failedSb.append(String.format("and %d more...", failedMessageIds.size() - LIMIT));
+        }
+        return failedSb.toString();
     }
 }

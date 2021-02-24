@@ -11,6 +11,7 @@ import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MainConsumer;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
+import uk.gov.companieshouse.chipsrestinterfacesconsumer.slack.SlackMessagingService;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
@@ -23,6 +24,9 @@ public class MainConsumerImpl implements MainConsumer {
 
     private final ApplicationLogger logger;
     private final MessageProcessorService messageProcessorService;
+
+    @Autowired
+    private SlackMessagingService slackMessagingService;
 
     @Autowired
     public MainConsumerImpl(ApplicationLogger logger, MessageProcessorService messageProcessorService) {
@@ -75,7 +79,13 @@ public class MainConsumerImpl implements MainConsumer {
             processMessage(groupId, messages.get(i), offsets.get(i), partitions.get(i));
         }
 
+        List<String> failedMessageIds = messageProcessorService.getFailedMessages();
+        if (!failedMessageIds.isEmpty()) {
+            slackMessagingService.sendMessage(failedMessageIds);
+        }
     }
+
+
 
     /**
      * Delegates the processing of the message to the {@code messageProcessorService}

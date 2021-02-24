@@ -12,7 +12,9 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcesso
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.slack.SlackMessagingService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 @Service
 public class MessageProcessorServiceImpl implements MessageProcessorService {
@@ -38,10 +40,9 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
     private ApplicationLogger logger;
 
     @Autowired
-    private SlackMessagingService slackMessagingService;
-
-    @Autowired
     private MessageProducer messageProducer;
+
+    private List<String> failedMessageIds = new Vector<String>();
 
     @Override
     public void processMessage(String consumerId, ChipsRestInterfacesSend message) {
@@ -63,7 +64,6 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
         logger.errorContext(messageId, SEND_FAILURE_MESSAGE, e, logMap);
 
         if (runAppInErrorMode) {
-            slackMessagingService.sendMessage(message.getMessageId());
             message.setAttempt(1);
             messageProducer.writeToTopic(message, retryTopicName);
             return;
@@ -79,7 +79,12 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
         } else {
             logger.errorContext(messageId, String.format("Maximum retry attempts %s reached for this message", maxRetryAttempts), e, logMap);
             messageProducer.writeToTopic(message, errorTopicName);
-            slackMessagingService.sendMessage(message.getMessageId());
+            failedMessageIds.add(message.getMessageId());
         }
     }
+
+    public List<String> getFailedMessages() {
+        return failedMessageIds;
+    }
+
 }

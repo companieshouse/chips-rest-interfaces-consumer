@@ -54,9 +54,6 @@ class MessageProcessorServiceImplTest {
     @Mock
     private ApplicationLogger logger;
 
-    @Mock
-    private SlackMessagingService slackMessagingService;
-
     @InjectMocks
     private MessageProcessorServiceImpl messageProcessorService;
 
@@ -85,7 +82,6 @@ class MessageProcessorServiceImplTest {
         verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend, CONSUMER_ID);
         verify(messageProducer, times(0)).writeToTopic(any(), eq(RETRY_TOPIC));
         verify(messageProducer, times(0)).writeToTopic(any(), eq(ERROR_TOPIC));
-        verify(slackMessagingService, never()).sendMessage(any());
     }
 
     @Test
@@ -101,7 +97,6 @@ class MessageProcessorServiceImplTest {
         verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend, CONSUMER_ID);
         verify(messageProducer, times(1)).writeToTopic(any(), eq(RETRY_TOPIC));
         verify(messageProducer, times(0)).writeToTopic(any(), eq(ERROR_TOPIC));
-        verify(slackMessagingService, times(1)).sendMessage(MESSAGE_ID);
     }
 
     @Test
@@ -123,7 +118,6 @@ class MessageProcessorServiceImplTest {
         assertEquals(1, chipsRestInterfacesSend.getAttempt());
         verify(messageProducer, times(1)).writeToTopic(chipsRestInterfacesSend, RETRY_TOPIC);
         verify(messageProducer, times(0)).writeToTopic(any(), eq(ERROR_TOPIC));
-        verify(slackMessagingService, never()).sendMessage(MESSAGE_ID);
     }
 
     @Test
@@ -149,7 +143,6 @@ class MessageProcessorServiceImplTest {
         assertEquals(1, chipsRestInterfacesSend.getAttempt());
         verify(messageProducer, times(1)).writeToTopic(chipsRestInterfacesSend, RETRY_TOPIC);
         verify(messageProducer, times(0)).writeToTopic(any(), eq(ERROR_TOPIC));
-        verify(slackMessagingService, never()).sendMessage(MESSAGE_ID);
     }
 
     @Test
@@ -176,7 +169,6 @@ class MessageProcessorServiceImplTest {
         assertEquals(1, chipsRestInterfacesSend.getAttempt());
         verify(messageProducer, times(1)).writeToTopic(chipsRestInterfacesSend, RETRY_TOPIC);
         verify(messageProducer, times(0)).writeToTopic(any(), eq(ERROR_TOPIC));
-        verify(slackMessagingService, never()).sendMessage(MESSAGE_ID);
     }
 
     @Test
@@ -201,7 +193,6 @@ class MessageProcessorServiceImplTest {
                 .errorContext(eq(MESSAGE_ID), eq("Maximum retry attempts " + MAX_RETRIES + " reached for this message"), eq(restClientException), mapArgumentCaptor.capture());
         verifyLogData(mapArgumentCaptor.getValue());
         verifyLogConsumerName(mapArgumentCaptor.getValue());
-        verify(slackMessagingService, times(1)).sendMessage(MESSAGE_ID);
 
         verify(messageProducer, times(0)).writeToTopic(any(), eq(RETRY_TOPIC));
         verify(messageProducer, times(1)).writeToTopic(chipsRestInterfacesSend, ERROR_TOPIC);
