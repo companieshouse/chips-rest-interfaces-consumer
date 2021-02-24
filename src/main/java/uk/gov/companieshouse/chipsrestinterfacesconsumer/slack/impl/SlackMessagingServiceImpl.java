@@ -29,7 +29,7 @@ public class SlackMessagingServiceImpl implements SlackMessagingService {
     @Value("${RUN_APP_IN_ERROR_MODE}")
     private boolean inErrorMode;
 
-    private ChatPostMessageRequest request;
+    private MethodsClient methods;
 
     @Autowired
     public SlackMessagingServiceImpl(ApplicationLogger logger) {
@@ -42,8 +42,10 @@ public class SlackMessagingServiceImpl implements SlackMessagingService {
         try {
             String slackErrorMessage = buildMessage(failedMessageIds);
             Slack slack = Slack.getInstance();
-            MethodsClient methods = slack.methods(slackAccessToken);
-            request = ChatPostMessageRequest.builder()
+            if(methods == null) {
+                methods = slack.methods(slackAccessToken);
+            }
+            ChatPostMessageRequest request = ChatPostMessageRequest.builder()
                     .channel(slackChannel)
                     .text(slackErrorMessage)
                     .build();
@@ -66,7 +68,9 @@ public class SlackMessagingServiceImpl implements SlackMessagingService {
 
         StringBuilder failedSb = new StringBuilder();
         failedSb.append(String.format("In %s mode - Unable to send message with ids: \n", mode));
-        for(int index = 0; index < LIMIT; index++){
+
+        int endIndex = (failedMessageIds.size() > LIMIT)? LIMIT : failedMessageIds.size();
+        for(int index = 0; index < endIndex; index++){
             failedSb.append(failedMessageIds.get(index) + "\n");
         }
         if (failedMessageIds.size() > LIMIT) {

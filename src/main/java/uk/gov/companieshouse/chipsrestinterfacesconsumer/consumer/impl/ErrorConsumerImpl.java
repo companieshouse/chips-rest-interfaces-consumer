@@ -11,9 +11,11 @@ import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.ErrorConsumer;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
+import uk.gov.companieshouse.chipsrestinterfacesconsumer.slack.SlackMessagingService;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -22,11 +24,15 @@ public class ErrorConsumerImpl implements ErrorConsumer {
 
     private final ApplicationLogger logger;
     private final MessageProcessorService messageProcessorService;
+    private final SlackMessagingService slackMessagingService;
 
     @Autowired
-    public ErrorConsumerImpl(ApplicationLogger logger, MessageProcessorService messageProcessorService) {
+    public ErrorConsumerImpl(ApplicationLogger logger,
+                             MessageProcessorService messageProcessorService,
+                             SlackMessagingService slackMessagingService) {
         this.logger = logger;
         this.messageProcessorService = messageProcessorService;
+        this.slackMessagingService = slackMessagingService;
     }
 
     @PostConstruct
@@ -61,5 +67,9 @@ public class ErrorConsumerImpl implements ErrorConsumer {
 
         messageProcessorService.processMessage("error-consumer", data);
         logger.infoContext(messageId, String.format("%s: Finished Processing Message from Partition: %s, Offset: %s", groupId, partition, offset), logMap);
+        List<String> failedMessageIds = messageProcessorService.getFailedMessages();
+        if (!failedMessageIds.isEmpty()) {
+            slackMessagingService.sendMessage(failedMessageIds);
+        }
     }
 }
