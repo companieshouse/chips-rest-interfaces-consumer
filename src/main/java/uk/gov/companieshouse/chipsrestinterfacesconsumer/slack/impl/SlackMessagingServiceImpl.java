@@ -67,7 +67,7 @@ public class SlackMessagingServiceImpl implements SlackMessagingService {
         String mode = (inErrorMode)? "error" : "normal";
 
         StringBuilder failedSb = new StringBuilder();
-        failedSb.append(String.format("In %s mode - Unable to send message with ids: \n", mode));
+        failedSb.append(String.format("In %s mode - Unable to send message with ids: %n", mode));
 
         int endIndex = (failedMessageIds.size() > LIMIT)? LIMIT : failedMessageIds.size();
         for(int index = 0; index < endIndex; index++){
