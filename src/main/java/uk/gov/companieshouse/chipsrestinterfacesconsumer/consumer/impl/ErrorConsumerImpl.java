@@ -71,7 +71,7 @@ public class ErrorConsumerImpl implements ErrorConsumer {
         messageProcessorService.processMessage("error-consumer", data, failedMessageOpt);
         logger.infoContext(messageId, String.format("%s: Finished Processing Message from Partition: %s, Offset: %s", groupId, partition, offset), logMap);
 
-        if (failedMessageOpt.isPresent() && !failedMessageOpt.get().isEmpty()) {
+        if (!failedMessageOpt.get().isEmpty()) {
             slackMessagingService.sendMessage(failedMessageOpt.get());
         }
     }

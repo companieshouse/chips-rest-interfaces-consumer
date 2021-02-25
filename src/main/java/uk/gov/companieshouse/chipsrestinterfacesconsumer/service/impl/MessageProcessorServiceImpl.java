@@ -10,7 +10,6 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogge
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.producer.MessageProducer;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

@@ -27,7 +27,7 @@ public class MainConsumerImpl implements MainConsumer {
     private final ApplicationLogger logger;
     private final MessageProcessorService messageProcessorService;
 
-    private SlackMessagingService slackMessagingService;
+    private final SlackMessagingService slackMessagingService;
 
     @Autowired
     public MainConsumerImpl(ApplicationLogger logger,
@@ -86,7 +86,7 @@ public class MainConsumerImpl implements MainConsumer {
             processMessage(groupId, messages.get(i), offsets.get(i), partitions.get(i), failedMessageOpt);
         }
 
-        if (failedMessageOpt.isPresent() && !failedMessageOpt.get().isEmpty()) {
+        if (!failedMessageOpt.get().isEmpty()) {
             slackMessagingService.sendMessage(failedMessageOpt.get());
         }
     }

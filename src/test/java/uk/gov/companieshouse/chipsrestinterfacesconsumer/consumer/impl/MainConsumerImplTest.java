@@ -86,13 +86,4 @@ class MainConsumerImplTest {
         verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData, failedMessageOpt);
         verify(slackMessagingService,  never()).sendMessage(failedMessageOpt.get());
     }
-
-    @Test
-    void readAndProcessRetryTopicWithFailedMessages() throws ServiceException {
-        messageList = Arrays.asList(data, secondData);
-        List<Long> offsets = Arrays.asList(0L, 1L);
-        List<Integer> partitions = Arrays.asList(0, 0);
-
-        mainConsumer.readAndProcessRetryTopic(messageList, offsets, partitions, RETRY_CONSUMER_ID);
-    }
 }
