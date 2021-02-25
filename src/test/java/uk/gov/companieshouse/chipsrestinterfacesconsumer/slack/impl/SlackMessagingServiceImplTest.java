@@ -4,7 +4,6 @@ import com.slack.api.methods.MethodsClient;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.request.chat.ChatPostMessageRequest;
 import com.slack.api.methods.response.chat.ChatPostMessageResponse;
-import okhttp3.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -9,14 +9,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
+import uk.gov.companieshouse.chipsrestinterfacesconsumer.slack.SlackMessagingService;
 import uk.gov.companieshouse.service.ServiceException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MainConsumerImplTest {
@@ -31,6 +35,9 @@ class MainConsumerImplTest {
 
     @Mock
     private ApplicationLogger logger;
+
+    @Mock
+    private SlackMessagingService slackMessagingService;
 
     @InjectMocks
     private MainConsumerImpl mainConsumer;
@@ -69,9 +76,29 @@ class MainConsumerImplTest {
         messageList = Arrays.asList(data, secondData);
         List<Long> offsets = Arrays.asList(0L, 1L);
         List<Integer> partitions = Arrays.asList(0, 0);
+
+        List<String> failedMessages = new ArrayList<>();
+        when(messageProcessorService.getFailedMessages()).thenReturn(failedMessages);
+
         mainConsumer.readAndProcessRetryTopic(messageList, offsets, partitions, RETRY_CONSUMER_ID);
 
         verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, data);
         verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData);
+        verify(slackMessagingService,  never()).sendMessage(failedMessages);
+    }
+
+    @Test
+    void readAndProcessRetryTopicWithFailedMessages() throws ServiceException {
+        messageList = Arrays.asList(data, secondData);
+        List<Long> offsets = Arrays.asList(0L, 1L);
+        List<Integer> partitions = Arrays.asList(0, 0);
+
+        List<String> failedMessages = new ArrayList<>();
+        failedMessages.add("abc-123");
+        when(messageProcessorService.getFailedMessages()).thenReturn(failedMessages);
+
+        mainConsumer.readAndProcessRetryTopic(messageList, offsets, partitions, RETRY_CONSUMER_ID);
+
+        verify(slackMessagingService,  times(1)).sendMessage(failedMessages);
     }
 }

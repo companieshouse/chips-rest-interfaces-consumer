@@ -25,13 +25,15 @@ public class MainConsumerImpl implements MainConsumer {
     private final ApplicationLogger logger;
     private final MessageProcessorService messageProcessorService;
 
-    @Autowired
     private SlackMessagingService slackMessagingService;
 
     @Autowired
-    public MainConsumerImpl(ApplicationLogger logger, MessageProcessorService messageProcessorService) {
+    public MainConsumerImpl(ApplicationLogger logger,
+                            MessageProcessorService messageProcessorService,
+                            SlackMessagingService slackMessagingService) {
         this.logger = logger;
         this.messageProcessorService = messageProcessorService;
+        this.slackMessagingService = slackMessagingService;
     }
 
     @PostConstruct

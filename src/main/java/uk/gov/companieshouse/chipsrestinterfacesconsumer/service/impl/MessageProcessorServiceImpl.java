@@ -9,7 +9,6 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.client.ChipsRestClient;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.producer.MessageProducer;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.slack.SlackMessagingService;
 
 import java.util.HashMap;
 import java.util.List;
