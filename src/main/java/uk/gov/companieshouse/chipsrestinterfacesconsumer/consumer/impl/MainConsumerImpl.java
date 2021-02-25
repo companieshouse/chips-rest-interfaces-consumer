@@ -87,8 +87,6 @@ public class MainConsumerImpl implements MainConsumer {
         }
     }
 
-
-
     /**
      * Delegates the processing of the message to the {@code messageProcessorService}
      * and handles any unexpected errors
