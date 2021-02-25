@@ -14,11 +14,11 @@ import uk.gov.companieshouse.service.ServiceException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ErrorConsumerImplTest {
@@ -49,22 +49,11 @@ class ErrorConsumerImplTest {
     @Test
     void readAndProcessErrorTopic() throws ServiceException {
         List<String> failedMessages = new ArrayList<>();
-        when(messageProcessorService.getFailedMessages()).thenReturn(failedMessages);
-
+        data.setAttempt(0);
         errorConsumer.readAndProcessErrorTopic(data, 0L, 0, ERROR_CONSUMER_ID);
 
-        verify(messageProcessorService, times(1)).processMessage(ERROR_CONSUMER_ID, data);
+        Optional<List<String>> failedMessageOpt = Optional.of(new ArrayList<>());
+        verify(messageProcessorService, times(1)).processMessage(ERROR_CONSUMER_ID, data, failedMessageOpt);
         verify(slackMessagingService,  never()).sendMessage(failedMessages);
-    }
-
-    @Test
-    void readAndProcessErrorTopicWithFailedMessages() throws ServiceException {
-        List<String> failedMessages = new ArrayList<>();
-        failedMessages.add("abc-123");
-        when(messageProcessorService.getFailedMessages()).thenReturn(failedMessages);
-
-        errorConsumer.readAndProcessErrorTopic(data, 0L, 0, ERROR_CONSUMER_ID);
-
-        verify(slackMessagingService,  times(1)).sendMessage(failedMessages);
     }
 }
