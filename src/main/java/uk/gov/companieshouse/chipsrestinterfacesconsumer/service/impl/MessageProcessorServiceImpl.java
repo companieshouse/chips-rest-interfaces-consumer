@@ -41,7 +41,7 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
     @Autowired
     private MessageProducer messageProducer;
 
-    private List<String> failedMessageIds = new ArrayList<String>();
+    private List<String> failedMessageIds = new ArrayList<>();
 
     @Override
     public void processMessage(String consumerId, ChipsRestInterfacesSend message) {
