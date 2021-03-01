@@ -10,7 +10,6 @@ import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.slack.SlackMessagingService;
-import uk.gov.companieshouse.service.ServiceException;
 
 import java.util.ArrayList;
 import java.util.List;
