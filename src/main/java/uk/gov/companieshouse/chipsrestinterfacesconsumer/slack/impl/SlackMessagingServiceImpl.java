@@ -29,8 +29,6 @@ public class SlackMessagingServiceImpl implements SlackMessagingService {
     @Value("${RUN_APP_IN_ERROR_MODE}")
     private boolean inErrorMode;
 
-    private MethodsClient methods;
-
     @Autowired
     public SlackMessagingServiceImpl(ApplicationLogger logger) {
         this.logger = logger;
@@ -42,15 +40,13 @@ public class SlackMessagingServiceImpl implements SlackMessagingService {
         try {
             String slackErrorMessage = buildMessage(failedMessageIds);
             Slack slack = Slack.getInstance();
-            if(methods == null) {
-                methods = slack.methods(slackAccessToken);
-            }
+            MethodsClient methods = slack.methods(slackAccessToken);
             ChatPostMessageRequest request = ChatPostMessageRequest.builder()
                     .channel(slackChannel)
                     .text(slackErrorMessage)
                     .build();
 
-            ChatPostMessageResponse response = methods.chatPostMessage(request);
+            ChatPostMessageResponse response = postSlackMessage(methods, request);
             if(response.isOk()) {
                 logger.info(String.format("Message sent to: %s", slackChannel));
             } else {
@@ -61,6 +57,12 @@ public class SlackMessagingServiceImpl implements SlackMessagingService {
         } finally {
             failedMessageIds.clear();
         }
+    }
+
+    ChatPostMessageResponse postSlackMessage(
+            MethodsClient methods,
+            ChatPostMessageRequest request) throws IOException, SlackApiException {
+        return methods.chatPostMessage(request);
     }
 
     private String buildMessage(List<String> failedMessageIds) {
