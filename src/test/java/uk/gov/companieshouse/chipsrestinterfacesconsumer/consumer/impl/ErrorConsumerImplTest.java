@@ -47,11 +47,11 @@ class ErrorConsumerImplTest {
 
     @Test
     void readAndProcessErrorTopic() {
-        List<String> failedMessages = new ArrayList<>();
+        List<String> failedMessageIds = new ArrayList<>();
         data.setAttempt(0);
         errorConsumer.readAndProcessErrorTopic(data, 0L, 0, ERROR_CONSUMER_ID);
 
-        verify(messageProcessorService, times(1)).processMessage(ERROR_CONSUMER_ID, data, failedMessages);
-        verify(slackMessagingService,  never()).sendMessage(failedMessages);
+        verify(messageProcessorService, times(1)).processMessage(ERROR_CONSUMER_ID, data, failedMessageIds);
+        verify(slackMessagingService,  never()).sendMessage(failedMessageIds);
     }
 }

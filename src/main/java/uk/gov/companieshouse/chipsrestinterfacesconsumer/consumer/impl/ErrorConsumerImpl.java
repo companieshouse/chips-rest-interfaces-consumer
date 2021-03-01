@@ -66,12 +66,12 @@ public class ErrorConsumerImpl implements ErrorConsumer {
         logger.infoContext(messageId, String.format("%s: Consumed Message from Partition: %s, Offset: %s", groupId, partition, offset), logMap);
         logger.infoContext(messageId, String.format("received data='%s'", data), logMap);
 
-        List<String> failedMessages = new ArrayList<>();
-        messageProcessorService.processMessage("error-consumer", data, failedMessages);
+        List<String> failedMessageIds = new ArrayList<>();
+        messageProcessorService.processMessage("error-consumer", data, failedMessageIds);
         logger.infoContext(messageId, String.format("%s: Finished Processing Message from Partition: %s, Offset: %s", groupId, partition, offset), logMap);
 
-        if (!failedMessages.isEmpty()) {
-            slackMessagingService.sendMessage(failedMessages);
+        if (!failedMessageIds.isEmpty()) {
+            slackMessagingService.sendMessage(failedMessageIds);
         }
     }
 }

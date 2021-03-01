@@ -75,12 +75,12 @@ class MainConsumerImplTest {
         List<Long> offsets = Arrays.asList(0L, 1L);
         List<Integer> partitions = Arrays.asList(0, 0);
 
-        List<String> failedMessages = new ArrayList<>();
+        List<String> failedMessageIds = new ArrayList<>();
 
         mainConsumer.readAndProcessRetryTopic(messageList, offsets, partitions, RETRY_CONSUMER_ID);
 
-        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, data, failedMessages);
-        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData, failedMessages);
-        verify(slackMessagingService,  never()).sendMessage(failedMessages);
+        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, data, failedMessageIds);
+        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData, failedMessageIds);
+        verify(slackMessagingService,  never()).sendMessage(failedMessageIds);
     }
 }
