@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 @ConditionalOnProperty(prefix = "feature", name = "errorMode", havingValue = "true")
@@ -67,12 +66,12 @@ public class ErrorConsumerImpl implements ErrorConsumer {
         logger.infoContext(messageId, String.format("%s: Consumed Message from Partition: %s, Offset: %s", groupId, partition, offset), logMap);
         logger.infoContext(messageId, String.format("received data='%s'", data), logMap);
 
-        Optional<List<String>> failedMessageOpt = Optional.of(new ArrayList<>());
-        messageProcessorService.processMessage("error-consumer", data, failedMessageOpt);
+        List<String> failedMessages = new ArrayList<>();
+        messageProcessorService.processMessage("error-consumer", data, failedMessages);
         logger.infoContext(messageId, String.format("%s: Finished Processing Message from Partition: %s, Offset: %s", groupId, partition, offset), logMap);
 
-        if (!failedMessageOpt.get().isEmpty()) {
-            slackMessagingService.sendMessage(failedMessageOpt.get());
+        if (!failedMessages.isEmpty()) {
+            slackMessagingService.sendMessage(failedMessages);
         }
     }
 }

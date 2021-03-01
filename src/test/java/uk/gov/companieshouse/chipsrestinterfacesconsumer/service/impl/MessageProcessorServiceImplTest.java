@@ -21,7 +21,6 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.producer.MessageProduce
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -79,7 +78,7 @@ class MessageProcessorServiceImplTest {
     void processMessageTest() {
         ChipsRestInterfacesSend chipsRestInterfacesSend = new ChipsRestInterfacesSend();
 
-        messageProcessorService.processMessage(CONSUMER_ID, chipsRestInterfacesSend, Optional.empty());
+        messageProcessorService.processMessage(CONSUMER_ID, chipsRestInterfacesSend, null);
 
         verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend, CONSUMER_ID);
         verify(messageProducer, times(0)).writeToTopic(any(), eq(RETRY_TOPIC));
@@ -94,14 +93,14 @@ class MessageProcessorServiceImplTest {
         RuntimeException runtimeException = new RuntimeException("runtimeException");
         doThrow(runtimeException).when(chipsRestClient).sendToChips(chipsRestInterfacesSend, CONSUMER_ID);
 
-        Optional<List<String>> failedMessageOpt = Optional.of(new ArrayList<>());
-        messageProcessorService.processMessage(CONSUMER_ID, chipsRestInterfacesSend, failedMessageOpt);
+        List<String> failedMessages = new ArrayList<>();
+        messageProcessorService.processMessage(CONSUMER_ID, chipsRestInterfacesSend, failedMessages);
 
         verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend, CONSUMER_ID);
         verify(messageProducer, times(1)).writeToTopic(any(), eq(RETRY_TOPIC));
         verify(messageProducer, times(0)).writeToTopic(any(), eq(ERROR_TOPIC));
-        assertEquals(1, failedMessageOpt.get().size());
-        assertEquals(MESSAGE_ID, failedMessageOpt.get().get(0));
+        assertEquals(1, failedMessages.size());
+        assertEquals(MESSAGE_ID, failedMessages.get(0));
     }
 
     @Test
@@ -109,8 +108,8 @@ class MessageProcessorServiceImplTest {
         RuntimeException runtimeException = new RuntimeException("runtimeException");
         doThrow(runtimeException).when(chipsRestClient).sendToChips(chipsRestInterfacesSend, CONSUMER_ID);
 
-        Optional<List<String>> failedMessageOpt = Optional.of(new ArrayList<>());
-        messageProcessorService.processMessage(CONSUMER_ID, chipsRestInterfacesSend, failedMessageOpt);
+        List<String> failedMessages = new ArrayList<>();
+        messageProcessorService.processMessage(CONSUMER_ID, chipsRestInterfacesSend, failedMessages);
 
         verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend, CONSUMER_ID);
         verify(logger, times(1)).errorContext(eq(MESSAGE_ID), eq(CHIPS_ERROR_MESSAGE), eq(runtimeException), mapArgumentCaptor.capture());
@@ -124,7 +123,7 @@ class MessageProcessorServiceImplTest {
         assertEquals(1, chipsRestInterfacesSend.getAttempt());
         verify(messageProducer, times(1)).writeToTopic(chipsRestInterfacesSend, RETRY_TOPIC);
         verify(messageProducer, times(0)).writeToTopic(any(), eq(ERROR_TOPIC));
-        assertTrue(failedMessageOpt.get().isEmpty());
+        assertTrue(failedMessages.isEmpty());
     }
 
     @Test
@@ -132,8 +131,8 @@ class MessageProcessorServiceImplTest {
         HttpClientErrorException httpClientErrorException = new HttpClientErrorException(HttpStatus.BAD_GATEWAY);
         doThrow(httpClientErrorException).when(chipsRestClient).sendToChips(chipsRestInterfacesSend, CONSUMER_ID);
 
-        Optional<List<String>> failedMessageOpt = Optional.of(new ArrayList<>());
-        messageProcessorService.processMessage(CONSUMER_ID, chipsRestInterfacesSend, failedMessageOpt);
+        List<String> failedMessages = new ArrayList<>();
+        messageProcessorService.processMessage(CONSUMER_ID, chipsRestInterfacesSend, failedMessages);
 
         verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend, CONSUMER_ID);
         verify(logger, times(1)).errorContext(eq(MESSAGE_ID), eq(CHIPS_ERROR_MESSAGE), eq(httpClientErrorException), mapArgumentCaptor.capture());
@@ -151,7 +150,7 @@ class MessageProcessorServiceImplTest {
         assertEquals(1, chipsRestInterfacesSend.getAttempt());
         verify(messageProducer, times(1)).writeToTopic(chipsRestInterfacesSend, RETRY_TOPIC);
         verify(messageProducer, times(0)).writeToTopic(any(), eq(ERROR_TOPIC));
-        assertTrue(failedMessageOpt.get().isEmpty());
+        assertTrue(failedMessages.isEmpty());
     }
 
     @Test
@@ -159,8 +158,8 @@ class MessageProcessorServiceImplTest {
         HttpServerErrorException httpServerErrorException = new HttpServerErrorException(HttpStatus.BAD_GATEWAY);
         doThrow(httpServerErrorException).when(chipsRestClient).sendToChips(chipsRestInterfacesSend, CONSUMER_ID);
 
-        Optional<List<String>> failedMessageOpt = Optional.of(new ArrayList<>());
-        messageProcessorService.processMessage(CONSUMER_ID, chipsRestInterfacesSend, failedMessageOpt);
+        List<String> failedMessages = new ArrayList<>();
+        messageProcessorService.processMessage(CONSUMER_ID, chipsRestInterfacesSend, failedMessages);
 
         verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend, CONSUMER_ID);
         verify(logger, times(1)).errorContext(eq(MESSAGE_ID),
@@ -179,7 +178,7 @@ class MessageProcessorServiceImplTest {
         assertEquals(1, chipsRestInterfacesSend.getAttempt());
         verify(messageProducer, times(1)).writeToTopic(chipsRestInterfacesSend, RETRY_TOPIC);
         verify(messageProducer, times(0)).writeToTopic(any(), eq(ERROR_TOPIC));
-        assertTrue(failedMessageOpt.get().isEmpty());
+        assertTrue(failedMessages.isEmpty());
     }
 
     @Test
@@ -188,8 +187,8 @@ class MessageProcessorServiceImplTest {
         RestClientException restClientException = new RestClientException("restClientException");
         doThrow(restClientException).when(chipsRestClient).sendToChips(chipsRestInterfacesSend, CONSUMER_ID);
 
-        Optional<List<String>> failedMessageOpt = Optional.of(new ArrayList<>());
-        messageProcessorService.processMessage(CONSUMER_ID, chipsRestInterfacesSend, failedMessageOpt);
+        List<String> failedMessages = new ArrayList<>();
+        messageProcessorService.processMessage(CONSUMER_ID, chipsRestInterfacesSend, failedMessages);
 
         verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend, CONSUMER_ID);
         verify(messageProducer, times(0)).writeToTopic(chipsRestInterfacesSend, RETRY_TOPIC);
@@ -209,8 +208,8 @@ class MessageProcessorServiceImplTest {
         verify(messageProducer, times(0)).writeToTopic(any(), eq(RETRY_TOPIC));
         verify(messageProducer, times(1)).writeToTopic(chipsRestInterfacesSend, ERROR_TOPIC);
 
-        assertEquals(1, failedMessageOpt.get().size());
-        assertEquals(MESSAGE_ID, failedMessageOpt.get().get(0));
+        assertEquals(1, failedMessages.size());
+        assertEquals(MESSAGE_ID, failedMessages.get(0));
 
     }
 

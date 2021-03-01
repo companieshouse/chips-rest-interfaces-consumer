@@ -14,7 +14,6 @@ import uk.gov.companieshouse.service.ServiceException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -47,13 +46,12 @@ class ErrorConsumerImplTest {
     }
 
     @Test
-    void readAndProcessErrorTopic() throws ServiceException {
+    void readAndProcessErrorTopic() {
         List<String> failedMessages = new ArrayList<>();
         data.setAttempt(0);
         errorConsumer.readAndProcessErrorTopic(data, 0L, 0, ERROR_CONSUMER_ID);
 
-        Optional<List<String>> failedMessageOpt = Optional.of(new ArrayList<>());
-        verify(messageProcessorService, times(1)).processMessage(ERROR_CONSUMER_ID, data, failedMessageOpt);
+        verify(messageProcessorService, times(1)).processMessage(ERROR_CONSUMER_ID, data, failedMessages);
         verify(slackMessagingService,  never()).sendMessage(failedMessages);
     }
 }

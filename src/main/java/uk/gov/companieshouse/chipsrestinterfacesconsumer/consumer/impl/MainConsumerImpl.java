@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 @ConditionalOnProperty(prefix = "feature", name = "errorMode", havingValue = "false")
@@ -59,7 +58,7 @@ public class MainConsumerImpl implements MainConsumer {
                                         @Header(KafkaHeaders.GROUP_ID) String groupId
     ){
         data.setAttempt(0);
-        processMessage(groupId, data, offset, partition, Optional.empty());
+        processMessage(groupId, data, offset, partition, null);
     }
 
     /**
@@ -80,14 +79,14 @@ public class MainConsumerImpl implements MainConsumer {
 
         logger.debug(String.format("%s, received %s messages", groupId, messages.size()));
 
-        Optional<List<String>> failedMessageOpt = Optional.of(new ArrayList<>());
+       List<String> failedMessages = new ArrayList<>();
 
         for (int i = 0; i < messages.size(); i++) {
-            processMessage(groupId, messages.get(i), offsets.get(i), partitions.get(i), failedMessageOpt);
+            processMessage(groupId, messages.get(i), offsets.get(i), partitions.get(i), failedMessages);
         }
 
-        if (!failedMessageOpt.get().isEmpty()) {
-            slackMessagingService.sendMessage(failedMessageOpt.get());
+        if (!failedMessages.isEmpty()) {
+            slackMessagingService.sendMessage(failedMessages);
         }
     }
 
@@ -104,7 +103,7 @@ public class MainConsumerImpl implements MainConsumer {
                                 ChipsRestInterfacesSend data,
                                 Long offset,
                                 Integer partition,
-                                Optional<List<String>> failedMessageOpt) {
+                                List<String> failedMessages) {
 
         var messageId = data.getMessageId();
         Map<String, Object> logMap = new HashMap<>();
@@ -115,6 +114,6 @@ public class MainConsumerImpl implements MainConsumer {
         logger.infoContext(messageId, String.format("%s: Consumed Message from Partition: %s, Offset: %s", consumerId, partition, offset), logMap);
         logger.infoContext(messageId, String.format("received data='%s'", data), logMap);
         logger.infoContext(messageId, String.format("%s: Finished Processing Message from Partition: %s, Offset: %s", consumerId, partition, offset), logMap);
-        messageProcessorService.processMessage(consumerId, data, failedMessageOpt);
+        messageProcessorService.processMessage(consumerId, data, failedMessages);
     }
 }
