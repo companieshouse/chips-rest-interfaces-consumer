@@ -17,7 +17,6 @@ import java.util.List;
 @Service
 public class SlackMessagingServiceImpl implements SlackMessagingService {
 
-    public static final int LIMIT = 20;
     private final ApplicationLogger logger;
 
     @Value("${SLACK_CHANNEL}")
@@ -71,13 +70,10 @@ public class SlackMessagingServiceImpl implements SlackMessagingService {
         StringBuilder failedSb = new StringBuilder();
         failedSb.append(String.format("In %s mode - Unable to send message with ids: %n", mode));
 
-        int endIndex = (failedMessageIds.size() > LIMIT)? LIMIT : failedMessageIds.size();
-        for(int index = 0; index < endIndex; index++){
+        for(int index = 0; index < failedMessageIds.size(); index++){
             failedSb.append(failedMessageIds.get(index) + "\n");
         }
-        if (failedMessageIds.size() > LIMIT) {
-            failedSb.append(String.format("and %d more...", failedMessageIds.size() - LIMIT));
-        }
+
         return failedSb.toString();
     }
 }
