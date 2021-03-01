@@ -12,6 +12,9 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.avro.AvroDeserializer;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -111,6 +114,22 @@ public class KafkaConsumerConfig {
     }
 
     /**
+     * Creates a concurrent kafka listener container factory.
+     * For each message a kafka listener receives this factory will create a container to process the message.
+     * Filter strategy is filtering out messages with timestamps after the app started
+     *
+     * @return A ConcurrentKafkaListenerContainerFactory
+     */
+    private ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> getNewErrorContainerFactory() {
+        var currentTime = Instant.now().toEpochMilli();
+        ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(newMainConsumerFactory());
+        factory.setRecordFilterStrategy(consumerRecord -> currentTime < consumerRecord.timestamp());
+        return factory;
+    }
+
+    /**
      *
      * @return ConcurrentKafkaListenerContainerFactory with default configuration
      */
@@ -132,4 +151,15 @@ public class KafkaConsumerConfig {
 
         return getNewRetryContainerFactory(idleMillis);
     }
+
+    /**
+     *
+     * @return ConcurrentKafkaListenerContainerFactory with error configuration
+     */
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend>
+    kafkaErrorListenerContainerFactory() {
+        return getNewErrorContainerFactory();
+    }
+
 }

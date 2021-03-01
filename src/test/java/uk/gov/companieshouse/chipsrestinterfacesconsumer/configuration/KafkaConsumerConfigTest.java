@@ -37,6 +37,12 @@ class KafkaConsumerConfigTest {
     }
 
     @Test
+    void kafkaErrorListenerContainerFactory() {
+        var factory = kafkaConsumerConfig.kafkaErrorListenerContainerFactory();
+        assertEquals(0, factory.getContainerProperties().getIdleBetweenPolls());
+    }
+
+    @Test
     void kafkaRetryListenerContainerFactoryRetryLessThanDefaultPollInterval() {
         var retryInterval = 1L;
         ReflectionTestUtils.setField(kafkaConsumerConfig, "retryThrottleSeconds", retryInterval);
