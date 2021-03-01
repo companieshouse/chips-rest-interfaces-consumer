@@ -43,7 +43,7 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
     @Override
     public void processMessage(String consumerId,
                                ChipsRestInterfacesSend message,
-                               List<String> failedMessage) {
+                               List<String> failedMessages) {
 
         Map<String, Object> logMap = new HashMap<>();
         logMap.put("Message", message.getData());
@@ -52,9 +52,9 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
             chipsRestClient.sendToChips(message, consumerId);
         } catch (HttpStatusCodeException hsce) {
             logMap.put("HTTP Status Code", hsce.getStatusCode().toString());
-            handleFailedMessage(message, hsce, logMap, failedMessage);
+            handleFailedMessage(message, hsce, logMap, failedMessages);
         } catch (Exception e) {
-            handleFailedMessage(message, e, logMap, failedMessage);
+            handleFailedMessage(message, e, logMap, failedMessages);
         }
     }
 
