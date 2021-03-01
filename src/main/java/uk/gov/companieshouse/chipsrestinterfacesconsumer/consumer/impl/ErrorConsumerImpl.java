@@ -14,9 +14,7 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcesso
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.slack.SlackMessagingService;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -25,15 +23,12 @@ public class ErrorConsumerImpl implements ErrorConsumer {
 
     private final ApplicationLogger logger;
     private final MessageProcessorService messageProcessorService;
-    private final SlackMessagingService slackMessagingService;
 
     @Autowired
     public ErrorConsumerImpl(ApplicationLogger logger,
-                             MessageProcessorService messageProcessorService,
-                             SlackMessagingService slackMessagingService) {
+                             MessageProcessorService messageProcessorService) {
         this.logger = logger;
         this.messageProcessorService = messageProcessorService;
-        this.slackMessagingService = slackMessagingService;
     }
 
     @PostConstruct
