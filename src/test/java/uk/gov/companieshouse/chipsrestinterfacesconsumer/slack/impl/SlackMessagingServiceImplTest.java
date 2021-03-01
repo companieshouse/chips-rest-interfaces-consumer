@@ -36,7 +36,6 @@ class SlackMessagingServiceImplTest {
     @BeforeEach
     void init() {
         ReflectionTestUtils.setField(slackMessagingServiceImpl,"slackChannel", SLACK_CHANNEL);
-        ReflectionTestUtils.setField(slackMessagingServiceImpl,"inErrorMode", false);
     }
 
     @Test

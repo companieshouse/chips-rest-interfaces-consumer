@@ -99,8 +99,7 @@ class MessageProcessorServiceImplTest {
         verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend, CONSUMER_ID);
         verify(messageProducer, times(1)).writeToTopic(any(), eq(RETRY_TOPIC));
         verify(messageProducer, times(0)).writeToTopic(any(), eq(ERROR_TOPIC));
-        assertEquals(1, failedMessageIds.size());
-        assertEquals(MESSAGE_ID, failedMessageIds.get(0));
+        assertTrue(failedMessageIds.isEmpty());
     }
 
     @Test
