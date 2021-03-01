@@ -64,7 +64,7 @@ class SlackMessagingServiceImplTest {
     }
 
     private List<String> buildDummyFailedMessages() {
-        List<String> failedMessageIds = new ArrayList<String>();
+        List<String> failedMessageIds = new ArrayList<>();
         failedMessageIds.add("abc-123");
         failedMessageIds.add("cde-345");
         failedMessageIds.add("efg-567");

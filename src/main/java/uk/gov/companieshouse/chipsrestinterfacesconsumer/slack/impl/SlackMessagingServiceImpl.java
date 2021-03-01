@@ -25,9 +25,6 @@ public class SlackMessagingServiceImpl implements SlackMessagingService {
     @Value("${SLACK_ACCESS_TOKEN}")
     private String slackAccessToken;
 
-    @Value("${RUN_APP_IN_ERROR_MODE}")
-    private boolean inErrorMode;
-
     @Autowired
     public SlackMessagingServiceImpl(ApplicationLogger logger) {
         this.logger = logger;
@@ -65,13 +62,14 @@ public class SlackMessagingServiceImpl implements SlackMessagingService {
     }
 
     private String buildMessage(List<String> failedMessageIds) {
-        String mode = (inErrorMode)? "error" : "normal";
 
         StringBuilder failedSb = new StringBuilder();
-        failedSb.append(String.format("In %s mode - Unable to send message with ids: %n", mode));
+        failedSb.append("Unable to send messages with ids: ");
+        failedSb.append("\n");
 
         for (String failedMessageId : failedMessageIds) {
-            failedSb.append(failedMessageId + "\n");
+            failedSb.append(failedMessageId);
+            failedSb.append("\n");
         }
 
         return failedSb.toString();

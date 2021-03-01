@@ -69,9 +69,6 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
         if (runAppInErrorMode) {
             message.setAttempt(1);
             messageProducer.writeToTopic(message, retryTopicName);
-            if(failedMessageIds != null) {
-                failedMessageIds.add(message.getMessageId());
-            }
             return;
         }
 
