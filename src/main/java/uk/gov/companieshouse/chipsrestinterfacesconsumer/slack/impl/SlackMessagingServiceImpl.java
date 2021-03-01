@@ -46,7 +46,7 @@ public class SlackMessagingServiceImpl implements SlackMessagingService {
                     .build();
 
             ChatPostMessageResponse response = postSlackMessage(methods, request);
-            if(response.isOk()) {
+            if (response.isOk()) {
                 logger.info(String.format("Message sent to: %s", slackChannel));
             } else {
                 logger.error(String.format("Error message sent but received response: %s", response.getError()));
@@ -70,7 +70,7 @@ public class SlackMessagingServiceImpl implements SlackMessagingService {
         StringBuilder failedSb = new StringBuilder();
         failedSb.append(String.format("In %s mode - Unable to send message with ids: %n", mode));
 
-        for(String failedMessageId : failedMessageIds){
+        for (String failedMessageId : failedMessageIds) {
             failedSb.append(failedMessageId + "\n");
         }
 

@@ -79,7 +79,7 @@ public class MainConsumerImpl implements MainConsumer {
 
         logger.debug(String.format("%s, received %s messages", groupId, messages.size()));
 
-       List<String> failedMessageIds = new ArrayList<>();
+        List<String> failedMessageIds = new ArrayList<>();
 
         for (int i = 0; i < messages.size(); i++) {
             processMessage(groupId, messages.get(i), offsets.get(i), partitions.get(i), failedMessageIds);

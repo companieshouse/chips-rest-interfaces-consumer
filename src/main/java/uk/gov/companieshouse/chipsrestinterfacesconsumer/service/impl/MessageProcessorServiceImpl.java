@@ -85,7 +85,7 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
         } else {
             logger.errorContext(messageId, String.format("Maximum retry attempts %s reached for this message", maxRetryAttempts), e, logMap);
             messageProducer.writeToTopic(message, errorTopicName);
-            if(failedMessageIds != null) {
+            if (failedMessageIds != null) {
                 failedMessageIds.add(message.getMessageId());
             }
         }
