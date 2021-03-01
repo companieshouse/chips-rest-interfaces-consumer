@@ -71,6 +71,10 @@ public class ApplicationLogger {
         logger.errorContext(context, message, e, cloneMapData(dataMap));
     }
 
+    public void error(String message) {
+        logger.error(message);
+    }
+
     public void error(String message, Exception e) {
         logger.error(message, e);
     }

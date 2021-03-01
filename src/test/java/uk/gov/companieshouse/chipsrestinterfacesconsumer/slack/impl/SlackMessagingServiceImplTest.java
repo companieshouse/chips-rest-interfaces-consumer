@@ -51,7 +51,7 @@ class SlackMessagingServiceImplTest {
         ChatPostMessageResponse chatPostMessageResponse = buildDummyResponse(false);
         doReturn(chatPostMessageResponse).when(slackMessagingServiceImpl).postSlackMessage(any(), any());
         slackMessagingServiceImpl.sendMessage(buildDummyFailedMessages());
-        verify(logger).info(String.format("Error message sent but received response: %s",
+        verify(logger).error(String.format("Error message sent but received response: %s",
                 chatPostMessageResponse.getError()));
     }
 
