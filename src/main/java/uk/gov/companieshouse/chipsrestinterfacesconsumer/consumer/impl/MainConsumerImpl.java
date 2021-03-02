@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -27,6 +28,9 @@ public class MainConsumerImpl implements MainConsumer {
     private final MessageProcessorService messageProcessorService;
 
     private final SlackMessagingService slackMessagingService;
+
+    @Value("${SEND_SLACK_MESSAGES}")
+    private boolean doSendMessages;
 
     @Autowired
     public MainConsumerImpl(ApplicationLogger logger,
@@ -85,7 +89,7 @@ public class MainConsumerImpl implements MainConsumer {
             processMessage(groupId, messages.get(i), offsets.get(i), partitions.get(i), failedMessageIds);
         }
 
-        if (!failedMessageIds.isEmpty()) {
+        if (doSendMessages && !failedMessageIds.isEmpty()) {
             slackMessagingService.sendMessage(failedMessageIds);
         }
     }
