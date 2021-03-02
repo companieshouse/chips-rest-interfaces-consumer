@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
@@ -69,7 +70,7 @@ class MainConsumerImplTest {
     }
 
     @Test
-    void readAndProcessRetryTopic() {
+    void readAndProcessRetryTopicWithEmptyFailedMessageIds() {
         List<ChipsRestInterfacesSend> messageList = Arrays.asList(data, secondData);
         List<Long> offsets = Arrays.asList(0L, 1L);
         List<Integer> partitions = Arrays.asList(0, 0);
@@ -82,4 +83,38 @@ class MainConsumerImplTest {
         verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData, failedMessageIds);
         verify(slackMessagingService,  never()).sendMessage(failedMessageIds);
     }
+
+    @Test
+    void readAndProcessRetryTopicWithSlackFlagFalse() {
+        List<ChipsRestInterfacesSend> messageList = Arrays.asList(data, secondData);
+        List<Long> offsets = Arrays.asList(0L, 1L);
+        List<Integer> partitions = Arrays.asList(0, 0);
+
+        ReflectionTestUtils.setField(mainConsumer, "doSendMessages", false);
+        List<String> failedMessageIds = new ArrayList<>();
+
+        mainConsumer.readAndProcessRetryTopic(messageList, offsets, partitions, RETRY_CONSUMER_ID);
+
+        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, data, failedMessageIds);
+        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData, failedMessageIds);
+
+        verify(slackMessagingService,  never()).sendMessage(failedMessageIds);
+    }
+
+    @Test
+    void readAndProcessRetryTopicWithSlackFlagTrue() {
+        List<ChipsRestInterfacesSend> messageList = Arrays.asList(data, secondData);
+        List<Long> offsets = Arrays.asList(0L, 1L);
+        List<Integer> partitions = Arrays.asList(0, 0);
+
+        ReflectionTestUtils.setField(mainConsumer, "doSendMessages", true);
+        List<String> failedMessageIds = new ArrayList<>();
+
+        mainConsumer.readAndProcessRetryTopic(messageList, offsets, partitions, RETRY_CONSUMER_ID);
+
+        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, data, failedMessageIds);
+        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData, failedMessageIds);
+        verify(slackMessagingService,  never()).sendMessage(failedMessageIds); // this'll be one time
+    }
+
 }

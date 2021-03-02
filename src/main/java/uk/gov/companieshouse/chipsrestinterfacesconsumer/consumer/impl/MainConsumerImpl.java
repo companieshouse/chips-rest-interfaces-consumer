@@ -29,7 +29,7 @@ public class MainConsumerImpl implements MainConsumer {
 
     private final SlackMessagingService slackMessagingService;
 
-    @Value("${SEND_SLACK_MESSAGES}")
+    @Value("${FEATURE_FLAG_SLACK_MESSAGES}")
     private boolean doSendMessages;
 
     @Autowired
