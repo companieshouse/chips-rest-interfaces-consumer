@@ -69,3 +69,9 @@ KAFKA_PRODUCER_LINGER_MS | 500 | Prevents messages beings sent piecemeal by alll
 To communicate any errors sending messages to Chips, to the Front End support team, this app uses the Slack API:
 
 https://companieshouse.atlassian.net/wiki/spaces/TTL/pages/2652078179/Slack+Notifications
+
+### Kafka complexities encountered and their solutions
+
+A list can be found here:
+
+https://companieshouse.atlassian.net/wiki/spaces/TTL/pages/2660073581/Complexities+Implementing+Kafka
