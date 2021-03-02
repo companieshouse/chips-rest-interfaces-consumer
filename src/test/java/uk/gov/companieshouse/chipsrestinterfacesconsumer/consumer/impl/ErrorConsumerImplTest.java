@@ -9,7 +9,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
-import uk.gov.companieshouse.service.ServiceException;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -38,9 +37,9 @@ class ErrorConsumerImplTest {
     }
 
     @Test
-    void readAndProcessErrorTopic() throws ServiceException {
+    void readAndProcessErrorTopic() {
+        data.setAttempt(0);
         errorConsumer.readAndProcessErrorTopic(data, 0L, 0, ERROR_CONSUMER_ID);
-
-        verify(messageProcessorService, times(1)).processMessage(ERROR_CONSUMER_ID, data);
+        verify(messageProcessorService, times(1)).processMessage(ERROR_CONSUMER_ID, data, null);
     }
 }

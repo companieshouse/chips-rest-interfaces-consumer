@@ -11,8 +11,10 @@ import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.MainConsumer;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
+import uk.gov.companieshouse.chipsrestinterfacesconsumer.slack.SlackMessagingService;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,10 +26,15 @@ public class MainConsumerImpl implements MainConsumer {
     private final ApplicationLogger logger;
     private final MessageProcessorService messageProcessorService;
 
+    private final SlackMessagingService slackMessagingService;
+
     @Autowired
-    public MainConsumerImpl(ApplicationLogger logger, MessageProcessorService messageProcessorService) {
+    public MainConsumerImpl(ApplicationLogger logger,
+                            MessageProcessorService messageProcessorService,
+                            SlackMessagingService slackMessagingService) {
         this.logger = logger;
         this.messageProcessorService = messageProcessorService;
+        this.slackMessagingService = slackMessagingService;
     }
 
     @PostConstruct
@@ -51,7 +58,7 @@ public class MainConsumerImpl implements MainConsumer {
                                         @Header(KafkaHeaders.GROUP_ID) String groupId
     ){
         data.setAttempt(0);
-        processMessage(groupId, data, offset, partition);
+        processMessage(groupId, data, offset, partition, null);
     }
 
     /**
@@ -71,10 +78,16 @@ public class MainConsumerImpl implements MainConsumer {
     ){
 
         logger.debug(String.format("%s, received %s messages", groupId, messages.size()));
+
+        List<String> failedMessageIds = new ArrayList<>();
+
         for (int i = 0; i < messages.size(); i++) {
-            processMessage(groupId, messages.get(i), offsets.get(i), partitions.get(i));
+            processMessage(groupId, messages.get(i), offsets.get(i), partitions.get(i), failedMessageIds);
         }
 
+        if (!failedMessageIds.isEmpty()) {
+            slackMessagingService.sendMessage(failedMessageIds);
+        }
     }
 
     /**
@@ -86,7 +99,12 @@ public class MainConsumerImpl implements MainConsumer {
      * @param offset The offset of {@code data}
      * @param partition The partition of {@code data}
      */
-    private void processMessage(String consumerId, ChipsRestInterfacesSend data, Long offset, Integer partition) {
+    private void processMessage(String consumerId,
+                                ChipsRestInterfacesSend data,
+                                Long offset,
+                                Integer partition,
+                                List<String> failedMessageIds) {
+
         var messageId = data.getMessageId();
         Map<String, Object> logMap = new HashMap<>();
         logMap.put("Group Id", consumerId);
@@ -96,6 +114,6 @@ public class MainConsumerImpl implements MainConsumer {
         logger.infoContext(messageId, String.format("%s: Consumed Message from Partition: %s, Offset: %s", consumerId, partition, offset), logMap);
         logger.infoContext(messageId, String.format("received data='%s'", data), logMap);
         logger.infoContext(messageId, String.format("%s: Finished Processing Message from Partition: %s, Offset: %s", consumerId, partition, offset), logMap);
-        messageProcessorService.processMessage(consumerId, data);
+        messageProcessorService.processMessage(consumerId, data, failedMessageIds);
     }
 }

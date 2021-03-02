@@ -24,7 +24,8 @@ public class ErrorConsumerImpl implements ErrorConsumer {
     private final MessageProcessorService messageProcessorService;
 
     @Autowired
-    public ErrorConsumerImpl(ApplicationLogger logger, MessageProcessorService messageProcessorService) {
+    public ErrorConsumerImpl(ApplicationLogger logger,
+                             MessageProcessorService messageProcessorService) {
         this.logger = logger;
         this.messageProcessorService = messageProcessorService;
     }
@@ -59,7 +60,8 @@ public class ErrorConsumerImpl implements ErrorConsumer {
         logger.infoContext(messageId, String.format("%s: Consumed Message from Partition: %s, Offset: %s", groupId, partition, offset), logMap);
         logger.infoContext(messageId, String.format("received data='%s'", data), logMap);
 
-        messageProcessorService.processMessage("error-consumer", data);
+
+        messageProcessorService.processMessage("error-consumer", data, null);
         logger.infoContext(messageId, String.format("%s: Finished Processing Message from Partition: %s, Offset: %s", groupId, partition, offset), logMap);
     }
 }

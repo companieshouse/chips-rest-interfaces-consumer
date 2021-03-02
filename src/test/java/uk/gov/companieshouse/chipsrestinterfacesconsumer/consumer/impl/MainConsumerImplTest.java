@@ -9,12 +9,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
-import uk.gov.companieshouse.service.ServiceException;
+import uk.gov.companieshouse.chipsrestinterfacesconsumer.slack.SlackMessagingService;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -32,12 +34,14 @@ class MainConsumerImplTest {
     @Mock
     private ApplicationLogger logger;
 
+    @Mock
+    private SlackMessagingService slackMessagingService;
+
     @InjectMocks
     private MainConsumerImpl mainConsumer;
 
     private ChipsRestInterfacesSend data;
     private ChipsRestInterfacesSend secondData;
-    private List<ChipsRestInterfacesSend> messageList;
 
     @BeforeEach
     void init() {
@@ -48,30 +52,34 @@ class MainConsumerImplTest {
     }
 
     @Test
-    void readAndProcessMainTopic() throws ServiceException {
+    void readAndProcessMainTopic() {
         mainConsumer.readAndProcessMainTopic(data, 0L, 0, MAIN_CONSUMER_ID);
 
-        verify(messageProcessorService, times(1)).processMessage(MAIN_CONSUMER_ID, data);
+        verify(messageProcessorService, times(1)).processMessage(MAIN_CONSUMER_ID, data, null);
         assertEquals(0, data.getAttempt());
     }
 
     @Test
-    void readAndProcessMainTopicWithAttempts() throws ServiceException {
+    void readAndProcessMainTopicWithAttempts() {
         data.setAttempt(5);
         mainConsumer.readAndProcessMainTopic(data, 0L, 0, MAIN_CONSUMER_ID);
 
-        verify(messageProcessorService, times(1)).processMessage(MAIN_CONSUMER_ID, data);
+        verify(messageProcessorService, times(1)).processMessage(MAIN_CONSUMER_ID, data, null);
         assertEquals(0, data.getAttempt());
     }
 
     @Test
-    void readAndProcessRetryTopic() throws ServiceException {
-        messageList = Arrays.asList(data, secondData);
+    void readAndProcessRetryTopic() {
+        List<ChipsRestInterfacesSend> messageList = Arrays.asList(data, secondData);
         List<Long> offsets = Arrays.asList(0L, 1L);
         List<Integer> partitions = Arrays.asList(0, 0);
+
+        List<String> failedMessageIds = new ArrayList<>();
+
         mainConsumer.readAndProcessRetryTopic(messageList, offsets, partitions, RETRY_CONSUMER_ID);
 
-        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, data);
-        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData);
+        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, data, failedMessageIds);
+        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData, failedMessageIds);
+        verify(slackMessagingService,  never()).sendMessage(failedMessageIds);
     }
 }
