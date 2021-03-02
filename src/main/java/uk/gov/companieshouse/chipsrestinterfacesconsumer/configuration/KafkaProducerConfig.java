@@ -21,9 +21,6 @@ public class KafkaProducerConfig {
     @Value("${kafka.broker.address}")
     private String brokerAddress;
 
-    @Value("${kafka.producer.retries}")
-    private int retries;
-
     @Value("${kafka.producer.batch.size.bytes}")
     private int batchSizeBytes;
 

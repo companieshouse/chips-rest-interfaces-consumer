@@ -2,6 +2,7 @@ package uk.gov.companieshouse.chipsrestinterfacesconsumer.configuration;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,7 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.avro.AvroDeserializer;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 @EnableKafka
 @Configuration
@@ -27,8 +29,8 @@ public class KafkaConsumerConfig {
     @Value("${RETRY_THROTTLE_RATE_SECONDS}")
     private long retryThrottleSeconds;
 
-    @Value("${MAX_RETRY_ATTEMPTS}")
-    private int maxRetryAttempts;
+    @Autowired
+    private Supplier<Long> timestampNow;
 
     /**
      *
@@ -111,6 +113,23 @@ public class KafkaConsumerConfig {
     }
 
     /**
+     * Creates a concurrent kafka listener container factory.
+     * For each message a kafka listener receives this factory will create a container to process the message.
+     * Filter strategy is filtering out messages with timestamps after the app started
+     *
+     * @return A ConcurrentKafkaListenerContainerFactory
+     */
+    private ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> getNewErrorContainerFactory() {
+        var appStartedTime = timestampNow.get();
+        ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(newMainConsumerFactory());
+        factory.setRecordFilterStrategy(consumerRecord -> appStartedTime < consumerRecord.timestamp());
+        factory.setAckDiscarded(false);
+        return factory;
+    }
+
+    /**
      *
      * @return ConcurrentKafkaListenerContainerFactory with default configuration
      */
@@ -132,4 +151,15 @@ public class KafkaConsumerConfig {
 
         return getNewRetryContainerFactory(idleMillis);
     }
+
+    /**
+     *
+     * @return ConcurrentKafkaListenerContainerFactory with error configuration
+     */
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend>
+    kafkaErrorListenerContainerFactory() {
+        return getNewErrorContainerFactory();
+    }
+
 }
