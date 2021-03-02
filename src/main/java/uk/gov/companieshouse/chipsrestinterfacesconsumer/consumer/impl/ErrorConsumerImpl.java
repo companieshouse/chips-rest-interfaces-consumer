@@ -61,7 +61,7 @@ public class ErrorConsumerImpl implements ErrorConsumer {
         logger.infoContext(messageId, String.format("received data='%s'", data), logMap);
 
 
-        messageProcessorService.processMessage("error-consumer", data, null);
+        messageProcessorService.processMessage("error-consumer", data);
         logger.infoContext(messageId, String.format("%s: Finished Processing Message from Partition: %s, Offset: %s", groupId, partition, offset), logMap);
     }
 }

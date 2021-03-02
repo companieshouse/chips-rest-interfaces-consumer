@@ -30,7 +30,7 @@ public class MainConsumerImpl implements MainConsumer {
     private final SlackMessagingService slackMessagingService;
 
     @Value("${FEATURE_FLAG_SLACK_MESSAGES}")
-    private boolean doSendMessages;
+    private boolean doSendSlackMessages;
 
     @Autowired
     public MainConsumerImpl(ApplicationLogger logger,
@@ -89,7 +89,7 @@ public class MainConsumerImpl implements MainConsumer {
             processMessage(groupId, messages.get(i), offsets.get(i), partitions.get(i), failedMessageIds);
         }
 
-        if (doSendMessages && !failedMessageIds.isEmpty()) {
+        if (doSendSlackMessages && !failedMessageIds.isEmpty()) {
             slackMessagingService.sendMessage(failedMessageIds);
         }
     }
@@ -118,6 +118,9 @@ public class MainConsumerImpl implements MainConsumer {
         logger.infoContext(messageId, String.format("%s: Consumed Message from Partition: %s, Offset: %s", consumerId, partition, offset), logMap);
         logger.infoContext(messageId, String.format("received data='%s'", data), logMap);
         logger.infoContext(messageId, String.format("%s: Finished Processing Message from Partition: %s, Offset: %s", consumerId, partition, offset), logMap);
-        messageProcessorService.processMessage(consumerId, data, failedMessageIds);
+        boolean isSuccessful = messageProcessorService.processMessage(consumerId, data);
+        if (failedMessageIds != null && !isSuccessful) {
+            failedMessageIds.add(messageId);
+        }
     }
 }

@@ -28,6 +28,8 @@ class MainConsumerImplTest {
     private static final String SECOND_DATA = "DATA-2";
     private static final String MAIN_CONSUMER_ID = "main-consumer";
     private static final String RETRY_CONSUMER_ID = "retry-consumer";
+    private static final String MESSAGE_ID = "abc-123";
+    private static final String SECOND_MESSAGE_ID = "cde-345";
 
     @Mock
     private MessageProcessorService messageProcessorService;
@@ -47,8 +49,10 @@ class MainConsumerImplTest {
     @BeforeEach
     void init() {
         data = new ChipsRestInterfacesSend();
+        data.setMessageId(MESSAGE_ID);
         data.setData(DATA);
         secondData = new ChipsRestInterfacesSend();
+        secondData.setMessageId(SECOND_MESSAGE_ID);
         secondData.setData(SECOND_DATA);
     }
 
@@ -56,7 +60,7 @@ class MainConsumerImplTest {
     void readAndProcessMainTopic() {
         mainConsumer.readAndProcessMainTopic(data, 0L, 0, MAIN_CONSUMER_ID);
 
-        verify(messageProcessorService, times(1)).processMessage(MAIN_CONSUMER_ID, data, null);
+        verify(messageProcessorService, times(1)).processMessage(MAIN_CONSUMER_ID, data);
         assertEquals(0, data.getAttempt());
     }
 
@@ -65,7 +69,7 @@ class MainConsumerImplTest {
         data.setAttempt(5);
         mainConsumer.readAndProcessMainTopic(data, 0L, 0, MAIN_CONSUMER_ID);
 
-        verify(messageProcessorService, times(1)).processMessage(MAIN_CONSUMER_ID, data, null);
+        verify(messageProcessorService, times(1)).processMessage(MAIN_CONSUMER_ID, data);
         assertEquals(0, data.getAttempt());
     }
 
@@ -79,9 +83,9 @@ class MainConsumerImplTest {
 
         mainConsumer.readAndProcessRetryTopic(messageList, offsets, partitions, RETRY_CONSUMER_ID);
 
-        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, data, failedMessageIds);
-        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData, failedMessageIds);
-        verify(slackMessagingService,  never()).sendMessage(failedMessageIds);
+        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, data);
+        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData);
+        verify(slackMessagingService, never()).sendMessage(failedMessageIds);
     }
 
     @Test
@@ -90,15 +94,16 @@ class MainConsumerImplTest {
         List<Long> offsets = Arrays.asList(0L, 1L);
         List<Integer> partitions = Arrays.asList(0, 0);
 
-        ReflectionTestUtils.setField(mainConsumer, "doSendMessages", false);
+        ReflectionTestUtils.setField(mainConsumer, "doSendSlackMessages", false);
         List<String> failedMessageIds = new ArrayList<>();
-
+        failedMessageIds.add(MESSAGE_ID);
+        failedMessageIds.add(SECOND_MESSAGE_ID);
         mainConsumer.readAndProcessRetryTopic(messageList, offsets, partitions, RETRY_CONSUMER_ID);
 
-        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, data, failedMessageIds);
-        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData, failedMessageIds);
+        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, data);
+        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData);
 
-        verify(slackMessagingService,  never()).sendMessage(failedMessageIds);
+        verify(slackMessagingService, never()).sendMessage(failedMessageIds);
     }
 
     @Test
@@ -107,14 +112,14 @@ class MainConsumerImplTest {
         List<Long> offsets = Arrays.asList(0L, 1L);
         List<Integer> partitions = Arrays.asList(0, 0);
 
-        ReflectionTestUtils.setField(mainConsumer, "doSendMessages", true);
+        ReflectionTestUtils.setField(mainConsumer, "doSendSlackMessages", true);
         List<String> failedMessageIds = new ArrayList<>();
-
+        failedMessageIds.add(MESSAGE_ID);
+        failedMessageIds.add(SECOND_MESSAGE_ID);
         mainConsumer.readAndProcessRetryTopic(messageList, offsets, partitions, RETRY_CONSUMER_ID);
 
-        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, data, failedMessageIds);
-        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData, failedMessageIds);
-        verify(slackMessagingService,  never()).sendMessage(failedMessageIds); // this'll be one time
+        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, data);
+        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData);
+        verify(slackMessagingService, times(1)).sendMessage(failedMessageIds);
     }
-
 }
