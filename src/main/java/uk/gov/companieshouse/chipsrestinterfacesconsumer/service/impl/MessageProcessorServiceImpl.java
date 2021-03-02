@@ -11,7 +11,6 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.producer.MessageProduce
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
