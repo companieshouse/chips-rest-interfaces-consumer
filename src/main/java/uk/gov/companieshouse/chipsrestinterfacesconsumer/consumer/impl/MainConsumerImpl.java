@@ -102,6 +102,7 @@ public class MainConsumerImpl implements MainConsumer {
      * @param data a deserialized message from kafka
      * @param offset The offset of {@code data}
      * @param partition The partition of {@code data}
+     * @param failedMessageIds collects the ids of failed Kafka messages
      */
     private void processMessage(String consumerId,
                                 ChipsRestInterfacesSend data,
