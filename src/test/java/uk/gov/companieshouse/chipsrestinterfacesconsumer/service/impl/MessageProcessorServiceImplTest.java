@@ -85,21 +85,6 @@ class MessageProcessorServiceImplTest {
     }
 
     @Test
-    void processErrorMessageTest() {
-        ChipsRestInterfacesSend chipsRestInterfacesSend = new ChipsRestInterfacesSend();
-        chipsRestInterfacesSend.setMessageId(MESSAGE_ID);
-        RuntimeException runtimeException = new RuntimeException("runtimeException");
-        doThrow(runtimeException).when(chipsRestClient).sendToChips(chipsRestInterfacesSend, CONSUMER_ID);
-
-        boolean result = messageProcessorService.processMessage(CONSUMER_ID, chipsRestInterfacesSend);
-
-        verify(chipsRestClient, times(1)).sendToChips(chipsRestInterfacesSend, CONSUMER_ID);
-        verify(messageProducer, times(1)).writeToTopic(any(), eq(RETRY_TOPIC));
-        verify(messageProducer, times(0)).writeToTopic(any(), eq(ERROR_TOPIC));
-        assertTrue(result);
-    }
-
-    @Test
     void testRetryIsCalled() {
         RuntimeException runtimeException = new RuntimeException("runtimeException");
         doThrow(runtimeException).when(chipsRestClient).sendToChips(chipsRestInterfacesSend, CONSUMER_ID);
