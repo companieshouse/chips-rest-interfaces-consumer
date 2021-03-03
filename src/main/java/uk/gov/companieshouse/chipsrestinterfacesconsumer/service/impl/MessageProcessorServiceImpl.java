@@ -27,9 +27,6 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
     @Value("${kafka.error.topic}")
     private String errorTopicName;
 
-    @Value("${RUN_APP_IN_ERROR_MODE:false}")
-    private boolean runAppInErrorMode;
-
     @Autowired
     private ChipsRestClient chipsRestClient;
 
@@ -64,15 +61,8 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
         var messageId = message.getMessageId();
         logger.errorContext(messageId, SEND_FAILURE_MESSAGE, e, logMap);
 
-        if (runAppInErrorMode) {
-            message.setAttempt(1);
-            messageProducer.writeToTopic(message, retryTopicName);
-            return true;
-        }
-
         var attempts = message.getAttempt();
         logger.infoContext(messageId, String.format("Attempt %s failed for this message", attempts), logMap);
-
 
         if (attempts < maxRetryAttempts) {
             message.setAttempt(attempts + 1);

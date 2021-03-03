@@ -25,7 +25,6 @@ class KafkaConsumerConfigTest {
 
     private static final String BROKER_ADDRESS = "BROKER";
     private static final long RETRY_THROTTLE_SECONDS = 5000L;
-    private static final int MAX_RETRY_ATTEMPTS = 5;
     private static final Long TIMESTAMP_PAST = 1614693284647L;
     private static final Long TIMESTAMP_NOW = 1614693285647L;
     private static final Long TIMESTAMP_FUTURE = 1614693286647L;
