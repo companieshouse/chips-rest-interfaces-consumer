@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -27,6 +28,9 @@ public class MainConsumerImpl implements MainConsumer {
     private final MessageProcessorService messageProcessorService;
 
     private final SlackMessagingService slackMessagingService;
+
+    @Value("${FEATURE_FLAG_SLACK_MESSAGES_020321}")
+    private boolean doSendSlackMessages;
 
     @Autowired
     public MainConsumerImpl(ApplicationLogger logger,
@@ -85,7 +89,7 @@ public class MainConsumerImpl implements MainConsumer {
             processMessage(groupId, messages.get(i), offsets.get(i), partitions.get(i), failedMessageIds);
         }
 
-        if (!failedMessageIds.isEmpty()) {
+        if (doSendSlackMessages && !failedMessageIds.isEmpty()) {
             slackMessagingService.sendMessage(failedMessageIds);
         }
     }
@@ -98,6 +102,7 @@ public class MainConsumerImpl implements MainConsumer {
      * @param data a deserialized message from kafka
      * @param offset The offset of {@code data}
      * @param partition The partition of {@code data}
+     * @param failedMessageIds collects the ids of failed Kafka messages
      */
     private void processMessage(String consumerId,
                                 ChipsRestInterfacesSend data,
@@ -113,7 +118,12 @@ public class MainConsumerImpl implements MainConsumer {
 
         logger.infoContext(messageId, String.format("%s: Consumed Message from Partition: %s, Offset: %s", consumerId, partition, offset), logMap);
         logger.infoContext(messageId, String.format("received data='%s'", data), logMap);
-        messageProcessorService.processMessage(consumerId, data, failedMessageIds);
+
+        boolean isSuccessful = messageProcessorService.processMessage(consumerId, data);
+        if (failedMessageIds != null && !isSuccessful) {
+            failedMessageIds.add(messageId);
+        }
+
         logger.infoContext(messageId, String.format("%s: Finished Processing Message from Partition: %s, Offset: %s", consumerId, partition, offset), logMap);
     }
 }

@@ -11,7 +11,6 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.producer.MessageProduce
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcessorService;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -41,9 +40,8 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
     private MessageProducer messageProducer;
 
     @Override
-    public void processMessage(String consumerId,
-                               ChipsRestInterfacesSend message,
-                               List<String> failedMessageIds) {
+    public boolean processMessage(String consumerId,
+                               ChipsRestInterfacesSend message) {
 
         Map<String, Object> logMap = new HashMap<>();
         logMap.put("Message", message.getData());
@@ -52,16 +50,16 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
             chipsRestClient.sendToChips(message, consumerId);
         } catch (HttpStatusCodeException hsce) {
             logMap.put("HTTP Status Code", hsce.getStatusCode().toString());
-            handleFailedMessage(message, hsce, logMap, failedMessageIds);
+            return handleFailedMessage(message, hsce, logMap);
         } catch (Exception e) {
-            handleFailedMessage(message, e, logMap, failedMessageIds);
+            return handleFailedMessage(message, e, logMap);
         }
+        return true;
     }
 
-    private void handleFailedMessage(ChipsRestInterfacesSend message,
+    private boolean handleFailedMessage(ChipsRestInterfacesSend message,
                                      Exception e,
-                                     Map<String, Object> logMap,
-                                     List<String> failedMessageIds) {
+                                     Map<String, Object> logMap) {
 
         var messageId = message.getMessageId();
         logger.errorContext(messageId, SEND_FAILURE_MESSAGE, e, logMap);
@@ -69,7 +67,7 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
         if (runAppInErrorMode) {
             message.setAttempt(1);
             messageProducer.writeToTopic(message, retryTopicName);
-            return;
+            return true;
         }
 
         var attempts = message.getAttempt();
@@ -79,12 +77,11 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
         if (attempts < maxRetryAttempts) {
             message.setAttempt(attempts + 1);
             messageProducer.writeToTopic(message, retryTopicName);
+            return true;
         } else {
             logger.errorContext(messageId, String.format("Maximum retry attempts %s reached for this message", maxRetryAttempts), e, logMap);
             messageProducer.writeToTopic(message, errorTopicName);
-            if (failedMessageIds != null) {
-                failedMessageIds.add(message.getMessageId());
-            }
+            return false;
         }
     }
 }
