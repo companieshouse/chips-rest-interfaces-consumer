@@ -66,7 +66,6 @@ class MessageProcessorServiceImplTest {
         ReflectionTestUtils.setField(messageProcessorService, "maxRetryAttempts", MAX_RETRIES);
         ReflectionTestUtils.setField(messageProcessorService, "retryTopicName", RETRY_TOPIC);
         ReflectionTestUtils.setField(messageProcessorService, "errorTopicName", ERROR_TOPIC);
-        ReflectionTestUtils.setField(messageProcessorService, "runAppInErrorMode", false);
 
         chipsRestInterfacesSend = new ChipsRestInterfacesSend();
         chipsRestInterfacesSend.setData(DUMMY_DATA);
@@ -87,7 +86,6 @@ class MessageProcessorServiceImplTest {
 
     @Test
     void processErrorMessageTest() {
-        ReflectionTestUtils.setField(messageProcessorService, "runAppInErrorMode", true);
         ChipsRestInterfacesSend chipsRestInterfacesSend = new ChipsRestInterfacesSend();
         chipsRestInterfacesSend.setMessageId(MESSAGE_ID);
         RuntimeException runtimeException = new RuntimeException("runtimeException");
