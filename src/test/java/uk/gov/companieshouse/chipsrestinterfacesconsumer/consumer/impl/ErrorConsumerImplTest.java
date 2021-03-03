@@ -40,6 +40,6 @@ class ErrorConsumerImplTest {
     void readAndProcessErrorTopic() {
         data.setAttempt(0);
         errorConsumer.readAndProcessErrorTopic(data, 0L, 0, ERROR_CONSUMER_ID);
-        verify(messageProcessorService, times(1)).processMessage(ERROR_CONSUMER_ID, data, null);
+        verify(messageProcessorService, times(1)).processMessage(ERROR_CONSUMER_ID, data);
     }
 }
