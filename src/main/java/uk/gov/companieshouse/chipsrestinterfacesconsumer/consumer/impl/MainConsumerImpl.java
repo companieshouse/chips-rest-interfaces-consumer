@@ -74,7 +74,7 @@ public class MainConsumerImpl implements MainConsumer {
         logger.debugContext(messageId, acknowledgment.toString(), logMap);
 
         data.setAttempt(0);
-        processMessage(groupId, data, offset, partition, null);
+        processMessage(groupId, data, offset, partition);
 
         acknowledgment.acknowledge();
         logger.debugContext(messageId, String.format("Acknowledged message %s", messageId), logMap);
@@ -103,7 +103,11 @@ public class MainConsumerImpl implements MainConsumer {
         List<String> failedMessageIds = new ArrayList<>();
 
         for (int i = 0; i < messages.size(); i++) {
-            processMessage(groupId, messages.get(i), offsets.get(i), partitions.get(i), failedMessageIds);
+            ChipsRestInterfacesSend message = messages.get(i);
+
+            if (!processMessage(groupId, message, offsets.get(i), partitions.get(i))) {
+                failedMessageIds.add(message.getMessageId());
+            }
         }
 
         acknowledgment.acknowledge();
@@ -122,13 +126,11 @@ public class MainConsumerImpl implements MainConsumer {
      * @param data a deserialized message from kafka
      * @param offset The offset of {@code data}
      * @param partition The partition of {@code data}
-     * @param failedMessageIds collects the ids of failed Kafka messages
      */
-    private void processMessage(String consumerId,
-                                ChipsRestInterfacesSend data,
-                                Long offset,
-                                Integer partition,
-                                List<String> failedMessageIds) {
+    private boolean processMessage(String consumerId,
+                                   ChipsRestInterfacesSend data,
+                                   Long offset,
+                                   Integer partition) {
 
         var messageId = data.getMessageId();
         Map<String, Object> logMap = new HashMap<>();
@@ -140,10 +142,8 @@ public class MainConsumerImpl implements MainConsumer {
         logger.infoContext(messageId, String.format("received data='%s'", data), logMap);
 
         boolean isSuccessful = messageProcessorService.processMessage(consumerId, data);
-        if (failedMessageIds != null && !isSuccessful) {
-            failedMessageIds.add(messageId);
-        }
 
         logger.infoContext(messageId, String.format("%s: Finished Processing Message from Partition: %s, Offset: %s", consumerId, partition, offset), logMap);
+        return isSuccessful;
     }
 }
