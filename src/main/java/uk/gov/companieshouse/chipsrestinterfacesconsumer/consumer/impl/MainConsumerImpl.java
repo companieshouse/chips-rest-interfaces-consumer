@@ -51,6 +51,7 @@ public class MainConsumerImpl implements MainConsumer {
      * Creates a container using the containerFactory argument to handle any messages retrieved from kafka
      *
      * @param data The deserialized message from Kafka
+     * @param acknowledgment The {@link Acknowledgment} to be called to commit the offset of {@code data}
      * @param offset The offset of {@code data}
      * @param partition The partition of {@code data}
      * @param groupId The group id of the consumer
@@ -63,20 +64,29 @@ public class MainConsumerImpl implements MainConsumer {
                                         @Header(KafkaHeaders.RECEIVED_PARTITION_ID) Integer partition,
                                         @Header(KafkaHeaders.GROUP_ID) String groupId
     ){
-        logger.debug(acknowledgment.toString());
+        var messageId = data.getMessageId();
+
+        Map<String, Object> logMap = new HashMap<>();
+        logMap.put("Group Id", groupId);
+        logMap.put("Partition", partition);
+        logMap.put("Offset", offset);
+
+        logger.debugContext(messageId, acknowledgment.toString(), logMap);
 
         data.setAttempt(0);
         processMessage(groupId, data, offset, partition, null);
 
         acknowledgment.acknowledge();
+        logger.debugContext(messageId, String.format("Acknowledged message %s", messageId), logMap);
     }
 
     /**
      * Creates a container using the containerFactory argument to handle any messages retrieved from kafka
      *
      * @param messages A list of deserialized messages from Kafka
-     * @param offsets A list of the offsets for the messages in {@code data}
-     * @param partitions A list of the partitions for the messages in {@code data}
+     * @param acknowledgment The {@link Acknowledgment} to be called to commit the offsets of all {@code messages} in the batch
+     * @param offsets A list of the offsets for the messages in {@code messages}
+     * @param partitions A list of the partitions for the messages in {@code messages}
      * @param groupId The group id of the consumer
      */
     @Override
@@ -87,10 +97,8 @@ public class MainConsumerImpl implements MainConsumer {
                                          @Header(KafkaHeaders.RECEIVED_PARTITION_ID) List<Integer> partitions,
                                          @Header(KafkaHeaders.GROUP_ID) String groupId
     ){
-
-        logger.debug(String.format("%s, received %s messages", groupId, messages.size()));
-
-        logger.debug(acknowledgment.toString());
+        var batchSize = messages.size();
+        logger.debug(String.format("%s, received %s messages", groupId, batchSize));
 
         List<String> failedMessageIds = new ArrayList<>();
 
@@ -98,10 +106,12 @@ public class MainConsumerImpl implements MainConsumer {
             processMessage(groupId, messages.get(i), offsets.get(i), partitions.get(i), failedMessageIds);
         }
 
+        acknowledgment.acknowledge();
+        logger.debug(String.format("%s, acknowledged batch of %s messages", groupId, batchSize));
+
         if (doSendSlackMessages && !failedMessageIds.isEmpty()) {
             slackMessagingService.sendMessage(failedMessageIds);
         }
-        acknowledgment.acknowledge();
     }
 
     /**

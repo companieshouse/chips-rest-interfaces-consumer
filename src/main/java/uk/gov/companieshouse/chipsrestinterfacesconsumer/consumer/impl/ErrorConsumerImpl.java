@@ -41,6 +41,7 @@ public class ErrorConsumerImpl implements ErrorConsumer {
      * Creates a container using the containerFactory argument to handle any messages retrieved from kafka
      *
      * @param data The deserialized message from Kafka
+     * @param acknowledgment The {@link Acknowledgment} to be called to commit the offset of {@code data}
      * @param offset The offset of {@code data}
      * @param partition The partition of {@code data}
      * @param groupId The group id of the consumer
@@ -53,9 +54,6 @@ public class ErrorConsumerImpl implements ErrorConsumer {
                                          @Header(KafkaHeaders.RECEIVED_PARTITION_ID) Integer partition,
                                          @Header(KafkaHeaders.GROUP_ID) String groupId){
 
-        logger.debug(acknowledgment.toString());
-
-        data.setAttempt(0);
         var messageId = data.getMessageId();
 
         Map<String, Object> logMap = new HashMap<>();
@@ -63,11 +61,17 @@ public class ErrorConsumerImpl implements ErrorConsumer {
         logMap.put("Partition", partition);
         logMap.put("Offset", offset);
 
+        logger.debugContext(messageId, acknowledgment.toString(), logMap);
+
         logger.infoContext(messageId, String.format("%s: Consumed Message from Partition: %s, Offset: %s", groupId, partition, offset), logMap);
         logger.infoContext(messageId, String.format("received data='%s'", data), logMap);
 
-        messageProcessorService.processMessage("error-consumer", data);
+        data.setAttempt(0);
+        messageProcessorService.processMessage(groupId, data);
+
         logger.infoContext(messageId, String.format("%s: Finished Processing Message from Partition: %s, Offset: %s", groupId, partition, offset), logMap);
+
         acknowledgment.acknowledge();
+        logger.debugContext(messageId, String.format("Acknowledged message %s", messageId), logMap);
     }
 }
