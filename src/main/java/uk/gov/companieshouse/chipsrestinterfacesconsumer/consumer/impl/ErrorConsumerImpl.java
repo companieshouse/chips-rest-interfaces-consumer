@@ -3,6 +3,7 @@ package uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -47,9 +48,12 @@ public class ErrorConsumerImpl implements ErrorConsumer {
     @Override
     @KafkaListener(topics = "${kafka.error.topic}", containerFactory = "kafkaErrorListenerContainerFactory", groupId = "error-group")
     public void readAndProcessErrorTopic(@Payload ChipsRestInterfacesSend data,
+                                         Acknowledgment acknowledgment,
                                          @Header(KafkaHeaders.OFFSET) Long offset,
                                          @Header(KafkaHeaders.RECEIVED_PARTITION_ID) Integer partition,
                                          @Header(KafkaHeaders.GROUP_ID) String groupId){
+
+        logger.debug(acknowledgment.toString());
 
         data.setAttempt(0);
         var messageId = data.getMessageId();
@@ -64,5 +68,6 @@ public class ErrorConsumerImpl implements ErrorConsumer {
 
         messageProcessorService.processMessage("error-consumer", data);
         logger.infoContext(messageId, String.format("%s: Finished Processing Message from Partition: %s, Offset: %s", groupId, partition, offset), logMap);
+        acknowledgment.acknowledge();
     }
 }

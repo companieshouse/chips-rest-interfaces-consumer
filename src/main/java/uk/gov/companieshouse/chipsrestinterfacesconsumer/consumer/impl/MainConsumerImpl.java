@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -57,12 +58,17 @@ public class MainConsumerImpl implements MainConsumer {
     @Override
     @KafkaListener(topics = "${kafka.main.topic}", containerFactory = "kafkaListenerContainerFactory", groupId = "main-group")
     public void readAndProcessMainTopic(@Payload ChipsRestInterfacesSend data,
+                                        Acknowledgment acknowledgment,
                                         @Header(KafkaHeaders.OFFSET) Long offset,
                                         @Header(KafkaHeaders.RECEIVED_PARTITION_ID) Integer partition,
                                         @Header(KafkaHeaders.GROUP_ID) String groupId
     ){
+        logger.debug(acknowledgment.toString());
+
         data.setAttempt(0);
         processMessage(groupId, data, offset, partition, null);
+
+        acknowledgment.acknowledge();
     }
 
     /**
@@ -76,12 +82,15 @@ public class MainConsumerImpl implements MainConsumer {
     @Override
     @KafkaListener(topics = "${kafka.retry.topic}", containerFactory = "kafkaRetryListenerContainerFactory", groupId = "retry-group")
     public void readAndProcessRetryTopic(@Payload List<ChipsRestInterfacesSend> messages,
+                                         Acknowledgment acknowledgment,
                                          @Header(KafkaHeaders.OFFSET) List<Long> offsets,
                                          @Header(KafkaHeaders.RECEIVED_PARTITION_ID) List<Integer> partitions,
                                          @Header(KafkaHeaders.GROUP_ID) String groupId
     ){
 
         logger.debug(String.format("%s, received %s messages", groupId, messages.size()));
+
+        logger.debug(acknowledgment.toString());
 
         List<String> failedMessageIds = new ArrayList<>();
 
@@ -92,6 +101,7 @@ public class MainConsumerImpl implements MainConsumer {
         if (doSendSlackMessages && !failedMessageIds.isEmpty()) {
             slackMessagingService.sendMessage(failedMessageIds);
         }
+        acknowledgment.acknowledge();
     }
 
     /**

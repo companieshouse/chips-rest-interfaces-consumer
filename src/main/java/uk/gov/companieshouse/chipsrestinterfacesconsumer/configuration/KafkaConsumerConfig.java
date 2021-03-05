@@ -10,6 +10,7 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.ContainerProperties;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.avro.AvroDeserializer;
 
@@ -53,6 +54,9 @@ public class KafkaConsumerConfig {
         props.put(
                 ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
                 "earliest");
+        props.put(
+                ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,
+                false);
         return props;
     }
 
@@ -91,6 +95,7 @@ public class KafkaConsumerConfig {
         ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(newMainConsumerFactory());
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         return factory;
     }
 
@@ -107,8 +112,11 @@ public class KafkaConsumerConfig {
         ConcurrentKafkaListenerContainerFactory<String, ChipsRestInterfacesSend> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(newRetryConsumerFactory());
-        factory.getContainerProperties().setIdleBetweenPolls(idleMillis);
         factory.setBatchListener(true);
+
+        ContainerProperties containerProperties = factory.getContainerProperties();
+        containerProperties.setIdleBetweenPolls(idleMillis);
+        containerProperties.setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         return factory;
     }
 
@@ -126,6 +134,7 @@ public class KafkaConsumerConfig {
         factory.setConsumerFactory(newMainConsumerFactory());
         factory.setRecordFilterStrategy(consumerRecord -> appStartedTime < consumerRecord.timestamp());
         factory.setAckDiscarded(false);
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         return factory;
     }
 
