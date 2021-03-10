@@ -3,9 +3,11 @@ package uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
@@ -17,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,6 +33,9 @@ class MainConsumerImplTest {
     private static final String RETRY_CONSUMER_ID = "retry-consumer";
     private static final String MESSAGE_ID = "abc-123";
     private static final String SECOND_MESSAGE_ID = "cde-345";
+
+    @Mock
+    private Acknowledgment acknowledgment;
 
     @Mock
     private MessageProcessorService messageProcessorService;
@@ -58,19 +64,21 @@ class MainConsumerImplTest {
 
     @Test
     void readAndProcessMainTopic() {
-        mainConsumer.readAndProcessMainTopic(data, 0L, 0, MAIN_CONSUMER_ID);
+        mainConsumer.readAndProcessMainTopic(data, acknowledgment, 0L, 0, MAIN_CONSUMER_ID);
 
         verify(messageProcessorService, times(1)).processMessage(MAIN_CONSUMER_ID, data);
         assertEquals(0, data.getAttempt());
+        verify(acknowledgment, times(1)).acknowledge();
     }
 
     @Test
     void readAndProcessMainTopicWithAttempts() {
         data.setAttempt(5);
-        mainConsumer.readAndProcessMainTopic(data, 0L, 0, MAIN_CONSUMER_ID);
+        mainConsumer.readAndProcessMainTopic(data, acknowledgment, 0L, 0, MAIN_CONSUMER_ID);
 
         verify(messageProcessorService, times(1)).processMessage(MAIN_CONSUMER_ID, data);
         assertEquals(0, data.getAttempt());
+        verify(acknowledgment, times(1)).acknowledge();
     }
 
     @Test
@@ -81,11 +89,13 @@ class MainConsumerImplTest {
 
         List<String> failedMessageIds = new ArrayList<>();
 
-        mainConsumer.readAndProcessRetryTopic(messageList, offsets, partitions, RETRY_CONSUMER_ID);
+        mainConsumer.readAndProcessRetryTopic(messageList, acknowledgment, offsets, partitions, RETRY_CONSUMER_ID);
 
-        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, data);
-        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData);
-        verify(slackMessagingService, never()).sendMessage(failedMessageIds);
+        InOrder retryOrder = inOrder(messageProcessorService, acknowledgment, slackMessagingService);
+        retryOrder.verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, data);
+        retryOrder.verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData);
+        retryOrder.verify(acknowledgment, times(1)).acknowledge();
+        retryOrder.verify(slackMessagingService, never()).sendMessage(failedMessageIds);
     }
 
     @Test
@@ -98,12 +108,13 @@ class MainConsumerImplTest {
         List<String> failedMessageIds = new ArrayList<>();
         failedMessageIds.add(MESSAGE_ID);
         failedMessageIds.add(SECOND_MESSAGE_ID);
-        mainConsumer.readAndProcessRetryTopic(messageList, offsets, partitions, RETRY_CONSUMER_ID);
+        mainConsumer.readAndProcessRetryTopic(messageList, acknowledgment, offsets, partitions, RETRY_CONSUMER_ID);
 
         verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, data);
         verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData);
 
         verify(slackMessagingService, never()).sendMessage(failedMessageIds);
+        verify(acknowledgment, times(1)).acknowledge();
     }
 
     @Test
@@ -116,10 +127,12 @@ class MainConsumerImplTest {
         List<String> failedMessageIds = new ArrayList<>();
         failedMessageIds.add(MESSAGE_ID);
         failedMessageIds.add(SECOND_MESSAGE_ID);
-        mainConsumer.readAndProcessRetryTopic(messageList, offsets, partitions, RETRY_CONSUMER_ID);
+        mainConsumer.readAndProcessRetryTopic(messageList, acknowledgment, offsets, partitions, RETRY_CONSUMER_ID);
 
-        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, data);
-        verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData);
-        verify(slackMessagingService, times(1)).sendMessage(failedMessageIds);
+        InOrder retryOrder = inOrder(messageProcessorService, acknowledgment, slackMessagingService);
+        retryOrder.verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, data);
+        retryOrder.verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData);
+        retryOrder.verify(acknowledgment, times(1)).acknowledge();
+        retryOrder.verify(slackMessagingService, times(1)).sendMessage(failedMessageIds);
     }
 }
