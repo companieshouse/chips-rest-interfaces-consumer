@@ -3,6 +3,8 @@ package uk.gov.companieshouse.chipsrestinterfacesconsumer.consumer.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -17,22 +19,29 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.slack.SlackMessagingSer
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MainConsumerImplTest {
 
     private static final String DATA = "DATA";
     private static final String SECOND_DATA = "DATA-2";
+    private static final String THIRD_DATA = "DATA-3";
     private static final String MAIN_CONSUMER_ID = "main-consumer";
     private static final String RETRY_CONSUMER_ID = "retry-consumer";
     private static final String MESSAGE_ID = "abc-123";
     private static final String SECOND_MESSAGE_ID = "cde-345";
+    private static final String THIRD_MESSAGE_ID = "fgh-678";
+    private static final long BATCH_FAILURE_RETRY_SLEEP_MS = 1000L;
 
     @Mock
     private Acknowledgment acknowledgment;
@@ -49,8 +58,12 @@ class MainConsumerImplTest {
     @InjectMocks
     private MainConsumerImpl mainConsumer;
 
+    @Captor
+    private ArgumentCaptor<List<String>> failedMessageIdsCaptor;
+
     private ChipsRestInterfacesSend data;
     private ChipsRestInterfacesSend secondData;
+    private ChipsRestInterfacesSend thirdData;
 
     @BeforeEach
     void init() {
@@ -60,6 +73,11 @@ class MainConsumerImplTest {
         secondData = new ChipsRestInterfacesSend();
         secondData.setMessageId(SECOND_MESSAGE_ID);
         secondData.setData(SECOND_DATA);
+        thirdData = new ChipsRestInterfacesSend();
+        thirdData.setMessageId(THIRD_MESSAGE_ID);
+        thirdData.setData(THIRD_DATA);
+
+        ReflectionTestUtils.setField(mainConsumer, "batchFailureRetrySleepMs", BATCH_FAILURE_RETRY_SLEEP_MS);
     }
 
     @Test
@@ -134,5 +152,29 @@ class MainConsumerImplTest {
         retryOrder.verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData);
         retryOrder.verify(acknowledgment, times(1)).acknowledge();
         retryOrder.verify(slackMessagingService, times(1)).sendMessage(failedMessageIds);
+    }
+
+    @Test
+    void readAndProcessRetryTopicWithExceptionCaughtInBatch() {
+        ReflectionTestUtils.setField(mainConsumer, "doSendSlackMessages", true);
+
+        List<ChipsRestInterfacesSend> messageList = Arrays.asList(data, secondData, thirdData);
+        List<Long> offsets = Arrays.asList(1050L, 1051L, 1052L);
+        List<Integer> partitions = Arrays.asList(0, 0, 0);
+
+        Exception e = new RuntimeException("error");
+        when(messageProcessorService.processMessage(eq(RETRY_CONSUMER_ID), any(ChipsRestInterfacesSend.class)))
+                .thenReturn(true)
+                .thenThrow(e);
+
+        mainConsumer.readAndProcessRetryTopic(messageList, acknowledgment, offsets, partitions, RETRY_CONSUMER_ID);
+
+        verify(logger, times(1)).errorContext(eq(SECOND_MESSAGE_ID), eq(e), any(Map.class));
+        verify(slackMessagingService, times(1)).sendMessage(failedMessageIdsCaptor.capture());
+        List<String> failedMessageIds = failedMessageIdsCaptor.getValue();
+        assertEquals(1, failedMessageIds.size());
+        assertEquals(SECOND_MESSAGE_ID, failedMessageIds.get(0));
+        verify(acknowledgment, times(1)).nack(1, BATCH_FAILURE_RETRY_SLEEP_MS);
+        verify(acknowledgment, times(0)).acknowledge();
     }
 }

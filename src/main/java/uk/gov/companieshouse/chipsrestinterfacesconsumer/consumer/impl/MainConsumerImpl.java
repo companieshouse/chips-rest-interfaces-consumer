@@ -21,6 +21,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger.KEY_GROUP_ID;
+import static uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger.KEY_OFFSET;
+import static uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger.KEY_PARTITION;
+
 @Service
 @ConditionalOnProperty(prefix = "feature", name = "errorMode", havingValue = "false")
 public class MainConsumerImpl implements MainConsumer {
@@ -32,6 +36,9 @@ public class MainConsumerImpl implements MainConsumer {
 
     @Value("${FEATURE_FLAG_SLACK_MESSAGES_020321}")
     private boolean doSendSlackMessages;
+
+    @Value("${BATCH_FAILURE_RETRY_SLEEP_MS:1000}")
+    private long batchFailureRetrySleepMs;
 
     @Autowired
     public MainConsumerImpl(ApplicationLogger logger,
@@ -67,9 +74,9 @@ public class MainConsumerImpl implements MainConsumer {
         var messageId = data.getMessageId();
 
         Map<String, Object> logMap = new HashMap<>();
-        logMap.put("Group Id", groupId);
-        logMap.put("Partition", partition);
-        logMap.put("Offset", offset);
+        logMap.put(KEY_GROUP_ID, groupId);
+        logMap.put(KEY_PARTITION, partition);
+        logMap.put(KEY_OFFSET, offset);
 
         logger.debugContext(messageId, acknowledgment.toString(), logMap);
 
@@ -102,16 +109,39 @@ public class MainConsumerImpl implements MainConsumer {
 
         List<String> failedMessageIds = new ArrayList<>();
 
-        for (int i = 0; i < messages.size(); i++) {
-            ChipsRestInterfacesSend message = messages.get(i);
+        boolean isBatchOk = true;
 
-            if (!processMessage(groupId, message, offsets.get(i), partitions.get(i))) {
-                failedMessageIds.add(message.getMessageId());
+        for (int i = 0; i < messages.size(); i++) {
+            var message = messages.get(i);
+            var messageID = message.getMessageId();
+            var partition = partitions.get(i);
+            var offset = offsets.get(i);
+
+            try {
+                if (!processMessage(groupId, message, offset, partition)) {
+                    failedMessageIds.add(messageID);
+                }
+            } catch (Exception e) {
+                Map<String, Object> logMap = new HashMap<>();
+                logMap.put(KEY_GROUP_ID, groupId);
+                logMap.put(KEY_PARTITION, partition);
+                logMap.put(KEY_OFFSET, offset);
+
+                logger.errorContext(messageID, e, logMap);
+
+                failedMessageIds.add(messageID);
+
+                acknowledgment.nack(i, batchFailureRetrySleepMs);
+                logger.infoContext(messageID, String.format("Committed messages in batch up to offset %s", offset), logMap);
+                isBatchOk = false;
+                break;
             }
         }
 
-        acknowledgment.acknowledge();
-        logger.debug(String.format("%s, acknowledged batch of %s messages", groupId, batchSize));
+        if (isBatchOk) {
+            acknowledgment.acknowledge();
+            logger.debug(String.format("%s, acknowledged batch of %s messages", groupId, batchSize));
+        }
 
         if (doSendSlackMessages && !failedMessageIds.isEmpty()) {
             slackMessagingService.sendMessage(failedMessageIds);
@@ -134,9 +164,9 @@ public class MainConsumerImpl implements MainConsumer {
 
         var messageId = data.getMessageId();
         Map<String, Object> logMap = new HashMap<>();
-        logMap.put("Group Id", consumerId);
-        logMap.put("Partition", partition);
-        logMap.put("Offset", offset);
+        logMap.put(KEY_GROUP_ID, consumerId);
+        logMap.put(KEY_PARTITION, partition);
+        logMap.put(KEY_OFFSET, offset);
 
         logger.infoContext(messageId, String.format("%s: Consumed Message from Partition: %s, Offset: %s", consumerId, partition, offset), logMap);
         logger.infoContext(messageId, String.format("received data='%s'", data), logMap);
