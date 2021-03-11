@@ -50,6 +50,11 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>org.apache.avro</groupId>
+                <artifactId>avro</artifactId>
+                <version>1.10.1</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
