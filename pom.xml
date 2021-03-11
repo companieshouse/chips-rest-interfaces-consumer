@@ -17,7 +17,7 @@
 
     <properties>
         <java.version>11</java.version>
-        <spring-boot-dependencies.version>2.4.0</spring-boot-dependencies.version>
+        <spring-boot-dependencies.version>2.4.3</spring-boot-dependencies.version>
         <spring-boot-maven-plugin.version>2.4.0</spring-boot-maven-plugin.version>
         <rest-service-common-library.version>0.0.5</rest-service-common-library.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
@@ -51,31 +51,6 @@
                 <version>${spring-boot-dependencies.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.codehaus.plexus</groupId>
-                <artifactId>plexus-utils</artifactId>
-                <version>3.3.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.avro</groupId>
-                <artifactId>avro</artifactId>
-                <version>1.10.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
-                <version>${log4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-api</artifactId>
-                <version>${log4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-to-slf4j</artifactId>
-                <version>${log4j.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
