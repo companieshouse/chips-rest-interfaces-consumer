@@ -17,6 +17,10 @@ import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 
+import static uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger.KEY_GROUP_ID;
+import static uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger.KEY_OFFSET;
+import static uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger.KEY_PARTITION;
+
 @Service
 @ConditionalOnProperty(prefix = "feature", name = "errorMode", havingValue = "true")
 public class ErrorConsumerImpl implements ErrorConsumer {
@@ -57,9 +61,9 @@ public class ErrorConsumerImpl implements ErrorConsumer {
         var messageId = data.getMessageId();
 
         Map<String, Object> logMap = new HashMap<>();
-        logMap.put("Group Id", groupId);
-        logMap.put("Partition", partition);
-        logMap.put("Offset", offset);
+        logMap.put(KEY_GROUP_ID, groupId);
+        logMap.put(KEY_PARTITION, partition);
+        logMap.put(KEY_OFFSET, offset);
 
         logger.debugContext(messageId, acknowledgment.toString(), logMap);
 

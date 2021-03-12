@@ -13,6 +13,10 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageProcesso
 import java.util.HashMap;
 import java.util.Map;
 
+import static uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger.KEY_HTTP_STATUS_CODE;
+import static uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger.KEY_MESSAGE;
+import static uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger.KEY_MESSAGE_CONSUMER_ID;
+
 @Service
 public class MessageProcessorServiceImpl implements MessageProcessorService {
 
@@ -38,15 +42,15 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
 
     @Override
     public boolean processMessage(String consumerId,
-                               ChipsRestInterfacesSend message) {
+                                  ChipsRestInterfacesSend message) {
 
         Map<String, Object> logMap = new HashMap<>();
-        logMap.put("Message", message.getData());
-        logMap.put("Message Consumer ID", consumerId);
+        logMap.put(KEY_MESSAGE, message.getData());
+        logMap.put(KEY_MESSAGE_CONSUMER_ID, consumerId);
         try {
             chipsRestClient.sendToChips(message, consumerId);
         } catch (HttpStatusCodeException hsce) {
-            logMap.put("HTTP Status Code", hsce.getStatusCode().toString());
+            logMap.put(KEY_HTTP_STATUS_CODE, hsce.getStatusCode().toString());
             return handleFailedMessage(message, hsce, logMap);
         } catch (Exception e) {
             return handleFailedMessage(message, e, logMap);
@@ -55,8 +59,8 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
     }
 
     private boolean handleFailedMessage(ChipsRestInterfacesSend message,
-                                     Exception e,
-                                     Map<String, Object> logMap) {
+                                        Exception e,
+                                        Map<String, Object> logMap) {
 
         var messageId = message.getMessageId();
         logger.errorContext(messageId, SEND_FAILURE_MESSAGE, e, logMap);

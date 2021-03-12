@@ -17,6 +17,13 @@ import java.util.Map;
 @Component
 public class ApplicationLogger {
 
+    public static final String KEY_GROUP_ID = "Group Id";
+    public static final String KEY_PARTITION = "Partition";
+    public static final String KEY_OFFSET = "Offset";
+    public static final String KEY_MESSAGE = "Message";
+    public static final String KEY_MESSAGE_CONSUMER_ID = "Message Consumer ID";
+    public static final String KEY_HTTP_STATUS_CODE = "HTTP Status Code";
+
     private Logger logger;
 
     @Value("${RUN_APP_IN_ERROR_MODE:false}")
@@ -61,6 +68,10 @@ public class ApplicationLogger {
 
     public void errorContext(String context, Exception e) {
         logger.errorContext(context, e, null);
+    }
+
+    public void errorContext(String context, Exception e, Map<String, Object> dataMap) {
+        logger.errorContext(context, e, cloneMapData(dataMap));
     }
 
     public void errorContext(String context, String message, Exception e) {
