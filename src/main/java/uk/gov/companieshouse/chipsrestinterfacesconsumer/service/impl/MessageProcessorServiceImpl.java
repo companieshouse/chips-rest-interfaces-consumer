@@ -69,6 +69,9 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
         logger.infoContext(messageId, String.format("Attempt %s failed for this message", attempts), logMap);
 
         if (attempts < maxRetryAttempts) {
+            if (attempts == 2) {
+                throw new RuntimeException("kgkg");
+            }
             message.setAttempt(attempts + 1);
             messageProducer.writeToTopic(message, retryTopicName);
             return true;

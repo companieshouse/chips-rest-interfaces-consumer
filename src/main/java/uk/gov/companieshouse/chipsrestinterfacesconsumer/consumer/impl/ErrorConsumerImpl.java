@@ -76,6 +76,6 @@ public class ErrorConsumerImpl implements ErrorConsumer {
         logger.infoContext(messageId, String.format("%s: Finished Processing Message from Partition: %s, Offset: %s", groupId, partition, offset), logMap);
 
         acknowledgment.acknowledge();
-        logger.debugContext(messageId, String.format("Acknowledged message %s", messageId), logMap);
+        logger.infoContext(messageId, String.format("Acknowledged (committed) message %s", messageId), logMap);
     }
 }
