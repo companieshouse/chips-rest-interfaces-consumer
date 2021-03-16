@@ -132,7 +132,7 @@ public class MainConsumerImpl implements MainConsumer {
                 failedMessageIds.add(messageID);
 
                 acknowledgment.nack(i, batchFailureRetrySleepMs);
-                logger.infoContext(messageID, String.format("Acknowledging (committing) messages in batch up to but not including offset %s", offset), logMap);
+                logger.infoContext(messageID, String.format("Acknowledged (committed) messages in batch up to but not including offset %s", offset), logMap);
                 isBatchOk = false;
                 break;
             }
