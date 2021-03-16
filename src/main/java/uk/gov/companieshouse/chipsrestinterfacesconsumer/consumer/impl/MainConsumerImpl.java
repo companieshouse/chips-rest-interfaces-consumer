@@ -139,8 +139,11 @@ public class MainConsumerImpl implements MainConsumer {
         }
 
         if (isBatchOk) {
+            Long lastOffset = null;
+            if (!offsets.isEmpty()) {
+                lastOffset = offsets.get(offsets.size() - 1);
+            }
             acknowledgment.acknowledge();
-            Long lastOffset = offsets.get(offsets.size() - 1);
             logger.info(String.format("%s, acknowledged (committed) batch of %s messages up to and including offset %s", groupId, batchSize, lastOffset));
         }
 
