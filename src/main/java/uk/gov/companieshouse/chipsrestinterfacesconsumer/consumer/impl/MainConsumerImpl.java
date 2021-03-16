@@ -78,13 +78,13 @@ public class MainConsumerImpl implements MainConsumer {
         logMap.put(KEY_PARTITION, partition);
         logMap.put(KEY_OFFSET, offset);
 
-        logger.debugContext(messageId, acknowledgment.toString(), logMap);
+        logger.debugContext(messageId, String.format("Debug: acknowledgment toString: %s", acknowledgment.toString()), logMap);
 
         data.setAttempt(0);
         processMessage(groupId, data, offset, partition);
 
         acknowledgment.acknowledge();
-        logger.debugContext(messageId, String.format("Acknowledged message %s", messageId), logMap);
+        logger.infoContext(messageId, String.format("Acknowledged (committed) message %s", messageId), logMap);
     }
 
     /**
@@ -132,15 +132,19 @@ public class MainConsumerImpl implements MainConsumer {
                 failedMessageIds.add(messageID);
 
                 acknowledgment.nack(i, batchFailureRetrySleepMs);
-                logger.infoContext(messageID, String.format("Committed messages in batch up to offset %s", offset), logMap);
+                logger.infoContext(messageID, String.format("Acknowledged (committed) messages in batch up to but not including offset %s", offset), logMap);
                 isBatchOk = false;
                 break;
             }
         }
 
         if (isBatchOk) {
+            Long lastOffset = null;
+            if (!offsets.isEmpty()) {
+                lastOffset = offsets.get(offsets.size() - 1);
+            }
             acknowledgment.acknowledge();
-            logger.debug(String.format("%s, acknowledged batch of %s messages", groupId, batchSize));
+            logger.info(String.format("%s, acknowledged (committed) batch of %s messages up to and including offset %s", groupId, batchSize, lastOffset));
         }
 
         if (doSendSlackMessages && !failedMessageIds.isEmpty()) {
