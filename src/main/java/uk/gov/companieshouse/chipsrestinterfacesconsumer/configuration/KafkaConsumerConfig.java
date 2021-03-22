@@ -11,6 +11,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.avro.AvroDeserializer;
 
@@ -66,7 +67,8 @@ public class KafkaConsumerConfig {
      */
     private ConsumerFactory<String, ChipsRestInterfacesSend> newMainConsumerFactory() {
         var props = getDefaultConfig();
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new AvroDeserializer<>(ChipsRestInterfacesSend.class));
+        var errorValueDeserializer = new ErrorHandlingDeserializer<>(new AvroDeserializer<>(ChipsRestInterfacesSend.class));
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), errorValueDeserializer);
     }
 
     /**
