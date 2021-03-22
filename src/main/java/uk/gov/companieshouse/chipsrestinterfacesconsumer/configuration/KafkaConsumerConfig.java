@@ -43,9 +43,6 @@ public class KafkaConsumerConfig {
                 ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
                 brokerAddress);
         props.put(
-                ConsumerConfig.GROUP_ID_CONFIG,
-                "CRIC-Group");
-        props.put(
                 ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
                 StringDeserializer.class);
         props.put(

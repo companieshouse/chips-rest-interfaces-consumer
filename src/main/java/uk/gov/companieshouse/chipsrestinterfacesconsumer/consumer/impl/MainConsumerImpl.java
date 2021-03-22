@@ -64,7 +64,7 @@ public class MainConsumerImpl implements MainConsumer {
      * @param groupId The group id of the consumer
      */
     @Override
-    @KafkaListener(topics = "${kafka.main.topic}", containerFactory = "kafkaListenerContainerFactory", groupId = "main-group")
+    @KafkaListener(topics = "${kafka.main.topic}", containerFactory = "kafkaListenerContainerFactory", groupId = "cric-main-group")
     public void readAndProcessMainTopic(@Payload ChipsRestInterfacesSend data,
                                         Acknowledgment acknowledgment,
                                         @Header(KafkaHeaders.OFFSET) Long offset,
@@ -97,7 +97,7 @@ public class MainConsumerImpl implements MainConsumer {
      * @param groupId The group id of the consumer
      */
     @Override
-    @KafkaListener(topics = "${kafka.retry.topic}", containerFactory = "kafkaRetryListenerContainerFactory", groupId = "retry-group")
+    @KafkaListener(topics = "${kafka.retry.topic}", containerFactory = "kafkaRetryListenerContainerFactory", groupId = "cric-retry-group")
     public void readAndProcessRetryTopic(@Payload List<ChipsRestInterfacesSend> messages,
                                          Acknowledgment acknowledgment,
                                          @Header(KafkaHeaders.OFFSET) List<Long> offsets,
