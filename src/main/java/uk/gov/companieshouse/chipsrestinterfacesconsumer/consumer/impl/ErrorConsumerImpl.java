@@ -51,7 +51,7 @@ public class ErrorConsumerImpl implements ErrorConsumer {
      * @param groupId The group id of the consumer
      */
     @Override
-    @KafkaListener(topics = "${kafka.error.topic}", containerFactory = "kafkaErrorListenerContainerFactory", groupId = "error-group")
+    @KafkaListener(topics = "${kafka.error.topic}", containerFactory = "kafkaErrorListenerContainerFactory", groupId = "cric-error-group")
     public void readAndProcessErrorTopic(@Payload ChipsRestInterfacesSend data,
                                          Acknowledgment acknowledgment,
                                          @Header(KafkaHeaders.OFFSET) Long offset,
