@@ -49,7 +49,7 @@ public class SlackMessagingServiceImpl implements SlackMessagingService {
     @Override
     public void sendDeserializationErrorMassage(String topic, int partition, long offset) {
         String deserializationFailureMessage =
-                String.format("Failed to deserialize message on topic %s - partition %d offset %d", topic, partition, offset);
+                String.format("Failed to deserialize message - topic: %s, partition: %d, offset: %d", topic, partition, offset);
         sendMessage(deserializationFailureMessage, "Deserialization error");
     }
 
