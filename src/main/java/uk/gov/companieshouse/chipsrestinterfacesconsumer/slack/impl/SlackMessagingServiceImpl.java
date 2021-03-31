@@ -31,37 +31,7 @@ public class SlackMessagingServiceImpl implements SlackMessagingService {
     }
 
     @Override
-    public void sendMessage(List<String> failedMessageIds) {
-
-        try {
-            String slackErrorMessage = buildMessage(failedMessageIds);
-            Slack slack = Slack.getInstance();
-            MethodsClient methods = slack.methods(slackAccessToken);
-            ChatPostMessageRequest request = ChatPostMessageRequest.builder()
-                    .channel(slackChannel)
-                    .text(slackErrorMessage)
-                    .build();
-
-            ChatPostMessageResponse response = postSlackMessage(methods, request);
-            if (response.isOk()) {
-                logger.info(String.format("Message sent to: %s", slackChannel));
-            } else {
-                logger.error(String.format("Error message sent but received response: %s", response.getError()));
-            }
-        } catch(IOException | SlackApiException e) {
-            logger.errorContext("Slack error message not sent", e);
-        } finally {
-            failedMessageIds.clear();
-        }
-    }
-
-    ChatPostMessageResponse postSlackMessage(
-            MethodsClient methods,
-            ChatPostMessageRequest request) throws IOException, SlackApiException {
-        return methods.chatPostMessage(request);
-    }
-
-    private String buildMessage(List<String> failedMessageIds) {
+    public void sendErrorTopicMessage(List<String> failedMessageIds) {
 
         StringBuilder failedSb = new StringBuilder();
         failedSb.append("Unable to send messages with ids: ");
@@ -72,6 +42,40 @@ public class SlackMessagingServiceImpl implements SlackMessagingService {
             failedSb.append("\n");
         }
 
-        return failedSb.toString();
+        sendMessage(failedSb.toString(), "Error topic");
+        failedMessageIds.clear();
+    }
+
+    @Override
+    public void sendDeserializationErrorMassage(String topic, int partition, long offset) {
+        String deserializationFailureMessage =
+                String.format("Failed to deserialize message on topic %s - partition %d offset %d", topic, partition, offset);
+        sendMessage(deserializationFailureMessage, "Deserialization error");
+    }
+
+    ChatPostMessageResponse postSlackMessage(
+            MethodsClient methods,
+            ChatPostMessageRequest request) throws IOException, SlackApiException {
+        return methods.chatPostMessage(request);
+    }
+
+    private void sendMessage(String slackMessage, String messageType) {
+        try {
+            Slack slack = Slack.getInstance();
+            MethodsClient methods = slack.methods(slackAccessToken);
+            ChatPostMessageRequest request = ChatPostMessageRequest.builder()
+                    .channel(slackChannel)
+                    .text(slackMessage)
+                    .build();
+
+            ChatPostMessageResponse response = postSlackMessage(methods, request);
+            if (response.isOk()) {
+                logger.info(String.format("%s message sent to: %s", messageType, slackChannel));
+            } else {
+                logger.error(String.format("%s message sent but received response: %s", messageType, response.getError()));
+            }
+        } catch(IOException | SlackApiException e) {
+            logger.errorContext(String.format("%s slack error message not sent", messageType), e);
+        }
     }
 }

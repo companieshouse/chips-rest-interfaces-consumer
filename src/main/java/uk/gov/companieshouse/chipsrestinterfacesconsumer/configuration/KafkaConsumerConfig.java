@@ -11,8 +11,10 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.avro.AvroDeserializer;
+import uk.gov.companieshouse.chipsrestinterfacesconsumer.slack.SlackMessagingService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +34,9 @@ public class KafkaConsumerConfig {
 
     @Autowired
     private Supplier<Long> timestampNow;
+
+    @Autowired
+    private SlackMessagingService slackMessagingService;
 
     /**
      *
@@ -63,7 +68,8 @@ public class KafkaConsumerConfig {
      */
     private ConsumerFactory<String, ChipsRestInterfacesSend> newMainConsumerFactory() {
         var props = getDefaultConfig();
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new AvroDeserializer<>(ChipsRestInterfacesSend.class));
+        var errorHadnlingDeserializer = new ErrorHandlingDeserializer<>(new AvroDeserializer<>(ChipsRestInterfacesSend.class));
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), errorHadnlingDeserializer);
     }
 
     /**
@@ -93,6 +99,9 @@ public class KafkaConsumerConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(newMainConsumerFactory());
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+        factory.setErrorHandler((exception, data) -> {
+            slackMessagingService.sendDeserializationErrorMassage(data.topic(), data.partition(),  data.offset());
+        });
         return factory;
     }
 

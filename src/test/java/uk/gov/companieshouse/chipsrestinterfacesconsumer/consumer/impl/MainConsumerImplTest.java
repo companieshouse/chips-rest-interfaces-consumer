@@ -113,7 +113,7 @@ class MainConsumerImplTest {
         retryOrder.verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, data);
         retryOrder.verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData);
         retryOrder.verify(acknowledgment, times(1)).acknowledge();
-        retryOrder.verify(slackMessagingService, never()).sendMessage(failedMessageIds);
+        retryOrder.verify(slackMessagingService, never()).sendErrorTopicMessage(failedMessageIds);
     }
 
     @Test
@@ -131,7 +131,7 @@ class MainConsumerImplTest {
         verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, data);
         verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData);
 
-        verify(slackMessagingService, never()).sendMessage(failedMessageIds);
+        verify(slackMessagingService, never()).sendErrorTopicMessage(failedMessageIds);
         verify(acknowledgment, times(1)).acknowledge();
     }
 
@@ -151,7 +151,7 @@ class MainConsumerImplTest {
         retryOrder.verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, data);
         retryOrder.verify(messageProcessorService, times(1)).processMessage(RETRY_CONSUMER_ID, secondData);
         retryOrder.verify(acknowledgment, times(1)).acknowledge();
-        retryOrder.verify(slackMessagingService, times(1)).sendMessage(failedMessageIds);
+        retryOrder.verify(slackMessagingService, times(1)).sendErrorTopicMessage(failedMessageIds);
     }
 
     @Test
@@ -170,7 +170,7 @@ class MainConsumerImplTest {
         mainConsumer.readAndProcessRetryTopic(messageList, acknowledgment, offsets, partitions, RETRY_CONSUMER_ID);
 
         verify(logger, times(1)).errorContext(eq(SECOND_MESSAGE_ID), eq(e), any(Map.class));
-        verify(slackMessagingService, times(1)).sendMessage(failedMessageIdsCaptor.capture());
+        verify(slackMessagingService, times(1)).sendErrorTopicMessage(failedMessageIdsCaptor.capture());
         List<String> failedMessageIds = failedMessageIdsCaptor.getValue();
         assertEquals(1, failedMessageIds.size());
         assertEquals(SECOND_MESSAGE_ID, failedMessageIds.get(0));

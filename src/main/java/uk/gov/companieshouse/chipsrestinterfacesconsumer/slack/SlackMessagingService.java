@@ -4,5 +4,8 @@ import java.util.List;
 
 public interface SlackMessagingService {
 
-    void sendMessage(List<String> failedMessageIds);
+    void sendErrorTopicMessage(List<String> failedMessageIds);
+
+    void sendDeserializationErrorMassage(String topic, int partition, long offset);
+
 }
