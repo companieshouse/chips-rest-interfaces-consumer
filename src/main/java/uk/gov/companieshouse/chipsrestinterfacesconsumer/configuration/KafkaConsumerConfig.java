@@ -68,8 +68,8 @@ public class KafkaConsumerConfig {
      */
     private ConsumerFactory<String, ChipsRestInterfacesSend> newMainConsumerFactory() {
         var props = getDefaultConfig();
-        var errorHadnlingDeserializer = new ErrorHandlingDeserializer<>(new AvroDeserializer<>(ChipsRestInterfacesSend.class));
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), errorHadnlingDeserializer);
+        var errorHandlingDeserializer = new ErrorHandlingDeserializer<>(new AvroDeserializer<>(ChipsRestInterfacesSend.class));
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), errorHandlingDeserializer);
     }
 
     /**
@@ -100,7 +100,9 @@ public class KafkaConsumerConfig {
         factory.setConsumerFactory(newMainConsumerFactory());
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         factory.setErrorHandler((exception, data) -> {
-            slackMessagingService.sendDeserializationErrorMassage(data.topic(), data.partition(),  data.offset());
+            String errorMessage = String.format("Failed to deserialize message - topic: %s, partition: %d, offset: %d",
+                    data.topic(), data.partition(),  data.offset());
+            slackMessagingService.sendDeserializationErrorMessage(errorMessage);
         });
         return factory;
     }

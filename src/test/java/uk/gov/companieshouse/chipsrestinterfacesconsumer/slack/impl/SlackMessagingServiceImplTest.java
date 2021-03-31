@@ -65,7 +65,8 @@ class SlackMessagingServiceImplTest {
     @Test
     void testSuccessfulDeserializationErrorMessage() throws IOException, SlackApiException {
         doReturn(buildDummyResponse(true)).when(slackMessagingServiceImpl).postSlackMessage(any(), any());
-        slackMessagingServiceImpl.sendDeserializationErrorMassage("Test-topic", 1, 1L);
+        String errorMessage = "Failed to deserialize message - topic: Test-topic, partition: 1, offset: 1";
+        slackMessagingServiceImpl.sendDeserializationErrorMessage(errorMessage);
         verify(logger).info(String.format("Deserialization error message sent to: %s", SLACK_CHANNEL));
     }
 
@@ -73,7 +74,8 @@ class SlackMessagingServiceImplTest {
     void testFailedSlackDeserializationErrorMessage() throws IOException, SlackApiException {
         ChatPostMessageResponse chatPostMessageResponse = buildDummyResponse(false);
         doReturn(chatPostMessageResponse).when(slackMessagingServiceImpl).postSlackMessage(any(), any());
-        slackMessagingServiceImpl.sendDeserializationErrorMassage("Test-topic", 1, 1L);
+        String errorMessage = "Failed to deserialize message - topic: Test-topic, partition: 1, offset: 1";
+        slackMessagingServiceImpl.sendDeserializationErrorMessage(errorMessage);
         verify(logger).error(String.format("Deserialization error message sent but received response: %s",
                 chatPostMessageResponse.getError()));
     }
@@ -82,7 +84,8 @@ class SlackMessagingServiceImplTest {
     void testFailedSlackDeserializationErrorMessageWithIOException() throws IOException, SlackApiException {
         IOException io = new IOException(null, null);
         doThrow(io).when(slackMessagingServiceImpl).postSlackMessage(any(), any());
-        slackMessagingServiceImpl.sendDeserializationErrorMassage("Test-topic", 1, 1L);
+        String errorMessage = "Failed to deserialize message - topic: Test-topic, partition: 1, offset: 1";
+        slackMessagingServiceImpl.sendDeserializationErrorMessage(errorMessage);
         verify(logger).errorContext("Deserialization error slack error message not sent", io);
     }
 
