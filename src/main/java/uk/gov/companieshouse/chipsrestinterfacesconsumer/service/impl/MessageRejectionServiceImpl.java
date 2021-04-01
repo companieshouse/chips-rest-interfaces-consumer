@@ -22,7 +22,7 @@ public class MessageRejectionServiceImpl implements MessageRejectionService {
     public void handleRejectedMessageBatch(Exception exception, ConsumerRecords<?, ?> data) {
 
         StringBuilder errorMessageDetails = new StringBuilder();
-        data.forEach((datum)-> {
+        data.forEach(datum -> {
             errorMessageDetails.append(
                 buildMessage(datum.topic(), datum.partition(), datum.offset()));
             errorMessageDetails.append("\n");

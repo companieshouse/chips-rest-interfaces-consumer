@@ -23,7 +23,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-public class MessageRejectionServiceImplTest {
+class MessageRejectionServiceImplTest {
 
     private static final String TOPIC = "test-topic";
 
@@ -38,7 +38,7 @@ public class MessageRejectionServiceImplTest {
 
 
     @Test
-    public void testDeserializeExceptionForMainConsumer() {
+    void testDeserializeExceptionForMainConsumer() {
         Exception exception = new Exception(new DeserializationException("", new byte[1], false, new SerializationException()));
         ConsumerRecord<?, ?> datum = new ConsumerRecord<>(TOPIC,1,1L, "", "");
         messageRejectionService.handleRejectedMessage(exception, datum);
@@ -47,7 +47,7 @@ public class MessageRejectionServiceImplTest {
     }
 
     @Test
-    public void testDeserializeExceptionForRetryBatchConsumer() {
+    void testDeserializeExceptionForRetryBatchConsumer() {
         Exception exception = new Exception(new DeserializationException("", new byte[1], false, new SerializationException()));
         ConsumerRecord<String, String> datum1 = new ConsumerRecord<>(TOPIC,1,1L, "", "");
         ConsumerRecord<String, String> datum2 = new ConsumerRecord<>(TOPIC,1,2L, "", "");
@@ -71,7 +71,7 @@ public class MessageRejectionServiceImplTest {
     }
 
     @Test
-    public void testNonDeserializeExceptionForMainConsumer() {
+    void testNonDeserializeExceptionForMainConsumer() {
         Exception exception = new Exception();
         ConsumerRecord<?, ?> datum = new ConsumerRecord<>(TOPIC,1,1L, "", "");
         messageRejectionService.handleRejectedMessage(exception, datum);
@@ -80,7 +80,7 @@ public class MessageRejectionServiceImplTest {
     }
 
     @Test
-    public void testNonDeserializeExceptionForRetryBatchConsumer() {
+    void testNonDeserializeExceptionForRetryBatchConsumer() {
         Exception exception = new Exception();
         Map<TopicPartition, List<ConsumerRecord<String, String>>> records = new HashMap<>();
         ConsumerRecords<?, ?> data = new ConsumerRecords<>(records);
