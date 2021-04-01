@@ -17,21 +17,19 @@ public class MessageRejectionServiceImpl implements MessageRejectionService {
     @Autowired
     private SlackMessagingService slackMessagingService;
 
-
     @Override
     public void handleRejectedMessage(Exception exception, ConsumerRecord<?, ?> datum) {
         String errorMessageDetails = buildMessage(datum.topic(), datum.partition(), datum.offset());
-
         if (exception.getCause() instanceof DeserializationException) {
-            sendToSlack(errorMessageDetails);
+             sendToSlack(exception, errorMessageDetails);
         } else {
-            logger.error(String.format("Kafka message exception - %s - %s", exception.getMessage(), errorMessageDetails));
+            logger.error(String.format("Kafka consumer message exception - %s", errorMessageDetails), exception);
         }
     }
 
-    private void sendToSlack(String errorMessageDetails) {
+    private void sendToSlack(Exception exception, String errorMessageDetails) {
         String deserializationFailureMessage = String.format("Failed to deserialize message - %s", errorMessageDetails);
-        logger.error(deserializationFailureMessage);
+        logger.error(deserializationFailureMessage, exception);
         slackMessagingService.sendDeserializationErrorMessage(deserializationFailureMessage);
     }
 
