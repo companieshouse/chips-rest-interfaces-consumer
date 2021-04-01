@@ -116,7 +116,6 @@ public class KafkaConsumerConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(newRetryConsumerFactory());
         factory.setBatchListener(true);
-        factory.setBatchErrorHandler((exception, data) -> messageRejectionService.handleRejectedMessageBatch(exception, data));
 
         ContainerProperties containerProperties = factory.getContainerProperties();
         containerProperties.setIdleBetweenPolls(idleMillis);
