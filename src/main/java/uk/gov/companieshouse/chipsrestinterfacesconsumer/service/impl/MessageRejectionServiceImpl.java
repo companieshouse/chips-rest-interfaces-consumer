@@ -21,15 +21,15 @@ public class MessageRejectionServiceImpl implements MessageRejectionService {
     public void handleRejectedMessage(Exception exception, ConsumerRecord<?, ?> datum) {
         String errorMessageDetails = buildMessage(datum.topic(), datum.partition(), datum.offset());
         if (exception.getCause() instanceof DeserializationException) {
-             sendToSlack(exception, errorMessageDetails);
+             logger.error(errorMessageDetails, exception);
+             sendToSlack(errorMessageDetails);
         } else {
             logger.error(String.format("Kafka consumer message exception - %s", errorMessageDetails), exception);
         }
     }
 
-    private void sendToSlack(Exception exception, String errorMessageDetails) {
+    private void sendToSlack(String errorMessageDetails) {
         String deserializationFailureMessage = String.format("Failed to deserialize message - %s", errorMessageDetails);
-        logger.error(deserializationFailureMessage, exception);
         slackMessagingService.sendDeserializationErrorMessage(deserializationFailureMessage);
     }
 
