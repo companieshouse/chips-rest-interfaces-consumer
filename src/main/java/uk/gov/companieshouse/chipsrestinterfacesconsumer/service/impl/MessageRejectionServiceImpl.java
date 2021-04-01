@@ -34,6 +34,6 @@ public class MessageRejectionServiceImpl implements MessageRejectionService {
     }
 
     private String buildMessage(String topic, int partition, long offset) {
-          return "topic: " + topic + ", partition: " + partition + ", offset: " + offset;
+        return "topic: " + topic + ", partition: " + partition + ", offset: " + offset;
     }
 }
