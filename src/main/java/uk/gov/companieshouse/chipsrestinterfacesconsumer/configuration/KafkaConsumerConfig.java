@@ -11,9 +11,10 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.avro.AvroDeserializer;
-
+import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageRejectionService;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -32,6 +33,9 @@ public class KafkaConsumerConfig {
 
     @Autowired
     private Supplier<Long> timestampNow;
+
+    @Autowired
+    private MessageRejectionService messageRejectionService;
 
     /**
      *
@@ -63,7 +67,8 @@ public class KafkaConsumerConfig {
      */
     private ConsumerFactory<String, ChipsRestInterfacesSend> newMainConsumerFactory() {
         var props = getDefaultConfig();
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new AvroDeserializer<>(ChipsRestInterfacesSend.class));
+        var errorHandlingDeserializer = new ErrorHandlingDeserializer<>(new AvroDeserializer<>(ChipsRestInterfacesSend.class));
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), errorHandlingDeserializer);
     }
 
     /**
@@ -78,8 +83,8 @@ public class KafkaConsumerConfig {
                 ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG,
                 maxPollInterval
         );
-
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new AvroDeserializer<>(ChipsRestInterfacesSend.class));
+        var errorHandlingDeserializer = new ErrorHandlingDeserializer<>(new AvroDeserializer<>(ChipsRestInterfacesSend.class));
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), errorHandlingDeserializer);
     }
 
     /**
@@ -93,6 +98,7 @@ public class KafkaConsumerConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(newMainConsumerFactory());
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+        factory.setErrorHandler((exception, data) -> messageRejectionService.handleRejectedMessage(exception, data));
         return factory;
     }
 
@@ -114,6 +120,7 @@ public class KafkaConsumerConfig {
         ContainerProperties containerProperties = factory.getContainerProperties();
         containerProperties.setIdleBetweenPolls(idleMillis);
         containerProperties.setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+
         return factory;
     }
 
@@ -132,6 +139,8 @@ public class KafkaConsumerConfig {
         factory.setRecordFilterStrategy(consumerRecord -> appStartedTime < consumerRecord.timestamp());
         factory.setAckDiscarded(false);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+        factory.setErrorHandler((exception, data) -> messageRejectionService.handleRejectedMessage(exception, data));
+
         return factory;
     }
 

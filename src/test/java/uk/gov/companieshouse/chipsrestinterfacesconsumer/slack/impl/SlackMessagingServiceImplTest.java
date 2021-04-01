@@ -39,27 +39,54 @@ class SlackMessagingServiceImplTest {
     }
 
     @Test
-    void testSuccessfulSlackMessage() throws IOException, SlackApiException {
+    void testSuccessfulSlackErrorTopicMessage() throws IOException, SlackApiException {
         doReturn(buildDummyResponse(true)).when(slackMessagingServiceImpl).postSlackMessage(any(), any());
-        slackMessagingServiceImpl.sendMessage(buildDummyFailedMessages());
-        verify(logger).info(String.format("Message sent to: %s", SLACK_CHANNEL));
+        slackMessagingServiceImpl.sendErrorTopicMessage(buildDummyFailedMessages());
+        verify(logger).info(String.format("Error topic message sent to: %s", SLACK_CHANNEL));
     }
 
     @Test
-    void testFailedSlackMessage() throws IOException, SlackApiException {
+    void testFailedSlackErrorTopicMessage() throws IOException, SlackApiException {
         ChatPostMessageResponse chatPostMessageResponse = buildDummyResponse(false);
         doReturn(chatPostMessageResponse).when(slackMessagingServiceImpl).postSlackMessage(any(), any());
-        slackMessagingServiceImpl.sendMessage(buildDummyFailedMessages());
-        verify(logger).error(String.format("Error message sent but received response: %s",
+        slackMessagingServiceImpl.sendErrorTopicMessage(buildDummyFailedMessages());
+        verify(logger).error(String.format("Error topic message sent but received response: %s",
                 chatPostMessageResponse.getError()));
     }
 
     @Test
-    void testFailedSlackMessageWithIOException() throws IOException, SlackApiException {
+    void testFailedSlackErrorTopicMessageWithIOException() throws IOException, SlackApiException {
         IOException io = new IOException(null, null);
         doThrow(io).when(slackMessagingServiceImpl).postSlackMessage(any(), any());
-        slackMessagingServiceImpl.sendMessage(buildDummyFailedMessages());
-        verify(logger).errorContext("Slack error message not sent", io);
+        slackMessagingServiceImpl.sendErrorTopicMessage(buildDummyFailedMessages());
+        verify(logger).errorContext("Error topic slack error message not sent", io);
+    }
+
+    @Test
+    void testSuccessfulDeserializationErrorMessage() throws IOException, SlackApiException {
+        doReturn(buildDummyResponse(true)).when(slackMessagingServiceImpl).postSlackMessage(any(), any());
+        String errorMessage = "Failed to deserialize message - topic: Test-topic, partition: 1, offset: 1";
+        slackMessagingServiceImpl.sendDeserializationErrorMessage(errorMessage);
+        verify(logger).info(String.format("Deserialization error message sent to: %s", SLACK_CHANNEL));
+    }
+
+    @Test
+    void testFailedSlackDeserializationErrorMessage() throws IOException, SlackApiException {
+        ChatPostMessageResponse chatPostMessageResponse = buildDummyResponse(false);
+        doReturn(chatPostMessageResponse).when(slackMessagingServiceImpl).postSlackMessage(any(), any());
+        String errorMessage = "Failed to deserialize message - topic: Test-topic, partition: 1, offset: 1";
+        slackMessagingServiceImpl.sendDeserializationErrorMessage(errorMessage);
+        verify(logger).error(String.format("Deserialization error message sent but received response: %s",
+                chatPostMessageResponse.getError()));
+    }
+
+    @Test
+    void testFailedSlackDeserializationErrorMessageWithIOException() throws IOException, SlackApiException {
+        IOException io = new IOException(null, null);
+        doThrow(io).when(slackMessagingServiceImpl).postSlackMessage(any(), any());
+        String errorMessage = "Failed to deserialize message - topic: Test-topic, partition: 1, offset: 1";
+        slackMessagingServiceImpl.sendDeserializationErrorMessage(errorMessage);
+        verify(logger).errorContext("Deserialization error slack error message not sent", io);
     }
 
     private List<String> buildDummyFailedMessages() {

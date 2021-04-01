@@ -148,7 +148,7 @@ public class MainConsumerImpl implements MainConsumer {
         }
 
         if (doSendSlackMessages && !failedMessageIds.isEmpty()) {
-            slackMessagingService.sendMessage(failedMessageIds);
+            slackMessagingService.sendErrorTopicMessage(failedMessageIds);
         }
     }
 
