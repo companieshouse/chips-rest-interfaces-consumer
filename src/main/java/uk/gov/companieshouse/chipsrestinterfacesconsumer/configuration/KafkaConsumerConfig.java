@@ -14,8 +14,7 @@ import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.avro.AvroDeserializer;
-import uk.gov.companieshouse.chipsrestinterfacesconsumer.slack.SlackMessagingService;
-
+import uk.gov.companieshouse.chipsrestinterfacesconsumer.service.MessageRejectionService;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -36,7 +35,7 @@ public class KafkaConsumerConfig {
     private Supplier<Long> timestampNow;
 
     @Autowired
-    private SlackMessagingService slackMessagingService;
+    private MessageRejectionService messageRejectionService;
 
     /**
      *
@@ -84,8 +83,8 @@ public class KafkaConsumerConfig {
                 ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG,
                 maxPollInterval
         );
-
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new AvroDeserializer<>(ChipsRestInterfacesSend.class));
+        var errorHandlingDeserializer = new ErrorHandlingDeserializer<>(new AvroDeserializer<>(ChipsRestInterfacesSend.class));
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), errorHandlingDeserializer);
     }
 
     /**
@@ -99,11 +98,7 @@ public class KafkaConsumerConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(newMainConsumerFactory());
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
-        factory.setErrorHandler((exception, data) -> {
-            String errorMessage = String.format("Failed to deserialize message - topic: %s, partition: %d, offset: %d",
-                    data.topic(), data.partition(),  data.offset());
-            slackMessagingService.sendDeserializationErrorMessage(errorMessage);
-        });
+        factory.setErrorHandler((exception, data) -> messageRejectionService.handleRejectedMessage(exception, data));
         return factory;
     }
 
@@ -121,10 +116,12 @@ public class KafkaConsumerConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(newRetryConsumerFactory());
         factory.setBatchListener(true);
+        factory.setBatchErrorHandler((exception, data) -> messageRejectionService.handleRejectedMessageBatch(exception, data));
 
         ContainerProperties containerProperties = factory.getContainerProperties();
         containerProperties.setIdleBetweenPolls(idleMillis);
         containerProperties.setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+
         return factory;
     }
 
@@ -143,6 +140,8 @@ public class KafkaConsumerConfig {
         factory.setRecordFilterStrategy(consumerRecord -> appStartedTime < consumerRecord.timestamp());
         factory.setAckDiscarded(false);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+        factory.setErrorHandler((exception, data) -> messageRejectionService.handleRejectedMessage(exception, data));
+
         return factory;
     }
 
