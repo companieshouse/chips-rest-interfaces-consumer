@@ -29,7 +29,9 @@ These instructions are for a local docker environment.
 
 Key             | Example Value   | Description
 ----------------|---------------- |------------------------------------
+BATCH_FAILURE_RETRY_SLEEP_MS | 1000 | How many ms to wait before retrying a batch that fails
 CHIPS_REST_INTERFACES_HOST | <CHIPS_REST_INTERFACES_URL> | Exit point to CHIPS for incoming messages.
+FEATURE_FLAG_SLACK_MESSAGES_020321 | true | Whether to send failure messages to a slack channel defined by SLACK_CHANNEL
 HUMAN_LOG | 1 |
 KAFKA_BROKER_ADDR | kafka:9092 |
 KAFKA_GROUP_NAME | chips-rest-interfaces-consumer-group |
@@ -39,3 +41,21 @@ KAFKA_PRODUCER_RETRIES | 5 |
 LOG_LEVEL | DEBUG |
 MAX_RETRY_ATTEMPTS | 10 | Number of retries before the message is added to the error topic.
 RETRY_THROTTLE_RATE_SECONDS | 30 | Delay between retry consumer processing the messages on the retry topic.
+RUN_APP_IN_ERROR_MODE | true | If true consumer only consumes off of error topic, if false, consumes off of main and retry topic
+SLACK_ACCESS_TOKEN | ABCDEFGHIJKLMNOPQRSTUVWXYZ | Access token for sending slack messages
+SLACK_CHANNEL | chips-rest-alerts-test | Slack channel failure messages are sent to
+
+### How it works RUN_APP_IN_ERROR_MODE = false
+
+1. A producer should produce a message to the KAFKA_CONSUMER_TOPIC conforming to the following schema: https://github.com/companieshouse/chs-kafka-schemas/blob/master/schemas/chips-rest-interfaces-send.avsc  
+2. The Chips-Rest-Interfaces-Consumer will then deserialize the message and attempt to send the message via REST onto the chips-rest-interfaces with the endpoint defined in the chips-rest-endpoint field in the message  
+3. If the message fails to receive a 2XX response from the REST request the message will be added to the retry topic with its attempts set to 1  
+4. Messages on the retry topic are tried every RETRY_THROTTLE_RATE_SECONDS if the message still fails, a new message is added to the retry topic with its attempts incremented by 1  
+5. If attempts > MAX_RETRY_ATTEMPTS the message is added to the error topic and is not automatically retried.  
+
+### How it works RUN_APP_IN_ERROR_MODE = true
+
+1. When the consumer starts it will poll the error topic.
+2. The consumer will process any messages created before the consumer was started
+3. It will attempt to send the message to CHIPS_REST_INTERFACES_HOST if the message fails the consumer will add a new message to the retry topic with attempts = 1
+4. An app running with `RUN_APP_IN_ERROR_MODE = false` will then read and process that message.
