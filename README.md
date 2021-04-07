@@ -64,3 +64,8 @@ SLACK_CHANNEL | chips-rest-alerts-test | Slack channel failure messages are sent
 2. The consumer will process any messages created before the consumer was started
 3. It will attempt to send the message to CHIPS_REST_INTERFACES_HOST if the message fails the consumer will add a new message to the retry topic with attempts = 1
 4. An app running with `RUN_APP_IN_ERROR_MODE = false` will then read and process that message
+
+### Topics
+`chips-rest-interfaces-send`: the main topic. This is where messages to be sent to Chips Rest are put from CHS services.  
+`chips-rest-interfaces-send-retry`: the retry topic. This is where Chips Rest Interfaces Consumer puts messages that fail their initial attempt.  
+`chips-rest-interfaces-send-error`: the error topic. Messages that have failed all retry attempts are placed here, and are not automatically tried again.
