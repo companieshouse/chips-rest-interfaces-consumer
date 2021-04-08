@@ -65,18 +65,18 @@ class SlackMessagingServiceImplTest {
     @Test
     void testSuccessfulDeserializationErrorMessage() throws IOException, SlackApiException {
         doReturn(buildDummyResponse(true)).when(slackMessagingServiceImpl).postSlackMessage(any(), any());
-        String errorMessage = "Failed to deserialize message - topic: Test-topic, partition: 1, offset: 1";
-        slackMessagingServiceImpl.sendDeserializationErrorMessage(errorMessage);
-        verify(logger).info(String.format("Deserialization error message sent to: %s", SLACK_CHANNEL));
+        String errorMessage = "Message rejected - Failed to deserialize message - topic: Test-topic, partition: 1, offset: 1";
+        slackMessagingServiceImpl.sendRejectedErrorMessage(errorMessage);
+        verify(logger).info(String.format("Message rejected error message sent to: %s", SLACK_CHANNEL));
     }
 
     @Test
     void testFailedSlackDeserializationErrorMessage() throws IOException, SlackApiException {
         ChatPostMessageResponse chatPostMessageResponse = buildDummyResponse(false);
         doReturn(chatPostMessageResponse).when(slackMessagingServiceImpl).postSlackMessage(any(), any());
-        String errorMessage = "Failed to deserialize message - topic: Test-topic, partition: 1, offset: 1";
-        slackMessagingServiceImpl.sendDeserializationErrorMessage(errorMessage);
-        verify(logger).error(String.format("Deserialization error message sent but received response: %s",
+        String errorMessage = "Message rejected - Failed to deserialize message - topic: Test-topic, partition: 1, offset: 1";
+        slackMessagingServiceImpl.sendRejectedErrorMessage(errorMessage);
+        verify(logger).error(String.format("Message rejected error message sent but received response: %s",
                 chatPostMessageResponse.getError()));
     }
 
@@ -84,9 +84,9 @@ class SlackMessagingServiceImplTest {
     void testFailedSlackDeserializationErrorMessageWithIOException() throws IOException, SlackApiException {
         IOException io = new IOException(null, null);
         doThrow(io).when(slackMessagingServiceImpl).postSlackMessage(any(), any());
-        String errorMessage = "Failed to deserialize message - topic: Test-topic, partition: 1, offset: 1";
-        slackMessagingServiceImpl.sendDeserializationErrorMessage(errorMessage);
-        verify(logger).errorContext("Deserialization error slack error message not sent", io);
+        String errorMessage = "Message rejected - Failed to deserialize message - topic: Test-topic, partition: 1, offset: 1";
+        slackMessagingServiceImpl.sendRejectedErrorMessage(errorMessage);
+        verify(logger).errorContext("Message rejected error slack error message not sent", io);
     }
 
     private List<String> buildDummyFailedMessages() {
