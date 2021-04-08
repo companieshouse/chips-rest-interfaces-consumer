@@ -6,6 +6,6 @@ public interface SlackMessagingService {
 
     void sendErrorTopicMessage(List<String> failedMessageIds);
 
-    void sendDeserializationErrorMessage(String deserializationFailureMessage);
+    void sendRejectedErrorMessage(String deserializationFailureMessage);
 
 }

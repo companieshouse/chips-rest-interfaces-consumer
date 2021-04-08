@@ -35,8 +35,8 @@ class MessageRejectionServiceImplTest {
         Exception exception = new Exception(new DeserializationException("", new byte[1], false, new SerializationException()));
         ConsumerRecord<?, ?> datum = new ConsumerRecord<>(TOPIC,1,1L, "", "");
         messageRejectionService.handleRejectedMessage(exception, datum);
-        String deserializationErrorMessage = "Failed to deserialize message - " + buildSingleMessage(TOPIC,1,1L);
-        verify(slackMessagingService, times(1)).sendDeserializationErrorMessage(deserializationErrorMessage);
+        String deserializationErrorMessage = "Message rejected - Failed to deserialize message - " + buildSingleMessage(TOPIC,1,1L);
+        verify(slackMessagingService, times(1)).sendRejectedErrorMessage(deserializationErrorMessage);
     }
 
     @Test
@@ -45,7 +45,7 @@ class MessageRejectionServiceImplTest {
         ConsumerRecord<?, ?> datum = new ConsumerRecord<>(TOPIC,1,1L, "", "");
         messageRejectionService.handleRejectedMessage(exception, datum);
         String deserializationErrorMessage = "Failed to deserialize message - " + buildSingleMessage(TOPIC,1,1L);
-        verify(slackMessagingService, never()).sendDeserializationErrorMessage(deserializationErrorMessage);
+        verify(slackMessagingService, never()).sendRejectedErrorMessage(deserializationErrorMessage);
     }
 
     private String buildSingleMessage(String topic, int partition, long offset) {

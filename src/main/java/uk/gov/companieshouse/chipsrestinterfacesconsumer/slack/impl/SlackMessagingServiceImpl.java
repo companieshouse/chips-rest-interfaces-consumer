@@ -47,8 +47,8 @@ public class SlackMessagingServiceImpl implements SlackMessagingService {
     }
 
     @Override
-    public void sendDeserializationErrorMessage(String deserializationFailureMessage) {
-       sendMessage(deserializationFailureMessage, "Deserialization error");
+    public void sendRejectedErrorMessage(String errorMessage) {
+       sendMessage(errorMessage, "Message rejected error");
     }
 
     ChatPostMessageResponse postSlackMessage(
