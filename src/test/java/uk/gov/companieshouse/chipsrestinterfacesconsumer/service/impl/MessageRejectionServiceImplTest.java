@@ -44,8 +44,8 @@ class MessageRejectionServiceImplTest {
         Exception exception = new Exception();
         ConsumerRecord<?, ?> datum = new ConsumerRecord<>(TOPIC,1,1L, "", "");
         messageRejectionService.handleRejectedMessage(exception, datum);
-        String deserializationErrorMessage = "Failed to deserialize message - " + buildSingleMessage(TOPIC,1,1L);
-        verify(slackMessagingService, never()).sendRejectedErrorMessage(deserializationErrorMessage);
+        String errorMessage = "Message rejected - Kafka consumer message exception - " + buildSingleMessage(TOPIC,1,1L);
+        verify(slackMessagingService, times(1)).sendRejectedErrorMessage(errorMessage);
     }
 
     private String buildSingleMessage(String topic, int partition, long offset) {
