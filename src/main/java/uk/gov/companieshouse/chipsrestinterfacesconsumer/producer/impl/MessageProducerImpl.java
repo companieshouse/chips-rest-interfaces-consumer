@@ -8,6 +8,13 @@ import uk.gov.companieshouse.chips.ChipsRestInterfacesSend;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger;
 import uk.gov.companieshouse.chipsrestinterfacesconsumer.producer.MessageProducer;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger.KEY_MESSAGE;
+import static uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger.KEY_OFFSET;
+import static uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger.KEY_PARTITION;
+
 @Service
 public class MessageProducerImpl implements MessageProducer {
 
@@ -29,8 +36,12 @@ public class MessageProducerImpl implements MessageProducer {
 
             @Override
             public void onSuccess(SendResult<String, ChipsRestInterfacesSend> result) {
-                logger.infoContext(messageId, "Sent message=[" + chipsMessage +
-                        "] with offset=[" + result.getRecordMetadata().offset() + "]");
+                Map<String, Object> logMap = new HashMap<>();
+                logMap.put(KEY_OFFSET, result.getRecordMetadata().offset());
+                logMap.put(KEY_PARTITION, result.getRecordMetadata().partition());
+                logMap.put(KEY_MESSAGE, chipsMessage.getData());
+
+                logger.infoContext(messageId, "Sent messageId " + messageId + " to topic " + topicName, logMap);
             }
 
             @Override
