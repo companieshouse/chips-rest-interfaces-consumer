@@ -23,7 +23,7 @@
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
         <ch-kafka.version>1.4.5</ch-kafka.version>
-        <structured-logging.version>1.9.5</structured-logging.version>
+        <structured-logging.version>1.9.10</structured-logging.version>
         <junit-jupiter.version>5.5.2</junit-jupiter.version>
         <mockito.version>3.1.0</mockito.version>
         <kafka-models.version>1.0.19</kafka-models.version>
@@ -84,6 +84,14 @@
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>rest-service-common-library</artifactId>
             <version>${rest-service-common-library.version}</version>
+        </dependency>
+        <!--  remove this log4j once spring boot upgrade is available after 23/12/2021 -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-bom</artifactId>
+            <version>2.16.0</version>
+            <scope>import</scope>
+            <type>pom</type>
         </dependency>
         <dependency>
             <groupId>uk.gov.companieshouse</groupId>
@@ -151,7 +159,7 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <version>2.7.0</version>
+                <version>3.1.4</version>
                 <configuration>
                     <container>
                         <expandClasspathDependencies>true</expandClasspathDependencies>
