@@ -44,6 +44,14 @@
 
     <dependencyManagement>
         <dependencies>
+            <!--  remove these 3 log4j once spring boot upgrade is available after 23/12/2021 -->
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-bom</artifactId>
+                <version>2.16.0</version>
+                <scope>impo rt</scope>
+                <type>pom</type>
+            </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -60,7 +68,7 @@
     </dependencyManagement>
 
     <dependencies>
-        <dependency>
+         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
             <!-- Without this exclusion, SLF4J warns about multiple bindings at start-up and we want
@@ -86,15 +94,6 @@
             <artifactId>rest-service-common-library</artifactId>
             <version>${rest-service-common-library.version}</version>
         </dependency>
-        <!--  remove these 3 log4j once spring boot upgrade is available after 23/12/2021 -->
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-bom</artifactId>
-            <version>2.16.0</version>
-            <scope>import</scope>
-            <type>pom</type>
-        </dependency>
-
         <dependency>
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>structured-logging</artifactId>
