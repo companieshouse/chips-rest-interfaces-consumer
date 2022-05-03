@@ -173,7 +173,6 @@ public class MainConsumerImpl implements MainConsumer {
         logMap.put(KEY_OFFSET, offset);
 
         logger.infoContext(messageId, String.format("%s: Consumed Message from Partition: %s, Offset: %s", consumerId, partition, offset), logMap);
-        logger.infoContext(messageId, String.format("received data='%s'", data), logMap);
 
         boolean isSuccessful = messageProcessorService.processMessage(consumerId, data);
 
