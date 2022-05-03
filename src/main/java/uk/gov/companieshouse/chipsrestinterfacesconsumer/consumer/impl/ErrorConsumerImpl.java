@@ -68,7 +68,6 @@ public class ErrorConsumerImpl implements ErrorConsumer {
         logger.debugContext(messageId, acknowledgment.toString(), logMap);
 
         logger.infoContext(messageId, String.format("%s: Consumed Message from Partition: %s, Offset: %s", groupId, partition, offset), logMap);
-        logger.infoContext(messageId, String.format("received data='%s'", data), logMap);
 
         data.setAttempt(0);
         messageProcessorService.processMessage(groupId, data);
