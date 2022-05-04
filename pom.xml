@@ -22,7 +22,7 @@
         <rest-service-common-library.version>0.0.5</rest-service-common-library.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
-        <ch-kafka.version>1.4.2</ch-kafka.version>
+        <ch-kafka.version>1.4.5</ch-kafka.version>
         <structured-logging.version>1.9.12</structured-logging.version>
         <junit-jupiter.version>5.5.2</junit-jupiter.version>
         <mockito.version>3.1.0</mockito.version>
