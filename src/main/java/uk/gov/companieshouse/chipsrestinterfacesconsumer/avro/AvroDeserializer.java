@@ -9,8 +9,6 @@ import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Deserializer;
 
-import java.util.Arrays;
-
 public class AvroDeserializer<T extends SpecificRecordBase> implements Deserializer<T> {
 
     protected final Class<T> targetType;
@@ -35,7 +33,7 @@ public class AvroDeserializer<T extends SpecificRecordBase> implements Deseriali
             return result;
         } catch (Exception ex) {
             throw new SerializationException(
-                    "Can't deserialize data '" + Arrays.toString(data) + "' from topic '" + topic + "'", ex);
+                    "Can't deserialize data from topic '" + topic + "'", ex);
         }
     }
 }

@@ -54,10 +54,6 @@ public class ApplicationLogger {
         logger.info(message, null);
     }
 
-    public void info(String message, Map<String, Object> map) {
-        logger.info(message, cloneMapData(map));
-    }
-
     public void infoContext(String context, String message) {
         logger.infoContext(context, message, null);
     }
