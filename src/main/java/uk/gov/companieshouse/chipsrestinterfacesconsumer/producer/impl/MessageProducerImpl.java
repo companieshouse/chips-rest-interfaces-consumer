@@ -39,15 +39,13 @@ public class MessageProducerImpl implements MessageProducer {
                 Map<String, Object> logMap = new HashMap<>();
                 logMap.put(KEY_OFFSET, result.getRecordMetadata().offset());
                 logMap.put(KEY_PARTITION, result.getRecordMetadata().partition());
-                logMap.put(KEY_MESSAGE, chipsMessage.getData());
 
                 logger.infoContext(messageId, "Sent messageId " + messageId + " to topic " + topicName, logMap);
             }
 
             @Override
             public void onFailure(Throwable ex) {
-                logger.errorContext(messageId, "Unable to send message=["
-                        + chipsMessage + "] due to : " + ex.getMessage(), new Exception(ex));
+                logger.errorContext(messageId, "Unable to send message due to : " + ex.getMessage(), new Exception(ex));
             }
         });
     }

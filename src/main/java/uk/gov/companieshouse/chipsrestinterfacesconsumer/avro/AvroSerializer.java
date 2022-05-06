@@ -36,7 +36,7 @@ public class AvroSerializer<T extends SpecificRecordBase> implements Serializer<
             return result;
         } catch (IOException ex) {
             throw new SerializationException(
-                    "Can't serialize data='" + data + "' for topic='" + topic + "'", ex);
+                    "Can't serialize data for topic='" + topic + "'", ex);
         }
     }
 }

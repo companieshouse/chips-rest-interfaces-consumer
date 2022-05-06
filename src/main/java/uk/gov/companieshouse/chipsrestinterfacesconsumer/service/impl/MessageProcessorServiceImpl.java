@@ -45,7 +45,7 @@ public class MessageProcessorServiceImpl implements MessageProcessorService {
                                   ChipsRestInterfacesSend message) {
 
         Map<String, Object> logMap = new HashMap<>();
-        logMap.put(KEY_MESSAGE, message.getData());
+        logMap.put(KEY_MESSAGE, message.getMessageId());
         logMap.put(KEY_MESSAGE_CONSUMER_ID, consumerId);
         try {
             chipsRestClient.sendToChips(message, consumerId);
