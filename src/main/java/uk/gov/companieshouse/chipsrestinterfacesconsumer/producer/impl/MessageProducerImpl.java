@@ -45,8 +45,7 @@ public class MessageProducerImpl implements MessageProducer {
 
             @Override
             public void onFailure(Throwable ex) {
-                logger.errorContext(messageId, "Unable to send message=["
-                        + chipsMessage + "] due to : " + ex.getMessage(), new Exception(ex));
+                logger.errorContext(messageId, "Unable to send message due to : " + ex.getMessage(), new Exception(ex));
             }
         });
     }
