@@ -11,7 +11,6 @@ import uk.gov.companieshouse.chipsrestinterfacesconsumer.producer.MessageProduce
 import java.util.HashMap;
 import java.util.Map;
 
-import static uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger.KEY_MESSAGE;
 import static uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger.KEY_OFFSET;
 import static uk.gov.companieshouse.chipsrestinterfacesconsumer.common.ApplicationLogger.KEY_PARTITION;
 
