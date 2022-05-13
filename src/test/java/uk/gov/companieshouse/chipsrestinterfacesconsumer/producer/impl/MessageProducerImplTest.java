@@ -69,7 +69,6 @@ class MessageProducerImplTest {
         var expectedMessage = "Sent messageId " + messageId + " to topic " + topic;
         HashMap<String, Object> expectedMap = new HashMap<>();
         expectedMap.put("Partition", 1);
-        expectedMap.put("Message", data.getData());
         expectedMap.put("Offset", offset);
         verify(logger, times(1)).infoContext(eq(messageId), eq(expectedMessage), eq(expectedMap));
     }

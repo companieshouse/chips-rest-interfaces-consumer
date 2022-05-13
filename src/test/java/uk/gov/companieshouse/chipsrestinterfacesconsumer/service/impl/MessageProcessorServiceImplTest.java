@@ -188,7 +188,7 @@ class MessageProcessorServiceImplTest {
     }
 
     private void verifyLogData(Map<String, Object> logMap) {
-        assertEquals(DUMMY_DATA, logMap.get(LOG_KEY_MESSAGE));
+        assertEquals(MESSAGE_ID, logMap.get(LOG_KEY_MESSAGE));
     }
 
     private void verifyLogHttpCode(Map<String, Object> logMap) {
