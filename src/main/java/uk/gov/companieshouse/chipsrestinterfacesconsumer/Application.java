@@ -6,8 +6,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class Application {
 
-    // Change to trigger PR analysis on build
-
     public static void main(String[] args) {
         SpringApplication.run(Application.class);
     }
