@@ -21,18 +21,4 @@
         <packageUrl regex="true">^pkg:maven/org\.springframework/spring\-web@.*$</packageUrl>
         <cve>CVE-2016-1000027</cve>
     </suppress>
-
-    <suppress until="2023-01-25Z">
-        <notes><![CDATA[
-           File names: tomcat-embed-core-9.0.64.jar AND tomcat-embed-websocket-9.0.64.jar
-
-           Suppressed for 6 months
-
-           A JIRA ticket has been created to track this vulnerability - https://companieshouse.atlassian.net/browse/DEBT-1743
-
-           The library should be updated and this suppression removed once a new Tomcat version is released.
-           ]]></notes>
-        <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat\-embed\-(core|websocket)@.*$</packageUrl>
-        <cve>CVE-2022-34305</cve>
-    </suppress>
 </suppressions>
