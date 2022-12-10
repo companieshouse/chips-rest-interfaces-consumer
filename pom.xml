@@ -19,7 +19,7 @@
         <java.version>11</java.version>
         <spring-boot-dependencies.version>2.7.1</spring-boot-dependencies.version>
         <spring-boot-maven-plugin.version>2.7.1</spring-boot-maven-plugin.version>
-        <spring-web.version>5.3.22</spring-web.version>
+        <spring-web.version>6.0.0</spring-web.version>
         <rest-service-common-library.version>0.0.6</rest-service-common-library.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
